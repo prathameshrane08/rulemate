@@ -10,6 +10,9 @@ import os
 import httpx
 
 from rulemate.answer import Answer, answer_question
+from rulemate.compliance.check import DesignRow, RowResult
+from rulemate.compliance.limits import RuleTable
+from rulemate.compliance.service import check_rows, get_rule_table, save_edited_table
 from rulemate.api import ClauseView
 from rulemate.ingest.pipeline import load_index
 from rulemate.llm import get_llm
@@ -76,3 +79,24 @@ class Backend:
 
     def clauses(self) -> list[Clause]:
         return get_retriever().clauses
+
+    # ---------------------------------------------------------------- compliance
+    def check(self, rows: list[DesignRow], explain: bool, provider: str | None) -> list[RowResult]:
+        if self.remote:
+            try:
+                r = httpx.post(
+                    f"{API_URL}/check",
+                    json={"rows": [x.model_dump() for x in rows], "explain": explain, "provider": provider},
+                    timeout=600,
+                )
+                r.raise_for_status()
+                return [RowResult.model_validate(x) for x in r.json()]
+            except httpx.HTTPError:
+                self.remote = False
+        return check_rows(rows, explain=explain, provider=provider)
+
+    def rule_table(self, rebuild: bool = False, provider: str | None = None) -> RuleTable:
+        return get_rule_table(provider=provider, force=rebuild)
+
+    def save_rule_table(self, table: RuleTable) -> None:
+        save_edited_table(table)

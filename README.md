@@ -108,7 +108,43 @@ The UI uses the API when it is running, otherwise it calls the code in-process (
   with its page, breadcrumb and clickable "refers to" / "referenced by" links.
 - **Sources** panel: every retrieved clause with how it was found (ID, search, cross-reference), fused score, cosine, BM25 and dense rank.
 - **Browse clauses**: the whole parsed index, filterable.
-- **Compliance check**: next step.
+- **Compliance check**: sample or uploaded CSV (or values typed into a form), colour-coded results, how each verdict
+  was reached, CSV export, and the editable rule table.
+
+## Compliance check
+
+```bash
+python -m rulemate limits                     # build / show the rule table (data/index/limits.json)
+python -m rulemate check data/designs/sample_design.csv --out results.csv
+python -m rulemate check data/designs/sample_design.csv --explain   # + guardrailed LLM explanations
+```
+
+**1. Rule table.** Numeric limits are extracted from every clause that states one (`rulemate/compliance/limits.py`).
+The LLM proposes `{parameter, subject, qualifier, condition, comparator, value, unit, quote}` as JSON; code keeps a
+proposal only if the value appears in the clause with that unit, pint understands the unit, and the comparator is
+valid. Code also corrects the comparator from the wording ("not less than" means `>=`), rejects per-unit rates
+("10 mm per person") given as plain values, and drops qualifiers and quotes that are not in the text. A regex
+extractor is the offline fallback. `auto` uses the LLM only when a hosted model (Groq / OpenAI) is configured,
+because on the sample a 3B local model extracted worse limits than the regex. Engineers can review and edit the
+table in the UI; edited rows are marked `manual`.
+
+**2. Verdict, in code only** (`rulemate/compliance/check.py`). For each design row:
+candidate limits with a compatible unit (pint) → semantic match on parameter → qualifier filter ("crew
+accommodation" only applies to crew spaces; a matching specific limit supersedes the general one) → limits whose
+sentence refers to a matched clause are added ("the travel distance **in 3.3.1** may be increased to 50 m") →
+value converted to the limit unit and compared.
+
+| Verdict | When |
+|---|---|
+| PASS | every applicable unconditional limit is met, and no conditional limit fails |
+| FAIL | an unconditional limit fails and no conditional relaxation is met |
+| NEEDS REVIEW | it passes only under a condition code cannot verify, only conditional limits apply, the value or unit is unusable, or no limit covers the parameter |
+
+**3. Explanation.** Optional: the LLM explains the verdict it is given. The explanation goes through the answer
+guardrails plus two compliance checks: it may not contradict a computed comparison ("950 mm does not meet 900 mm"
+when code says it does) or state an unverified condition as fact. If it fails twice, only the code result is shown.
+
+API: `POST /check` (JSON rows), `POST /check/csv` (upload), `GET /limits`, `PUT /limits`.
 
 ## Using the real challenge data
 

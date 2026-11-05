@@ -146,7 +146,11 @@ def _is_exempt(sentence_wo_cites: str) -> bool:
 # ------------------------------------------------------------------ main check
 
 
-def check_answer(answer: str, retrieved: list[Clause]) -> CheckResult:
+def check_answer(
+    answer: str, retrieved: list[Clause], extra_numbers: list[tuple[float, str | None]] | None = None
+) -> CheckResult:
+    """``extra_numbers``: (value, unit) pairs the answer may state besides the sources, e.g. a design value."""
+    extra = [(float(v), _ALIAS_TO_UNIT.get(u or "") or _ALIAS_TO_UNIT.get((u or "").lower())) for v, u in (extra_numbers or [])]
     violations: list[Violation] = []
     by_key: dict[tuple[str, str], Clause] = {(c.doc.lower(), normalize_id(c.clause_id)): c for c in retrieved}
     by_id: dict[str, list[Clause]] = {}
@@ -193,7 +197,7 @@ def check_answer(answer: str, retrieved: list[Clause]) -> CheckResult:
 
         # numbers and units
         if sent_clauses:
-            src_nums = extract_numbers(source)
+            src_nums = extract_numbers(source) + extra
             src_values = {v for v, _ in src_nums}
             src_pairs = {(v, u) for v, u in src_nums if u}
             for value, unit in extract_numbers(_LIST_MARKER_RE.sub("", plain)):

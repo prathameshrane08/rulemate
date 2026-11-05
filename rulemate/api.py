@@ -6,16 +6,23 @@ GET  /health               index + model status
 POST /ask                  question -> verified answer / excerpts / not found
 GET  /search?q=...         raw retrieval result (for debugging and the Sources panel)
 GET  /clause/{clause_id}   clause text by ID (IDs may contain "/", spaces and brackets)
+POST /check                design rows (JSON) -> PASS / FAIL / NEEDS REVIEW per row
+POST /check/csv            same, CSV upload
+GET  /limits               the extracted rule table
+PUT  /limits               save an engineer-edited rule table
 """
 
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel
 
 from .answer import Answer, answer_question
+from .compliance.check import DesignRow, RowResult, read_design_csv
+from .compliance.limits import RuleTable
+from .compliance.service import check_rows, get_rule_table, save_edited_table
 from .config import CLAUSES_FILE
 from .ingest.pipeline import load_index
 from .llm import get_llm
@@ -103,3 +110,37 @@ def clause(clause_id: str, doc: str | None = Query(None)) -> list[ClauseView]:
             )
         )
     return out
+
+
+class CheckRequest(BaseModel):
+    rows: list[DesignRow]
+    explain: bool = False
+    provider: str | None = None
+
+
+@app.post("/check", response_model=list[RowResult])
+def check(req: CheckRequest) -> list[RowResult]:
+    _require_index()
+    return check_rows(req.rows, explain=req.explain, provider=req.provider)
+
+
+@app.post("/check/csv", response_model=list[RowResult])
+async def check_csv(file: UploadFile = File(...), explain: bool = False, provider: str | None = None) -> list[RowResult]:
+    _require_index()
+    try:
+        rows = read_design_csv(await file.read())
+    except ValueError as e:
+        raise HTTPException(422, str(e)) from e
+    return check_rows(rows, explain=explain, provider=provider)
+
+
+@app.get("/limits", response_model=RuleTable)
+def limits(rebuild: bool = False, method: str = "auto", provider: str | None = None) -> RuleTable:
+    _require_index()
+    return get_rule_table(method=method, provider=provider, force=rebuild)  # type: ignore[arg-type]
+
+
+@app.put("/limits", response_model=RuleTable)
+def put_limits(table: RuleTable) -> RuleTable:
+    save_edited_table(table)
+    return table

@@ -16,6 +16,7 @@ import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
 
 from rulemate.answer import Answer  # noqa: E402
+from rulemate.compliance.check import RowResult  # noqa: E402
 from rulemate.config import CLAUSES_FILE, ROOT  # noqa: E402
 from rulemate.guardrails import CITATION_RE  # noqa: E402
 from ui.backend import Backend  # noqa: E402
@@ -232,15 +233,176 @@ with tab_ask:
             sources_panel(ss.messages[ss.selected]["content"])
 
 
-# ------------------------------------------------------------------ compliance tab (step 5)
+# ------------------------------------------------------------------ compliance tab
+
+VERDICT_STYLE = {
+    "PASS": "background-color: #d1fadf; color: #05603a; font-weight: 600",
+    "FAIL": "background-color: #fee4e2; color: #b42318; font-weight: 600",
+    "NEEDS REVIEW": "background-color: #fef0c7; color: #b54708; font-weight: 600",
+}
+VERDICT_BADGE = {"PASS": ("PASS", ":material/check_circle:", "green"),
+                 "FAIL": ("FAIL", ":material/cancel:", "red"),
+                 "NEEDS REVIEW": ("NEEDS REVIEW", ":material/help:", "orange")}
+
+
+def limit_buttons(res: RowResult, key: str) -> None:
+    seen = []
+    for lr in res.applied:
+        if lr.limit.clause_uid not in seen:
+            seen.append(lr.limit.clause_uid)
+    if seen:
+        cols = st.columns(min(len(seen), 4))
+        for j, uid in enumerate(seen):
+            cols[j % len(cols)].button(f"📄 {uid.split('::', 1)[1]}", key=f"{key}-{j}", on_click=open_clause,
+                                       args=(uid,), width="stretch")
+
+
+def row_detail(res: RowResult, idx: int) -> None:
+    label, icon, color = VERDICT_BADGE[res.verdict]
+    r = res.row
+    st.badge(label, icon=icon, color=color)
+    st.markdown(f"**{r.item_id} · {r.space}** — {r.parameter}: **{r.raw_value or r.value} {r.unit}**")
+    st.markdown("**Decided by code**")
+    st.markdown(render_text(res.reason))
+    limit_buttons(res, f"lim-{idx}")
+    if res.explanation_status == "verified":
+        st.markdown("**Explanation** :green-badge[:material/verified: checked]")
+        st.markdown(render_text(res.explanation))
+    elif res.explanation_status == "rejected":
+        st.caption("The LLM explanation failed the checks and is not shown; the code result above is complete.")
+        with st.expander("Why it was rejected"):
+            for v in res.explanation_violations:
+                st.markdown(f"- {v}")
+    if res.limits:
+        with st.expander("Limits considered"):
+            st.dataframe(pd.DataFrame([{
+                "clause": lr.limit.clause_id, "limit": lr.limit.describe(), "role": lr.role,
+                "only for": lr.limit.qualifier or "", "condition": lr.limit.condition or "",
+                "value in limit unit": lr.value_in_limit_unit, "outcome": lr.outcome or "",
+                "match": lr.similarity, "extracted by": lr.limit.method,
+            } for lr in res.limits]), hide_index=True, width="stretch")
+
+
+def rule_table_editor() -> None:
+    from rulemate.compliance.limits import Limit
+    from rulemate.compliance.units import UnitError, parse_unit
+
+    table = backend.rule_table()
+    st.caption(f"{len(table.limits)} limits extracted ({table.model or 'regex'}), "
+               f"{len(table.rejected)} proposals rejected by validation. Edit a row and save to override it "
+               "(marked as manual). Every limit links back to its clause.")
+    cols = ["id", "clause_id", "parameter", "qualifier", "condition", "comparator", "value", "unit", "method"]
+    df = pd.DataFrame([{k: getattr(l, k) for k in cols} for l in table.limits], columns=cols)
+    edited = st.data_editor(
+        df, hide_index=True, width="stretch", key="limits-editor",
+        disabled=["id", "clause_id", "method"],
+        column_config={
+            "id": None,
+            "comparator": st.column_config.SelectboxColumn(options=[">=", "<=", ">", "<"], required=True),
+            "value": st.column_config.NumberColumn(required=True),
+        },
+    )
+    c1, c2 = st.columns(2)
+    if c1.button("Save edits", icon=":material/save:"):
+        by_id = {l.id: l for l in table.limits}
+        errors, new = [], []
+        for rec in edited.to_dict("records"):
+            old = by_id[rec["id"]]
+            changes = {k: (rec[k] if not (isinstance(rec[k], float) and pd.isna(rec[k])) else None)
+                       for k in ("parameter", "qualifier", "condition", "comparator", "value", "unit")}
+            if any(changes[k] != getattr(old, k) for k in changes):
+                try:
+                    parse_unit(changes["unit"] or "")
+                except UnitError as e:
+                    errors.append(f"{old.clause_id}: {e}")
+                    new.append(old)
+                    continue
+                new.append(Limit(**{**old.model_dump(), **changes, "method": "manual"}))
+            else:
+                new.append(old)
+        table.limits = new
+        backend.save_rule_table(table)
+        st.success("Saved.") if not errors else st.error("; ".join(errors))
+    if c2.button("Re-extract from clauses", icon=":material/refresh:", help="Discards manual edits"):
+        with st.spinner("Extracting limits..."):
+            backend.rule_table(rebuild=True, provider=provider)
+        st.rerun()
+
 
 with tab_check:
-    st.info("Compliance check: upload design values (CSV) and get PASS / FAIL / NEEDS REVIEW per item, "
-            "decided in code against limits extracted from the clauses.", icon=":material/construction:")
-    sample = ROOT / "data" / "designs" / "sample_design.csv"
-    if sample.exists():
-        st.caption("Sample design values (synthetic):")
-        st.dataframe(pd.read_csv(sample), hide_index=True, width="stretch")
+    from rulemate.compliance.check import DesignRow, read_design_csv, results_to_csv
+
+    st.caption("Verdicts are computed in code: limits extracted from the clauses, units converted with pint, "
+               "values compared. The LLM only explains a verdict, and its explanation is checked too.")
+    ss.setdefault("extra_rows", [])
+    ss.setdefault("check_results", None)
+
+    src = st.radio("Design values", ["Sample design (synthetic)", "Upload CSV"], horizontal=True)
+    rows: list[DesignRow] = []
+    if src == "Upload CSV":
+        up = st.file_uploader("CSV with columns: item_id, space, parameter, value, unit, notes", type=["csv"])
+        if up is not None:
+            try:
+                rows = read_design_csv(up.getvalue())
+            except ValueError as e:
+                st.error(str(e))
+    else:
+        rows = read_design_csv((ROOT / "data" / "designs" / "sample_design.csv").read_bytes())
+
+    with st.expander("Add a single value"):
+        with st.form("one-row", clear_on_submit=True, border=False):
+            f1, f2, f3, f4 = st.columns([3, 3, 1.3, 1])
+            sp = f1.text_input("Space", placeholder="Deck 4 corridor")
+            pa = f2.text_input("Parameter", placeholder="corridor clear width")
+            va = f3.number_input("Value", value=None, step=1.0, format="%g")
+            un = f4.text_input("Unit", placeholder="mm")
+            if st.form_submit_button("Add") and pa and va is not None:
+                ss.extra_rows.append(DesignRow(item_id=f"F{len(ss.extra_rows) + 1}", space=sp, parameter=pa,
+                                               value=va, unit=un, raw_value=f"{va:g}"))
+    rows = rows + ss.extra_rows
+    if ss.extra_rows:
+        st.caption(f"{len(ss.extra_rows)} value(s) added by hand.")
+        if st.button("Clear added values", type="tertiary"):
+            ss.extra_rows = []
+            st.rerun()
+
+    o1, o2 = st.columns([1, 3])
+    explain = o2.toggle("LLM explanations (checked by guardrails)", value=False,
+                        help="Slower: one LLM call per row. Verdicts do not change.")
+    if o1.button("Run check", type="primary", disabled=not rows, icon=":material/play_arrow:"):
+        with st.spinner(f"Checking {len(rows)} values..."):
+            ss.check_results = backend.check(rows, explain, provider)
+
+    results = ss.check_results
+    if results:
+        counts = {v: sum(r.verdict == v for r in results) for v in ("PASS", "FAIL", "NEEDS REVIEW")}
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Items", len(results))
+        m2.metric("PASS", counts["PASS"])
+        m3.metric("FAIL", counts["FAIL"])
+        m4.metric("NEEDS REVIEW", counts["NEEDS REVIEW"])
+        if any(r.synthetic for r in results):
+            st.caption(":orange[Limits come from SYNTHETIC sample rules.]")
+        table_df = pd.DataFrame([{
+            "item": r.row.item_id, "space": r.row.space, "parameter": r.row.parameter,
+            "value": f"{r.row.raw_value or r.row.value} {r.row.unit}", "verdict": r.verdict,
+            "limit(s)": "; ".join(x.limit.describe() + (" (if …)" if x.limit.condition else "") for x in r.applied),
+            "clause(s)": ", ".join(sorted({x.limit.clause_id for x in r.applied})),
+        } for r in results])
+        styled = table_df.style.map(lambda v: VERDICT_STYLE.get(v, ""), subset=["verdict"])
+        ev = st.dataframe(styled, hide_index=True, width="stretch", on_select="rerun",
+                          selection_mode="single-row", key="check-table")
+        st.download_button("Download results (CSV)", results_to_csv(results), file_name="rulemate_compliance.csv",
+                           mime="text/csv", icon=":material/download:")
+        sel = ev.selection.rows
+        pick = sel[0] if sel else next((i for i, r in enumerate(results) if r.verdict == "FAIL"), 0)
+        st.divider()
+        st.caption("Select a row to see how the verdict was reached.")
+        row_detail(results[pick], pick)
+
+    st.divider()
+    with st.expander("Rule table: limits extracted from the clauses"):
+        rule_table_editor()
 
 
 # ------------------------------------------------------------------ browse tab

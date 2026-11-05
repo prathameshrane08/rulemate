@@ -129,6 +129,48 @@ def cmd_ask(args) -> None:
             print(f"  - {v}")
 
 
+def cmd_limits(args) -> None:
+    from .compliance.service import get_rule_table, resolve_method
+
+    _load()
+    t = get_rule_table(method=args.method, provider=args.provider, force=args.force)
+    print(f"method={resolve_method(args.method, args.provider)}  model={t.model}  limits={len(t.limits)}  rejected proposals={len(t.rejected)}")
+    for l in t.limits:
+        extra = []
+        if l.qualifier:
+            extra.append(f"only: {l.qualifier}")
+        if l.condition:
+            extra.append(f"if: {l.condition[:50]}")
+        if l.notes:
+            extra.append("; ".join(l.notes))
+        print(f"  {l.clause_id:18} {l.describe():14} {l.parameter[:40]:40} {l.method:5} {' | '.join(extra)}")
+    if args.verbose:
+        for r in t.rejected:
+            print(f"  rejected {r['clause']}: {r['reason']}")
+
+
+def cmd_check(args) -> None:
+    from .compliance.check import read_design_csv, results_to_csv
+    from .compliance.service import check_rows
+
+    _load()
+    rows = read_design_csv(Path(args.csv).read_bytes())
+    results = check_rows(rows, explain=args.explain, provider=args.provider)
+    colour = {"PASS": "\033[32m", "FAIL": "\033[31m", "NEEDS REVIEW": "\033[33m"}
+    for r in results:
+        print(f"{colour[r.verdict]}{r.verdict:12}\033[0m {r.row.item_id:5} {r.row.parameter[:28]:28} "
+              f"{r.row.raw_value:>6} {r.row.unit:7} {r.row.space[:40]}")
+        for line in r.reason.splitlines():
+            print(f"{'':19}{line}")
+        if r.explanation:
+            print(f"{'':19}LLM ({r.explanation_status}): {r.explanation}")
+    counts = {v: sum(r.verdict == v for r in results) for v in ("PASS", "FAIL", "NEEDS REVIEW")}
+    print(f"\n{counts}")
+    if args.out:
+        Path(args.out).write_text(results_to_csv(results))
+        print(f"written {args.out}")
+
+
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(prog="rulemate")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -163,6 +205,20 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--no-cache", action="store_true")
     p.add_argument("-v", "--verbose", action="store_true", help="show guardrail violations")
     p.set_defaults(fn=cmd_ask)
+
+    p = sub.add_parser("limits", help="extract / show the rule table of numeric limits")
+    p.add_argument("--method", choices=["auto", "llm", "regex"], default="auto")
+    p.add_argument("--provider")
+    p.add_argument("--force", action="store_true", help="re-extract everything")
+    p.add_argument("-v", "--verbose", action="store_true", help="show rejected proposals")
+    p.set_defaults(fn=cmd_limits)
+
+    p = sub.add_parser("check", help="check a design CSV against the rule table")
+    p.add_argument("csv")
+    p.add_argument("--explain", action="store_true", help="add LLM explanations (guardrailed)")
+    p.add_argument("--provider")
+    p.add_argument("--out", help="write results CSV")
+    p.set_defaults(fn=cmd_check)
 
     args = ap.parse_args(argv)
     args.fn(args)
