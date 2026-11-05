@@ -103,6 +103,32 @@ def cmd_search(args) -> None:
             print("        " + h.clause.text.replace("\n", "\n        ")[:400])
 
 
+def cmd_ask(args) -> None:
+    from .answer import answer_question
+    from .llm import get_llm
+    from .retrieval import get_retriever
+
+    _load()
+    ans = answer_question(args.question, retriever=get_retriever(), llm=get_llm(args.provider), use_cache=not args.no_cache)
+    badge = {"verified": "VERIFIED", "excerpts": "EXCERPTS ONLY", "not_found": "NOT FOUND"}[ans.status]
+    extra = " (cached)" if ans.cached else ""
+    print(f"[{badge}]{extra}  confidence={ans.confidence} top_score={ans.top_score}  "
+          f"attempts={ans.attempts} rejected={ans.rejected_attempts}  {ans.model}  {ans.latency_ms:.0f} ms")
+    if ans.synthetic:
+        print("[SYNTHETIC SAMPLE DATA - not a real rule]")
+    print("-" * 80)
+    print(ans.text)
+    print("-" * 80)
+    if ans.citations:
+        print("cited: " + ", ".join(f"{c.clause_id} (p.{c.page})" for c in ans.citations))
+    if ans.note:
+        print(f"note: {ans.note}")
+    if ans.violations and args.verbose:
+        print("guardrail violations on last rejected draft:")
+        for v in ans.violations:
+            print(f"  - {v}")
+
+
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(prog="rulemate")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -130,6 +156,13 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--no-xref", action="store_true", help="do not follow cross-references")
     p.add_argument("--bm25", action="store_true", help="BM25 + ID lookup only (no embeddings)")
     p.set_defaults(fn=cmd_search)
+
+    p = sub.add_parser("ask", help="answer a question with verified citations")
+    p.add_argument("question")
+    p.add_argument("--provider", help="e.g. groq | openai | ollama | groq,ollama (default: LLM_PROVIDER)")
+    p.add_argument("--no-cache", action="store_true")
+    p.add_argument("-v", "--verbose", action="store_true", help="show guardrail violations")
+    p.set_defaults(fn=cmd_ask)
 
     args = ap.parse_args(argv)
     args.fn(args)

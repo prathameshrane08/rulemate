@@ -54,6 +54,40 @@ python -m rulemate search "helicopter landing area size"   # confidence=none
 python -m rulemate search "stair angle" --bm25             # without embeddings
 ```
 
+## Answers with citations
+
+`python -m rulemate ask "<question>"` retrieves clauses, asks the LLM to answer **only** from them with a
+`[doc § clause]` citation on every sentence, then checks the draft in code (`rulemate/guardrails.py`):
+
+| Check | Rejects |
+|---|---|
+| citation | a sentence without a citation (lead-ins ending in ":" and "not specified" statements without numbers are exempt) |
+| retrieved | a citation of a clause that was not retrieved for this question |
+| number | a number, or number + unit, that does not appear in the clause cited by that sentence (no unit conversion) |
+| quote | quoted text that is not word for word in a cited clause |
+| hedge | "probably", "typically", "usually", ... unless the cited clause uses the word |
+
+If a check fails, the LLM gets one retry with the list of violations. If that fails too, the user gets the matching
+clause text labelled **excerpts only**. Retrieval confidence `none`, or a `NOT_FOUND` reply from the LLM, gives
+"Not found in the provided rules." plus the closest clauses. The LLM never decides what is shown.
+
+| Badge | Meaning |
+|---|---|
+| verified | generated answer passed every check |
+| excerpts only | clause text only (checks failed twice, or LLM unavailable / too slow) |
+| not found | nothing in the rules answers the question |
+
+Providers (`rulemate/llm.py`): Groq (`GROQ_MODEL`, default `openai/gpt-oss-120b`), any OpenAI-compatible endpoint, and
+Ollama (`llama3.2`) for offline use. `LLM_PROVIDER=groq,ollama` falls through to the next provider on error or
+timeout (`LLM_TIMEOUT`). Verified and not-found answers are cached in `data/cache/answers.json`, keyed by question, model and index version.
+
+```bash
+python -m rulemate ask "What is the minimum corridor width?"
+python -m rulemate ask "what does 13.3.1.4 say" -v          # -v shows guardrail violations of rejected drafts
+python -m rulemate ask "helicopter landing area size"       # not found
+python -m rulemate ask "maximum stair angle" --provider ollama --no-cache
+```
+
 ## Using the real challenge data
 
 1. Delete `data/rules/SAMPLE_SYNTHETIC_rules.md` and `data/designs/sample_design.csv`.
