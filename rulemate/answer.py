@@ -38,7 +38,7 @@ header line of the clause that supports it. Put the citation at the end of the s
 4. If you quote, quote word for word and put the quote in double quotes.
 5. Do not guess. Never use words like "probably", "typically", "usually", "likely", "generally".
 6. State conditions and exceptions that the clauses give (for example "provided that ...").
-7. If a clause refers to another clause that is in the list, use both.
+7. If a clause refers to another clause that is in the list (for example "calculated in accordance with 4.2"), also state what the referenced clause requires, and cite it.
 8. If the clauses do not answer the question, reply with exactly: NOT_FOUND
 9. Be concise: 1 to 5 sentences, or a short bullet list. No preamble, no closing remarks."""
 
@@ -93,7 +93,10 @@ def format_context(hits: list[Hit]) -> str:
             meta.append(f"page {c.page}")
         if h.source == "xref" and h.via:
             meta.append(f"referenced by {h.via}")
-        blocks.append(f"{c.citation} {' | '.join(meta)}\n{c.text}")
+        shown = {h2.clause.clause_id for h2 in hits}
+        refs = [r for r in c.refs if r in shown or any(x.startswith(r + ".") for x in shown)]
+        tail = f"\n(Refers to: {', '.join(refs)} - see below)" if refs else ""
+        blocks.append(f"{c.citation} {' | '.join(meta)}\n{c.text}{tail}")
     return "\n\n".join(blocks)
 
 

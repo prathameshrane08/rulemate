@@ -88,6 +88,28 @@ python -m rulemate ask "helicopter landing area size"       # not found
 python -m rulemate ask "maximum stair angle" --provider ollama --no-cache
 ```
 
+## API and UI
+
+```bash
+uvicorn rulemate.api:app --port 8000      # terminal 1: backend (http://localhost:8000/docs)
+streamlit run ui/app.py                   # terminal 2: UI (http://localhost:8501)
+```
+
+| Endpoint | |
+|---|---|
+| `GET /health` | documents, clause count, retrieval mode, LLM |
+| `POST /ask` | `{"question": "...", "provider": "groq,ollama", "use_cache": true}` returns an answer with status, citations and sources |
+| `GET /search?q=` | raw retrieval result with scores |
+| `GET /clause/{id}` | clause by ID, e.g. `/clause/II-2/13.3.1.4` or `/clause/Reg.%20II-2%2F9.3.3` |
+
+The UI uses the API when it is running, otherwise it calls the code in-process (so the demo survives a dead API).
+
+- **Ask the rules**: chat with a badge per answer (verified / excerpts only / not found); citation buttons open the clause
+  with its page, breadcrumb and clickable "refers to" / "referenced by" links.
+- **Sources** panel: every retrieved clause with how it was found (ID, search, cross-reference), fused score, cosine, BM25 and dense rank.
+- **Browse clauses**: the whole parsed index, filterable.
+- **Compliance check**: next step.
+
 ## Using the real challenge data
 
 1. Delete `data/rules/SAMPLE_SYNTHETIC_rules.md` and `data/designs/sample_design.csv`.
