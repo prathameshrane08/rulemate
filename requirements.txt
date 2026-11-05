@@ -1,0 +1,28 @@
+# core
+pydantic>=2.7
+python-dotenv>=1.0
+numpy>=1.26
+
+# ingest
+pdfplumber>=0.11
+python-docx>=1.1
+beautifulsoup4>=4.12
+
+# retrieval
+rank_bm25>=0.2.2
+sentence-transformers>=3.0
+
+# llm
+httpx>=0.27
+
+# compliance
+pint>=0.24
+
+# api / ui
+fastapi>=0.111
+uvicorn>=0.30
+streamlit>=1.36
+python-multipart>=0.0.9
+
+# tests
+pytest>=8.0

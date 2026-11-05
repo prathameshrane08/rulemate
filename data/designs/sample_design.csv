@@ -1,0 +1,16 @@
+item_id,space,parameter,value,unit,notes
+D01,Deck 5 passenger corridor (MVZ 3),corridor clear width,1250,mm,SYNTHETIC sample
+D02,Deck 7 passenger corridor (MVZ 2),corridor clear width,1.1,m,SYNTHETIC sample
+D03,Deck 3 crew corridor,corridor clear width,950,mm,SYNTHETIC sample; serves 40 crew
+D04,Stairway enclosure SE-4,stair inclination,42,degree,SYNTHETIC sample
+D05,Stairway SE-7,stair inclination,47,degree,SYNTHETIC sample
+D06,Cabin 7120 to stairway SE-3,travel distance,38,m,SYNTHETIC sample
+D07,Cabin 9044 to stairway SE-5,travel distance,46.5,m,SYNTHETIC sample; route passes through atrium
+D08,MVZ bulkhead door FD-301,fire door rating,60,min,SYNTHETIC sample
+D09,Stairway enclosure door FD-412,fire door rating,20,min,SYNTHETIC sample
+D10,Deck 6 dead-end corridor,dead-end corridor length,9,m,SYNTHETIC sample
+D11,Cabin door 8012,door clear width,760,mm,SYNTHETIC sample; cabin door
+D12,Main stair SE-1,handrail height,0.9,m,SYNTHETIC sample
+D13,Fire door FD-220,fire door closing time,45,s,SYNTHETIC sample
+D14,Main vertical zone 3,main vertical zone length,46,m,SYNTHETIC sample
+D15,Stairway SE-2,stair riser height,21,cm,SYNTHETIC sample
