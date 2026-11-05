@@ -256,8 +256,7 @@ EXPLAIN_PROMPT = """You explain the result of an automated compliance check of a
 The verdict is already decided by code and is final: do not change it, question it, or recompute it.
 
 Write 1 to 3 short sentences. Every sentence must cite the rule clause it relies on in the exact form [doc § clause] \
-copied from the clause header. Copy limit values and units exactly as in the clause. If the verdict depends on a \
-condition, say that the condition must be confirmed; it has NOT been checked, so never say whether it is met. \
+copied from the clause header. Copy limit values and units exactly as in the clause. {condition_rule}\
 Do not use words like "probably", "typically" or "usually".
 
 Design item: {item}
@@ -331,6 +330,11 @@ def explain_row(res: RowResult, clauses: dict[str, Clause], llm, cache: dict | N
         value=f"{row.value:g} {row.unit}",
         verdict=res.verdict,
         reason=res.reason,
+        condition_rule=(
+            "The verdict depends on a condition that has NOT been checked: say that it must be confirmed, "
+            "and never say whether it is met. " if res.verdict == "NEEDS REVIEW" else
+            "Only state what the reason above states; do not add conditions or requirements. "
+        ),
         clauses="\n\n".join(f"{c.citation} {c.title}\n{c.text}" for c in used),
     )}]
     from ..guardrails import extract_numbers

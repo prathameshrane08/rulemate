@@ -115,6 +115,15 @@ def test_short_clause_id_resolved_when_unambiguous():
     assert res.ok and f"[{D} § II-2/13.3.2.1]" in res.text
 
 
+def test_context_expands_relative_references():
+    from rulemate.answer import expand_refs
+
+    out = expand_refs("in no case less than the minimum width given in 3.1.1.", ["II-2/13.3.1.1"])
+    assert out == "in no case less than the minimum width given in 3.1.1 (= II-2/13.3.1.1)."
+    assert expand_refs("see Table 13.1 for values", ["II-2 Table 13.1"]) == "see Table 13.1 (= II-2 Table 13.1) for values"
+    assert expand_refs("up to 3.5 degrees", ["II-2/9.3.5"]) == "up to 3.5 degrees"
+
+
 def test_violation_messages_are_actionable():
     v = check_answer(f"Corridors must be at least 1.2 m wide [{D} § II-2/13.3.1.1].", RETRIEVED).violations
     assert any("1.2 m" in str(x) for x in v)
@@ -199,6 +208,21 @@ def test_pipeline_model_says_not_found(retriever):
 def test_pipeline_existing_clause_is_never_not_found(retriever):
     a = ask(retriever, FakeLLM(["NOT_FOUND"]), "Explain regulation II-2/14.2.2")
     assert a.status == "excerpts" and "II-2/14.2.2" in a.text
+
+
+def test_pipeline_model_refusal_on_confident_match_shows_excerpts(clauses_dense):
+    a = answer_question("What is the minimum corridor width?", retriever=clauses_dense, llm=FakeLLM(["NOT_FOUND"]),
+                        use_cache=False)
+    assert a.confidence == "high" and a.status == "excerpts" and "1200 mm" in a.text
+
+
+@pytest.fixture(scope="module")
+def clauses_dense():
+    clauses = ingest_file(ROOT / "data" / "rules" / "SAMPLE_SYNTHETIC_rules.md")[1]
+    r = Retriever(clauses, use_dense=True)
+    if r.mode != "hybrid":
+        pytest.skip("embedding model not available")
+    return r
 
 
 def test_pipeline_no_retrieval_no_llm_call(retriever):

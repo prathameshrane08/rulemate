@@ -163,6 +163,11 @@ rejection rate, answer latency p50/p95 and compliance accuracy, followed by a th
 
 When the real documents arrive, replace the questions with ones about them (keep the four types) and rerun.
 
+## Demo
+
+See `DEMO.md` for the 3-minute script and the pitch outline. Before presenting, run
+`python scripts/warm_demo.py --refresh` to cache every demo answer and explanation and to see exactly what will be shown.
+
 ## Using the real challenge data
 
 1. Delete `data/rules/SAMPLE_SYNTHETIC_rules.md` and `data/designs/sample_design.csv`.

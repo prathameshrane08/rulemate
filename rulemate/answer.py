@@ -2,7 +2,7 @@
 
 Code decides what is shown:
 * retrieval confidence "none"           -> "Not found in the provided rules" + closest clauses (no LLM call)
-* LLM replies NOT_FOUND                 -> same
+* LLM replies NOT_FOUND on a weak match -> same (on a confident match or a named clause: excerpts instead)
 * answer passes every guardrail         -> status "verified"
 * fails twice / LLM down or too slow    -> status "excerpts": the matching clause text, labelled as excerpts
 """
@@ -19,6 +19,7 @@ from pydantic import BaseModel
 
 from .config import CLAUSES_FILE, ROOT
 from .guardrails import check_answer
+from .ingest.parsers import NOT_A_VALUE
 from .llm import LLMError, get_llm
 from .models import Clause
 from .retrieval import Hit, RetrievalResult, Retriever, get_retriever
@@ -86,6 +87,7 @@ def context_clauses(res: RetrievalResult) -> list[Hit]:
 
 def format_context(hits: list[Hit]) -> str:
     blocks = []
+    shown = {h.clause.clause_id for h in hits}
     for h in hits:
         c = h.clause
         meta = [c.title] if c.title else []
@@ -93,11 +95,29 @@ def format_context(hits: list[Hit]) -> str:
             meta.append(f"page {c.page}")
         if h.source == "xref" and h.via:
             meta.append(f"referenced by {h.via}")
-        shown = {h2.clause.clause_id for h2 in hits}
-        refs = [r for r in c.refs if r in shown or any(x.startswith(r + ".") for x in shown)]
-        tail = f"\n(Refers to: {', '.join(refs)} - see below)" if refs else ""
-        blocks.append(f"{c.citation} {' | '.join(meta)}\n{c.text}{tail}")
+        visible = [r for r in c.refs if r in shown]  # only point at clauses the model can see and cite
+        blocks.append(f"{c.citation} {' | '.join(meta)}\n{expand_refs(c.text, visible)}")
     return "\n\n".join(blocks)
+
+
+def expand_refs(text: str, refs: list[str]) -> str:
+    """'... given in 3.1.1.' -> '... given in 3.1.1 (= II-2/13.3.1.1).' so the model can cite the right clause."""
+    for ref in refs:
+        local = ref.split("/")[-1].split(" [")[-1].rstrip("]")
+        parts = local.split(".")
+        forms = sorted({local} | {".".join(parts[k:]) for k in range(1, len(parts) - 1)}, key=len, reverse=True)
+        for f in forms:
+            if f == ref or "." not in f:
+                continue
+            m = re.search(rf"(?<![\w.\[]){re.escape(f)}(?![\w]|\.\d){NOT_A_VALUE}", text)
+            if m:
+                text = f"{text[:m.end()]} (= {ref}){text[m.end():]}"
+                break
+        else:
+            t = re.search(rf"\b{re.escape(ref.split(' ', 1)[-1])}\b", text) if " Table " in ref else None
+            if t and ref not in text:
+                text = f"{text[:t.end()]} (= {ref}){text[t.end():]}"
+    return text
 
 
 def build_messages(question: str, hits: list[Hit], confidence: str) -> list[dict]:
@@ -241,10 +261,13 @@ def answer_question(
                                         attempts=attempt - 1, rejected_attempts=rejected,
                                         violations=last_violations))
         model = llm.label
-        if is_not_found(raw) and any(h.source == "id" for h in res.hits):
-            # the question names a clause that exists: never answer "not found", show the clause instead
-            return done(excerpts_answer(question, res, hits, "the model gave no answer; showing the requested clause",
-                                        attempts=attempt, rejected_attempts=rejected, model=model))
+        if is_not_found(raw) and (res.confidence == "high" or any(h.source == "id" for h in res.hits)):
+            # retrieval is confident (or the question names an existing clause): a refusal from the model is not
+            # enough to tell the user "not found in the rules"; show the relevant clauses instead
+            note = ("the model gave no answer; showing the requested clause" if any(h.source == "id" for h in res.hits)
+                    else "the model gave no answer; showing the most relevant clauses")
+            return done(excerpts_answer(question, res, hits, note, attempts=attempt, rejected_attempts=rejected,
+                                        model=model))
         if is_not_found(raw):
             ans = not_found_answer(question, res, note="The model found no answer in the retrieved clauses.")
             ans.attempts, ans.model, ans.rejected_attempts = attempt, model, rejected
@@ -279,8 +302,9 @@ def answer_question(
                 "role": "user",
                 "content": "Your answer failed these automatic checks:\n- "
                 + "\n- ".join(last_violations)
-                + "\n\nRewrite the whole answer and fix every problem. Follow all the rules. "
-                "If the clauses do not answer the question, reply with exactly: NOT_FOUND",
+                + "\n\nRewrite the whole answer and fix every problem. Follow all the rules. Valid citations are only: "
+                + ", ".join(c.citation for c in retrieved)
+                + "\nIf the clauses do not answer the question, reply with exactly: NOT_FOUND",
             },
         ]
 
