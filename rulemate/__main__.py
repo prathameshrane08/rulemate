@@ -66,6 +66,43 @@ def cmd_list(args) -> None:
     print(f"\n{Counter(c.kind for c in res.clauses)}")
 
 
+def cmd_index(args) -> None:
+    import time
+
+    from .retrieval import Retriever
+
+    _load()
+    t = time.perf_counter()
+    r = Retriever(_load().clauses, use_dense=True)
+    print(f"mode={r.mode}  searchable={len(r.searchable)}  built in {time.perf_counter() - t:.1f}s")
+
+
+def cmd_search(args) -> None:
+    import time
+
+    from .retrieval import get_retriever
+
+    _load()
+    r = get_retriever(use_dense=not args.bm25)
+    t = time.perf_counter()
+    res = r.search(args.query, k=args.k, follow_refs=not args.no_xref)
+    ms = (time.perf_counter() - t) * 1000
+    verdict = {"high": "RELEVANT", "low": "WEAK MATCH (LLM must confirm or say not found)",
+               "none": "NOTHING RELEVANT -> 'Not found in the provided rules'"}[res.confidence]
+    print(f"mode={res.mode}  top_score={res.top_score}  confidence={res.confidence}: {verdict}  ({ms:.0f} ms)")
+    if res.id_queries:
+        print(f"clause IDs in query: {res.id_queries}")
+    print(f"{'source':7} {'score':>6} {'cos':>6} {'bm25':>4} {'dense':>5}  clause")
+    for h in res.hits:
+        via = f"  (via {h.via})" if h.via else ""
+        cos = f"{h.cosine:.3f}" if h.cosine is not None else "-"
+        bmr = "-" if h.bm25_rank is None else h.bm25_rank + 1
+        dr = "-" if h.dense_rank is None else h.dense_rank + 1
+        print(f"{h.source:7} {h.score:6.3f} {cos:>6} {bmr!s:>4} {dr!s:>5}  {h.clause.clause_id}{via}")
+        if args.text:
+            print("        " + h.clause.text.replace("\n", "\n        ")[:400])
+
+
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(prog="rulemate")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -82,6 +119,17 @@ def main(argv: list[str] | None = None) -> None:
     p = sub.add_parser("list", help="list all parsed clauses")
     p.add_argument("--doc")
     p.set_defaults(fn=cmd_list)
+
+    p = sub.add_parser("index", help="build / refresh the embedding cache")
+    p.set_defaults(fn=cmd_index)
+
+    p = sub.add_parser("search", help="hybrid search over clauses")
+    p.add_argument("query")
+    p.add_argument("-k", type=int, default=5)
+    p.add_argument("--text", action="store_true", help="print clause text")
+    p.add_argument("--no-xref", action="store_true", help="do not follow cross-references")
+    p.add_argument("--bm25", action="store_true", help="BM25 + ID lookup only (no embeddings)")
+    p.set_defaults(fn=cmd_search)
 
     args = ap.parse_args(argv)
     args.fn(args)

@@ -33,6 +33,27 @@ python -m rulemate show 13.3.1.4        # suffix match, shows cross-refs
 pytest -q
 ```
 
+## Retrieval
+
+`python -m rulemate search "<question>"` runs, in order:
+
+1. **Clause-ID lookup**: IDs in the question ("13.3.1", "Reg. II-2/9.3.3", "[2.1.3]", "Table 13.1") are looked up
+   directly. A heading brings its sub-clauses with it. A question that is only an ID skips fuzzy search.
+2. **Hybrid search**: BM25 (`rank_bm25`) and `BAAI/bge-small-en-v1.5` embeddings, combined with reciprocal rank fusion (k=60).
+   Embeddings are cached in `data/index/embeddings.npy` and rebuilt only when the clauses change.
+   Without the model (offline), it falls back to BM25 only.
+3. **Cross-references**: the ID matches and the top 3 hits pull in the clauses they reference ("see 4.2" brings 4.2 and its children), capped at 8.
+4. **Confidence**: best cosine ≥ 0.70 is `high`, ≥ 0.60 is `low` (the LLM must confirm the clauses answer it, or say not found),
+   and below that is `none` ("Not found in the provided rules", no LLM call). Tune with `RULEMATE_HIGH_SCORE` / `RULEMATE_LOW_SCORE`.
+
+```bash
+python -m rulemate index                                   # build the embedding cache (first run downloads ~130 MB)
+python -m rulemate search "What is the minimum corridor width?" --text
+python -m rulemate search "what does 13.3.1.4 say"         # ID lookup + cross-ref to 4.2
+python -m rulemate search "helicopter landing area size"   # confidence=none
+python -m rulemate search "stair angle" --bm25             # without embeddings
+```
+
 ## Using the real challenge data
 
 1. Delete `data/rules/SAMPLE_SYNTHETIC_rules.md` and `data/designs/sample_design.csv`.
