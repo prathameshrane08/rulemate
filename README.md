@@ -146,6 +146,23 @@ when code says it does) or state an unverified condition as fact. If it fails tw
 
 API: `POST /check` (JSON rows), `POST /check/csv` (upload), `GET /limits`, `PUT /limits`.
 
+## Evaluation
+
+```bash
+python eval/run.py --retrieval-only     # seconds: hit@5, MRR, threshold calibration, compliance accuracy
+python eval/run.py                      # full: every question answered with the configured LLM, cache off
+python eval/run.py --provider groq      # compare providers
+```
+
+`eval/questions.jsonl` has 30 questions: 20 answerable (with expected clause IDs and the key numbers a correct
+answer must contain), 5 asking for a specific clause ID, and 5 that the rules cannot answer.
+`eval/compliance_expected.json` labels the sample design. The script prints a Markdown table (also saved to
+`eval/results/latest.md`) with retrieval hit@5 and MRR, correct "not found" rate, wrongly refused rate, verified /
+excerpts share, key-number recall, citation precision (sentence-clause word overlap plus number check), guardrail
+rejection rate, answer latency p50/p95 and compliance accuracy, followed by a threshold calibration table.
+
+When the real documents arrive, replace the questions with ones about them (keep the four types) and rerun.
+
 ## Using the real challenge data
 
 1. Delete `data/rules/SAMPLE_SYNTHETIC_rules.md` and `data/designs/sample_design.csv`.

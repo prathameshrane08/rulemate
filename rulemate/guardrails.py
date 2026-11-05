@@ -17,7 +17,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from .lookup import normalize_id
+from .lookup import find_clause, normalize_id
 from .models import Clause
 
 # [doc § clause]; clause IDs may contain one level of brackets, e.g. "Pt.3 Ch.2 Sec.4 [2.1.3]"
@@ -165,6 +165,9 @@ def check_answer(
         clause = by_key.get((doc.lower(), normalize_id(cid)))
         if clause is None and len(by_id.get(normalize_id(cid), [])) == 1:
             clause = by_id[normalize_id(cid)][0]  # right clause, slightly mangled doc name
+        if clause is None:
+            short = find_clause(retrieved, cid)  # "5.2" -> II-2/13.5.2, only if unambiguous among retrieved
+            clause = short[0] if len(short) == 1 else None
         cites.append((doc, cid, clause))
         return _PLACEHOLDER.format(len(cites) - 1)
 

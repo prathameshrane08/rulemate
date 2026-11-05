@@ -46,7 +46,8 @@ STOPWORDS = set(
 
 # words that do not add meaning to "what does 13.3.1 say"
 ID_FILLER = set("say says said mean means state states tell me about show text requirement requirements "
-                "regulation reg clause paragraph section table rule rules content contain contains".split())
+                "regulation reg clause paragraph section table rule rules content contain contains explain explains "
+                "describe describes summarize summarise summary require requires required cover covers what's in".split())
 
 
 def tokenize(text: str) -> list[str]:

@@ -110,6 +110,11 @@ def test_mangled_doc_name_is_rewritten_to_canonical_citation():
     assert res.text == f"Corridors must be at least 1200 mm wide [{D} § II-2/13.3.1.1]."
 
 
+def test_short_clause_id_resolved_when_unambiguous():
+    res = check_answer("Stairs may not be steeper than 45 degrees [doc § 3.2.1].", RETRIEVED)
+    assert res.ok and f"[{D} § II-2/13.3.2.1]" in res.text
+
+
 def test_violation_messages_are_actionable():
     v = check_answer(f"Corridors must be at least 1.2 m wide [{D} § II-2/13.3.1.1].", RETRIEVED).violations
     assert any("1.2 m" in str(x) for x in v)
@@ -187,8 +192,13 @@ def test_pipeline_llm_down_shows_excerpts(retriever):
 
 
 def test_pipeline_model_says_not_found(retriever):
-    a = ask(retriever, FakeLLM(["NOT_FOUND"]))
+    a = ask(retriever, FakeLLM(["NOT_FOUND"]), "how wide must escape corridors be")
     assert a.status == "not_found" and a.text.startswith("Not found in the provided rules")
+
+
+def test_pipeline_existing_clause_is_never_not_found(retriever):
+    a = ask(retriever, FakeLLM(["NOT_FOUND"]), "Explain regulation II-2/14.2.2")
+    assert a.status == "excerpts" and "II-2/14.2.2" in a.text
 
 
 def test_pipeline_no_retrieval_no_llm_call(retriever):

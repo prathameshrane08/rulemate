@@ -241,6 +241,10 @@ def answer_question(
                                         attempts=attempt - 1, rejected_attempts=rejected,
                                         violations=last_violations))
         model = llm.label
+        if is_not_found(raw) and any(h.source == "id" for h in res.hits):
+            # the question names a clause that exists: never answer "not found", show the clause instead
+            return done(excerpts_answer(question, res, hits, "the model gave no answer; showing the requested clause",
+                                        attempts=attempt, rejected_attempts=rejected, model=model))
         if is_not_found(raw):
             ans = not_found_answer(question, res, note="The model found no answer in the retrieved clauses.")
             ans.attempts, ans.model, ans.rejected_attempts = attempt, model, rejected

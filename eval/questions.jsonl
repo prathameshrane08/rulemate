@@ -1,0 +1,30 @@
+{"id": "q01", "type": "answerable", "question": "What is the minimum clear width of corridors used as escape routes?", "expected": ["II-2/13.3.1.1"], "facts": ["1200"]}
+{"id": "q02", "type": "answerable", "question": "Can crew corridors be narrower than passenger corridors?", "expected": ["II-2/13.3.1.2"], "facts": ["900", "50"]}
+{"id": "q03", "type": "answerable", "question": "How long may a dead-end corridor be?", "expected": ["II-2/13.3.1.3"], "facts": ["7"]}
+{"id": "q04", "type": "answerable", "question": "What is the maximum inclination of an escape stairway?", "expected": ["II-2/13.3.2.1"], "facts": ["45"]}
+{"id": "q05", "type": "answerable", "question": "How wide must stairways be?", "expected": ["II-2/13.3.2.2", "II-2/13.4.3.1"], "facts": ["900"]}
+{"id": "q06", "type": "answerable", "question": "When does a stairway need an intermediate handrail?", "expected": ["II-2/13.3.2.2"], "facts": ["1800"]}
+{"id": "q07", "type": "answerable", "question": "At what height must stair handrails be fitted?", "expected": ["II-2/13.3.2.4"], "facts": ["850", "1000"]}
+{"id": "q08", "type": "answerable", "question": "What are the limits for stair riser height and tread depth?", "expected": ["II-2/13.3.2.5"], "facts": ["200", "240"]}
+{"id": "q09", "type": "answerable", "question": "How far can a passenger walk from a cabin to the nearest stairway enclosure?", "expected": ["II-2/13.3.3.1"], "facts": ["40"]}
+{"id": "q10", "type": "answerable", "question": "Can the travel distance be longer if the escape route goes through a large public space?", "expected": ["II-2/13.3.3.2"], "facts": ["50"]}
+{"id": "q11", "type": "answerable", "question": "How many means of escape are required from a space?", "expected": ["II-2/13.2.1"], "facts": []}
+{"id": "q12", "type": "answerable", "question": "What is the minimum clear width of a cabin door?", "expected": ["II-2/13.5.2", "II-2 Table 13.1"], "facts": ["700"]}
+{"id": "q13", "type": "answerable", "question": "What is the maximum opening force for doors in escape routes?", "expected": ["II-2/13.5.3"], "facts": ["100"]}
+{"id": "q14", "type": "answerable", "question": "How long must the low-location lighting stay operational?", "expected": ["II-2/13.6.2"], "facts": ["60"]}
+{"id": "q15", "type": "answerable", "question": "What fire integrity rating do fire doors in main vertical zone bulkheads need?", "expected": ["II-2/9.3.1", "II-2 Table 9.1"], "facts": ["60"]}
+{"id": "q16", "type": "answerable", "question": "What closing time is required for fire doors?", "expected": ["II-2/9.3.3"], "facts": ["40", "10"]}
+{"id": "q17", "type": "answerable", "question": "What is the maximum mean length of a main vertical zone?", "expected": ["II-2/9.2.2"], "facts": ["48"]}
+{"id": "q18", "type": "answerable", "question": "How is the corridor width calculated when many people use the corridor?", "expected": ["II-2/13.3.1.4", "II-2/13.4.2.1"], "facts": ["10"], "tags": ["cross-reference"]}
+{"id": "q19", "type": "answerable", "question": "What is the maximum total evacuation time in the evacuation analysis?", "expected": ["II-2/14.2.1"], "facts": ["60"]}
+{"id": "q20", "type": "answerable", "question": "What fire integrity is required for a door in a galley boundary?", "expected": ["II-2 Table 9.1"], "facts": ["30"], "tags": ["table"]}
+{"id": "c01", "type": "clause_id", "question": "What does 13.3.1.2 say?", "expected": ["II-2/13.3.1.2"], "facts": ["900"]}
+{"id": "c02", "type": "clause_id", "question": "Show me Reg. II-2/9.3.4", "expected": ["II-2/9.3.4"], "facts": []}
+{"id": "c03", "type": "clause_id", "question": "What is in Table 13.1?", "expected": ["II-2 Table 13.1"], "facts": ["1200"]}
+{"id": "c04", "type": "clause_id", "question": "Explain regulation II-2/14.2.2", "expected": ["II-2/14.2.2"], "facts": []}
+{"id": "c05", "type": "clause_id", "question": "What does clause 13.3.2.1 require?", "expected": ["II-2/13.3.2.1"], "facts": ["45"]}
+{"id": "u01", "type": "unanswerable", "question": "What is the minimum size of a helicopter landing area?", "expected": [], "facts": []}
+{"id": "u02", "type": "unanswerable", "question": "How many lifeboats are required for 3000 passengers?", "expected": [], "facts": []}
+{"id": "u03", "type": "unanswerable", "question": "What is the maximum permissible noise level in passenger cabins?", "expected": [], "facts": []}
+{"id": "u04", "type": "unanswerable", "question": "What bottom shell plating thickness is required?", "expected": [], "facts": []}
+{"id": "u05", "type": "unanswerable", "question": "What capacity must the bilge pumps have?", "expected": [], "facts": []}
