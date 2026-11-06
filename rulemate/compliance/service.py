@@ -22,11 +22,13 @@ def _has_hosted_llm(spec: str | None) -> bool:
 
 
 def resolve_method(method: Method, provider: str | None) -> str:
-    """'auto' uses the LLM for extraction only when a hosted model is configured: on the sample rules a small
-    local model (llama3.2 3B) extracted worse limits than the regex fallback."""
+    """'auto' means the deterministic regex extractor. Measured on the two labelled example designs, an LLM-built
+    rule table (Groq gpt-oss-120b, 6 Nov 2026) got 79 % / 87 % of verdicts right against 100 % / 100 % for the
+    regex table: it dropped conditions ("where two tiers of berths are fitted") and added relaxations. LLM
+    extraction stays available with method="llm" to propose limits, which an engineer then reviews."""
     if method != "auto":
         return method
-    return "auto" if _has_hosted_llm(provider) else "regex"
+    return "regex"
 
 
 def get_rule_table(method: Method = "auto", provider: str | None = None, force: bool = False) -> RuleTable:

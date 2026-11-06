@@ -164,8 +164,9 @@ The LLM proposes `{parameter, subject, qualifier, condition, comparator, value, 
 proposal only if the value appears in the clause with that unit, pint understands the unit, and the comparator is
 valid. Code also corrects the comparator from the wording ("not less than" means `>=`), rejects per-unit rates
 ("10 mm per person") given as plain values, and drops qualifiers and quotes that are not in the text. A regex
-extractor is the offline fallback. `auto` uses the LLM only when a hosted model (Groq / OpenAI) is configured,
-because on the sample a 3B local model extracted worse limits than the regex. Engineers can review and edit the
+extractor is the default (`auto`): on the two labelled example designs an LLM-built table (Groq gpt-oss-120b) got
+79 % / 87 % of verdicts right against 100 % / 100 % for the regex table, because it dropped conditions and added
+relaxations. `--method llm` keeps LLM extraction available to propose limits for review. Engineers can review and edit the
 table in the UI; edited rows are marked `manual`.
 
 **2. Verdict, in code only** (`rulemate/compliance/check.py`). For each design row:
@@ -208,6 +209,11 @@ rejection rate, answer latency p50/p95, compliance accuracy and planted-defect r
 threshold calibration table.
 
 When the real documents arrive, replace the questions with ones about them (keep the four types) and rerun.
+
+## Deployment
+
+See `DEPLOYMENT.md`: install, configuration, offline / own-server / hosted LLM modes and what data
+leaves the machine in each, running as services, access control, updating rules, backups and troubleshooting.
 
 ## Demo
 

@@ -68,13 +68,18 @@ class RuleTable(BaseModel):
 _LIMIT_WORDS = re.compile(
     r"\b(not less than|not more than|not exceed(?:ing)?|shall not exceed|at least|minimum|maximum|"
     r"no(?:t)? greater than|no(?:t)? smaller than|up to|min\.|max\.|increased to|reduced to|"
-    r"not be (?:less|more) than|more than .{0,60}not (?:be )?permitted)\b",
+    r"not be (?:less|more) than|more than .{0,60}not (?:be )?permitted|no one of which \w+ \w+ more than)\b",
     re.I,
 )
 
 
+# sections that say where a rule applies, not what a design must meet ("This part applies to vessels of
+# 300 gross tons or more") - their numbers are thresholds, never design limits
+_SCOPE_TITLES = re.compile(r"^(application|applicability|scope|purpose|intent|definitions?|preemptive effect|general)\b", re.I)
+
+
 def is_candidate(c: Clause) -> bool:
-    if c.kind == "heading":
+    if c.kind == "heading" or _SCOPE_TITLES.match(c.title or ""):
         return False
     has_unit_number = any(u for _, u in extract_numbers(c.text))
     return (c.kind == "table" and bool(extract_numbers(c.text))) or (has_unit_number and bool(_LIMIT_WORDS.search(c.text)))
@@ -99,10 +104,11 @@ _MAX_PHRASE = re.compile(
     r"(not more than|not be more than|not exceeding|shall not exceed|not exceed|no more than|up to|"
     r"maximum(?: \w+)?(?: of)?|max\.|increased to)\s*$", re.I)
 _PROHIBITED_ABOVE = re.compile(r"\bmore than\s*$", re.I)  # "more than 40 feet ... shall not be permitted"
-_PROHIBITED = re.compile(r"\b(?:shall|must|may) not be permitted|\bnot permitted\b|\bprohibited\b", re.I)
+_PROHIBITED = re.compile(
+    r"\b(?:shall|must|may) not be permitted|\bnot permitted\b|\bprohibited\b|\bno one of which\b", re.I)
 # unit words, US customary included; longest first
 UNIT_RX = (
-    r"(?:square (?:feet|foot|met(?:er|re)s?)|cubic (?:feet|foot|met(?:er|re)s?)|centimet(?:er|re)s?|"
+    r"(?:persons|person|square (?:feet|foot|met(?:er|re)s?)|cubic (?:feet|foot|met(?:er|re)s?)|centimet(?:er|re)s?|"
     r"millimet(?:er|re)s?|met(?:er|re)s?|inches|inch|feet|foot|ft|mm|cm|m2|m²|m3|m³|m|degrees|°|min|s|kN|N|%)"
 )
 _NUM_TOKEN = r"\d+(?:\s\d/\d+|\.\d+)?"
