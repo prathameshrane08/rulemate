@@ -1,84 +1,103 @@
 # RuleMate demo (3 minutes)
 
-> Numbers marked **[update]** come from the run with local llama3.2 on the synthetic sample. Rerun
-> `python eval/run.py --provider groq` (and again on the real Meyer documents) and copy in the new numbers.
+Meyer judges three things: **accuracy** (compliant vs non-compliant, no misleading findings), **design
+interpretation** (understands the design, shows *why* something fails) and **quality & usability** (a solid
+foundation an engineer can use). The demo shows each one, on the vessel type Meyer gave us: a US research vessel,
+checked against the real US regulation for it, 46 CFR Part 190.
+
+> Numbers marked **[update]** come from the eval run with the local llama3.2 model. Rerun
+> `python eval/run.py --provider groq` and copy in the new numbers. Design values in the research-vessel example are
+> SYNTHETIC placeholders until they are measured on the RCRV drawings; say so.
 
 ## Before going on stage
 
 ```bash
 source .venv/bin/activate
-python -m rulemate ingest && python -m rulemate index     # only if the rule files changed
-python scripts/warm_demo.py --provider groq,ollama         # caches every demo answer and explanation
-uvicorn rulemate.api:app --port 8000                       # terminal 1
-streamlit run ui/app.py                                    # terminal 2 -> http://localhost:8501
+python scripts/fetch_cfr.py                                  # only once: real 46 CFR 190 text into data/rules/
+python -m rulemate ingest && python -m rulemate index && python -m rulemate limits --force   # if rules changed
+python scripts/warm_demo.py --provider groq,ollama           # caches every demo answer and explanation
+uvicorn rulemate.api:app --port 8000                         # terminal 1
+streamlit run ui/app.py                                      # terminal 2 -> http://localhost:8501
 ```
 
-- In the sidebar: provider **groq,ollama**, **Use answer cache** on (same provider as the warm-up, or the cache misses).
-- Clear the chat. Open the Compliance tab once so it loads.
-- No Wi-Fi: set `LLM_PROVIDER=ollama` in `.env` and rerun the warm-up with `--provider ollama`.
+- Sidebar: provider **groq,ollama**, **Use answer cache** on (same provider as the warm-up, or the cache misses).
+- Clear the chat. Open the Compliance tab once so it loads; leave *Research vessel example* selected.
+- No Wi-Fi: set `LLM_PROVIDER=ollama` in `.env` and rerun the warm-up with `--provider ollama`. Everything runs on
+  the laptop; that is also the answer to "can it run on our own servers?".
 - If an answer comes back as **excerpts only**, that is the safety net working; say so and move on.
 - Backup: screenshots of each step in case the laptop or projector fails.
-- If the demo still runs on the synthetic sample, say so in the first sentence. The UI shows the banner anyway.
 
 ## Script
 
 | Time | Do | Say |
 |---|---|---|
-| 0:00-0:20 | UI open on *Ask the rules* | "Ship designers at Meyer check every space against thousands of pages of rules. A normal chatbot will happily invent a clause number. RuleMate has one rule: every answer is traceable to a clause, or it says *not found in the rules*." |
-| 0:20-0:55 | **Demo 1, cited answer.** Sidebar: *What is the minimum corridor width?* Click the 📄 citation. | "Green badge: verified. Every sentence carries a clause citation, and code checked each one after the model wrote it: the cited clause was retrieved, every number and unit is in that clause, no guessing words. Click the citation: here is the exact clause, page 3, with its place in the document." |
-| 0:55-1:30 | **Demo 2, cross-reference.** Sidebar: *How is the corridor width calculated when many people use it?* Point at the Sources panel, then open 13.3.1.4 and click *Refers to: II-2/13.4.2*. | "Clause 13.3.1.4 only says *calculated in accordance with 4.2*. RuleMate followed that reference in code; you can see it in Sources: *xref ← 13.3.1.4*. So the answer includes the 10 mm per person rule from 4.2, and both clauses are cited." (Groq; the small local model often stops at "in accordance with 4.2": then use the clause dialog, see below.) |
-| 1:30-1:55 | **Demo 3, refusal.** Sidebar: *What is the required size of a helicopter landing area?* | "Our rules don't cover helidecks. Instead of guessing, RuleMate says *Not found in the provided rules* and shows the closest clauses so you can check for yourself. That decision was made in code, from the retrieval score, before any model was called." |
-| 1:55-2:40 | **Demo 4, compliance FAIL.** Compliance tab, *Run check*. Click row **D02**, then **D03**. | "Fifteen design values from a CSV. D02: a passenger corridor of 1.1 metres. Code converted it to 1100 mm, compared it with the 1200 mm minimum in 13.3.1.1: **FAIL**. The model did not decide this; it only explains it, and its explanation is checked as well. D03 is a crew corridor of 950 mm: it passes only under the crew relaxation, *if it serves no more than 50 persons*. Code cannot verify that, so it says **NEEDS REVIEW** instead of guessing." |
-| 2:40-3:00 | Show the eval table (slide 4) or `eval/results/latest.md` | "We measure it: 100% retrieval hit@5, 100% correct refusals, 0 unchecked drafts shown **[update]**. And when the real Meyer documents arrive, you drop them in a folder and rerun one command." |
+| 0:00-0:20 | UI open on *Compliance check* | "You told us: the earlier a compliance defect is found, the cheaper. A door opening the wrong way is an hour in design and expensive in production. RuleMate checks design values against the rules, code decides every verdict, and every finding is traceable to a clause and to the drawing it came from." |
+| 0:20-1:15 | **Demo 1, compliance on your vessel type.** *Research vessel example – 46 CFR 190* is selected, rule set *46CFR190*. *Run check*. Click **R12**, then the clause button. | "A US research vessel like the RCRV, against the real US regulation for research vessels, 46 CFR Part 190, fetched from the official eCFR. The values are placeholders until we measure them on the GA. Fourteen items: seven PASS, six FAIL, one for review. R12: an aft bulwark of 1.0 metre. The rule says 39 and a half **inches**. 1.0 m is 39.37 inches, so **FAIL**. American drawings, American rule, metric value: units are converted by code, not by the model. Here is the clause, word for word, and here is where the design value came from." |
+| 1:15-1:35 | Click **R01**, then **R14**. | "R01 is written the way the drawing writes it, 2 foot 6: 30 inches against a 28-inch minimum, PASS. R14, two-tier berths: the 30 cm limit applies only *where two tiers are fitted*. Code cannot confirm that from a CSV, so it says **NEEDS REVIEW** instead of guessing. That is how we keep misleading findings out." |
+| 1:35-2:00 | **Demo 2, cited answer.** *Ask the rules* tab, sidebar: *How high must guard rails be on a research vessel?* Click the 📄 citation. | "The same rules answer questions. Verified badge: every sentence is cited, and code checked after generation that the cited clause was retrieved, that it actually supports the sentence, and that every number and unit is in it. 39 and a half inches, from 190.25-5(a)." |
+| 2:00-2:20 | **Demo 3, cross-reference.** Sidebar: *How is the corridor width calculated when many people use it?* Point at Sources. | "Rules point at each other. This clause only says *in accordance with 4.2*; RuleMate followed the reference in code, you see it in Sources as *xref*, and both clauses are cited. This one runs on our synthetic cruise-ship sample, marked as such." (If the answer stops at "in accordance with 4.2", open the clause and click *Refers to*.) |
+| 2:20-2:35 | **Demo 4, refusal.** Sidebar: *What is the required size of a helicopter landing area?* | "Part 190 does not cover helidecks. Instead of guessing, RuleMate says *Not found in the provided rules* and lists the closest clauses. Decided in code from the retrieval score, before any model was called." |
+| 2:35-3:00 | Eval table (slide 5) or `eval/results/latest.md` | "We measure it. We planted defects: every passing value pushed 3 % past its limit. 100 % were caught, and with values exactly at the limit, 0 false FAILs. 100 % retrieval hit@5, 100 % correct refusals **[update]**. To add a rule set: drop the file in a folder, run one command." |
+
+Optional if there is time, in a terminal (change impact after a late design change):
+
+```bash
+python -m rulemate check new_design.csv --baseline data/designs/rcrv_example_design.csv --rules 46CFR190
+```
+
+"After a change, it lists only the items whose verdict changed, new FAILs first: what to recheck."
 
 ### If something goes wrong
 
 | Problem | Do |
 |---|---|
-| Demo 2 answer does not mention 4.2's content | Open the 13.3.1.4 clause dialog and click *Refers to*. The cross-reference is shown by code whatever the model writes. |
+| Demo 3 answer does not mention 4.2's content | Open the 13.3.1.4 clause dialog and click *Refers to*. The cross-reference is shown by code whatever the model writes. |
 | API is down | The UI falls back to in-process calls by itself; carry on. |
-| LLM slow or down | Cached answers return instantly; uncached ones show excerpts after the timeout (25 s). |
+| LLM slow or down | Cached answers return instantly; uncached ones show excerpts after the timeout (25 s). Compliance verdicts never need the LLM. |
+| A question comes back with cruise-ship clauses | Set *Rule sets for questions* in the sidebar to 46CFR190 (the demo buttons do this). |
 
 ---
 
 # Pitch outline (5 slides)
 
-## 1. Problem
-- Designing a cruise ship means meeting SOLAS, class rules, flag-state rules and owner specifications: thousands of pages that refer to each other ("see 4.2", "Table 13.1").
-- Designers lose hours looking up and cross-checking clauses; a missed relaxation or a wrong unit shows up late, where it is expensive.
-- Generic AI assistants are not usable here: they make up clause numbers and values, and you cannot tell when.
+## 1. Problem (in Meyer's words)
+- A complex regulatory landscape: SOLAS, MARPOL, class rules (DNV, Lloyd's), flag-state rules, PVAG/ADA; overlapping, cross-referenced, and often vague.
+- Checking is manual and needs senior engineers who know the rules and the design.
+- Late findings are expensive: a door found in design is an hour; found in production it is a rework job.
+- Generic AI is not usable here: it invents clause numbers and values, and you cannot tell when.
 
 ## 2. Solution: RuleMate
-- **Ask the rules**: plain-language questions, answers with exact clause citations, one click to the clause text and page.
-- **Check the design**: upload design values (CSV), get PASS / FAIL / NEEDS REVIEW per item with the clause and the computed comparison.
-- How it works: rules are split by their own numbering (Reg. II-2/13.3.1.1, Pt.3 Ch.2 Sec.4 [2.1.3]) and tables are kept whole → hybrid search (BM25 + embeddings) + exact clause-ID lookup + cross-references followed → the LLM writes the text → code checks it.
-- Runs on Groq, any OpenAI-compatible endpoint, or fully offline with Ollama.
+- **Check the design**: design values (as the drawing writes them, e.g. `2'-6"`, with their source drawing) checked against the rule sets that apply to the vessel; PASS / FAIL / NEEDS REVIEW per item with the clause, the computed comparison and an explanation.
+- **Ask the rules**: plain-language questions, answers with exact clause citations, one click to the clause text.
+- **After a change**: re-check and list only what changed verdict.
+- Works on the real US regulation for Meyer's challenge vessel (46 CFR Part 190, research vessels) plus any PDF/DOCX/HTML/TXT rule set, split by its own numbering.
 
 ## 3. How trust is guaranteed
 - **Code finds and computes the facts; the LLM only explains them.**
-- Every answer is checked after generation, in code: each sentence cited, each cited clause actually retrieved, every number and unit present in the cited clause, quotes word for word, no guessing words. Fails twice → the user sees the clause excerpts, labelled as excerpts.
-- "Not found in the provided rules" when nothing relevant is retrieved, and a named clause is never answered "not found".
-- Compliance: limits extracted to a rule table and validated against the clause text; pint converts units; **code decides the verdict**; an explanation that contradicts the computed result, or states an unchecked condition as fact, is rejected.
-- Every answer carries a badge: *verified*, *excerpts only* or *not found*. The rule table can be reviewed and edited by an engineer.
+- Limits are extracted into a rule table an engineer can review; each one is validated against the clause text. pint converts units; code compares and decides. Conditions code cannot verify become NEEDS REVIEW, never a guess.
+- Every answer is checked after generation: each sentence cited, each cited clause retrieved *and* supporting the sentence, every number and unit present, quotes word for word, no guessing words. Fails twice: clause excerpts, labelled.
+- Traceable both ways: the clause that sets the limit and the drawing the value came from.
 
-## 4. Evaluation **[update with Groq + real documents]**
+## 4. Evaluation **[update with Groq]**
 
-| Metric | Result |
+Fill from `eval/results/latest.md`.
+
+| Metric (Meyer criterion) | Result |
 |---|---|
-| Retrieval hit@5 | 100% (MRR 0.97) |
-| Correct "not found" on unanswerable questions | 100% (5) |
-| Answerable questions wrongly refused | 0% |
-| Answers verified by all guardrails | 96% |
-| Citation precision | 100% |
+| Planted defects caught (accuracy) | 100 % of 14 across both designs |
+| False FAIL with values exactly at the limit (accuracy) | 0 % of 14 |
+| Compliance verdicts correct, research vessel / cruise sample | 100 % of 14 / 100 % of 15 |
+| Retrieval hit@5 (interpretation) | 100 % (MRR 0.96) |
+| Correct "not found" on unanswerable questions | 100 % of 6 |
+| Answers verified by every guardrail | 81 % (rest shown as labelled excerpts) **[update]** |
+| Citation precision (each citation supports its sentence) | 93 % **[update]** |
 | Drafts that failed a guardrail shown to the user | 0 (by construction) |
-| Answer latency p50 / p95 | 1.8 s / 2.8 s (local llama3.2 on a laptop) |
-| Compliance verdicts correct (15 items) | 100% |
 
-30 questions: 20 answerable, 5 asking for a specific clause, 5 unanswerable. Caveat to say out loud: synthetic sample written by the team; real documents will score lower, and we will show those numbers too.
+38 questions (8 on the real 46 CFR 190 text). Caveat to say out loud: the questions and design values were written by the team; real design data will score lower and we will show those numbers too.
 
 ## 5. Next steps for Meyer
-- Load Meyer's real rule set: SOLAS, class rules, flag-state requirements, owner specifications. Check the parsers on each numbering style and rerun the eval with Meyer's own questions.
-- Read design values straight from the design tools (space and parameter exports) instead of CSV.
-- Engineer sign-off: reviewed rule table, accepted NEEDS REVIEW items and an audit trail of which clause version a decision used.
-- Track rule changes: when a new edition arrives, list the design items whose limits changed.
-- Run on-premises with a local model for confidential design data (the Ollama path already works).
+- Read design values straight from the RCRV drawings and 3D model (Navisworks export of spaces and properties) instead of a CSV.
+- More rule sets per vessel type: SOLAS, DNV class rules, PVAG/ADA, plus interpretations (IACS unified interpretations) that say how a vague rule is applied.
+- Change impact in the design tool: "you added a cabin: these items must be rechecked".
+- Engineer sign-off: reviewed rule table, accepted review items, an audit trail of which clause version a decision used; role-based access.
+- Runs fully on-premises or in an EU data centre with a local model (the offline path already works on a 32 GB laptop).

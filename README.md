@@ -3,6 +3,16 @@
 Answers questions about ship design rules with exact clause citations, and checks design values against rule limits.
 Every answer is traceable to a clause, or it says "not found in the rules".
 
+Rule documents loaded today:
+
+| Document | What it is | Used with |
+|---|---|---|
+| `46CFR190` | **Real regulation text**: US 46 CFR Part 190, construction and arrangement of oceanographic research vessels (means of escape, accommodation, rails), fetched from eCFR with `scripts/fetch_cfr.py`. Public domain. | the research-vessel example design (Meyer's challenge vessel, the OSU Regional Class Research Vessel, is a US research vessel) |
+| `SAMPLE_SYNTHETIC_rules` | **Invented** SOLAS-style cruise-ship rules for development, labelled synthetic everywhere | the cruise-ship sample design |
+
+Each check and each question can be scoped to the rule sets that apply to the vessel (`--rules`, or the selector in
+the UI), so a research-vessel stairway is never judged by cruise-ship rules.
+
 ## Setup (3 commands)
 
 ```bash
@@ -21,6 +31,7 @@ page, text, parent, breadcrumb path and resolved cross-references. Tables are ke
 |---|---|---|
 | `solas` | `Chapter II-2`, `Regulation 13`, `3.1.1 ...` | `II-2/13.3.1.1` |
 | `class` | `Pt.3 Ch.2`, `Section 4`, `[2.1.3] ...` | `Pt.3 Ch.2 Sec.4 [2.1.3]` |
+| `cfr` | `Subpart 190.10`, `§ 190.10-25`, `(b) ...` | `190.10-25(b)` |
 | `decimal` | `4.2.1 ...` | `4.2.1` |
 | `fallback` | headings only | `S3`, `S3.1` |
 
@@ -111,13 +122,42 @@ The UI uses the API when it is running, otherwise it calls the code in-process (
 - **Compliance check**: sample or uploaded CSV (or values typed into a form), colour-coded results, how each verdict
   was reached, CSV export, and the editable rule table.
 
+## Real rules: 46 CFR Part 190
+
+```bash
+python scripts/fetch_cfr.py              # 46 CFR 190 -> data/rules/46CFR190.md (verbatim text, eCFR, latest issue)
+python scripts/fetch_cfr.py --part 72    # another part, e.g. passenger vessels
+python -m rulemate ingest && python -m rulemate index && python -m rulemate limits --force
+python -m rulemate ask "How high must guard rails be on a research vessel?" --rules 46CFR190
+```
+
+Sections ending in `-90` apply only to vessels contracted before 1968 and are left out (`--keep-old` keeps them), so
+superseded limits do not enter the rule table of a new design. The US text brings real-world wording that the
+extractor handles: inches and feet, mixed fractions ("39 1/2 inches"), the same limit stated twice
+("190 centimeters (75 inches)", kept once with the other value noted), prohibitions ("dead end corridors more than
+40 feet in length shall not be permitted" means `<= 40 ft`), and per-person quantities ("2.78 square meters ... for
+each person") that are not room limits.
+
 ## Compliance check
 
 ```bash
 python -m rulemate limits                     # build / show the rule table (data/index/limits.json)
-python -m rulemate check data/designs/sample_design.csv --out results.csv
+python -m rulemate check data/designs/rcrv_example_design.csv --rules 46CFR190
+python -m rulemate check data/designs/sample_design.csv --rules SAMPLE_SYNTHETIC_rules --out results.csv
 python -m rulemate check data/designs/sample_design.csv --explain   # + guardrailed LLM explanations
+python -m rulemate check new.csv --baseline old.csv --rules 46CFR190 # change impact: which items changed verdict
 ```
+
+**Design values.** CSV columns `item_id, space, parameter, value, unit, source, notes`. `source` records where the
+value comes from (drawing, sheet, model element, measured or stated) and is shown next to every verdict, so a FAIL
+can be traced to the drawing as well as to the clause. Values may be written the way US drawings write them:
+`2'-6"`, `3 ft 6 in`, `39 1/2` (unit `in`), or with the unit in the cell (`40 ft`). The research-vessel example
+(`data/designs/rcrv_example_design.csv`) uses SYNTHETIC values with planted defects; replace them with values
+measured on the RCRV general arrangement and keep the `source` column.
+
+**Change impact.** `--baseline old.csv` checks both versions and lists only the items whose verdict changed (new
+FAILs first), new and removed items, and value changes that kept their verdict: what to look at after a late
+design change such as an added cabin.
 
 **1. Rule table.** Numeric limits are extracted from every clause that states one (`rulemate/compliance/limits.py`).
 The LLM proposes `{parameter, subject, qualifier, condition, comparator, value, unit, quote}` as JSON; code keeps a
@@ -154,12 +194,18 @@ python eval/run.py                      # full: every question answered with the
 python eval/run.py --provider groq      # compare providers
 ```
 
-`eval/questions.jsonl` has 30 questions: 20 answerable (with expected clause IDs and the key numbers a correct
-answer must contain), 5 asking for a specific clause ID, and 5 that the rules cannot answer.
-`eval/compliance_expected.json` labels the sample design. The script prints a Markdown table (also saved to
+`eval/questions.jsonl` has 38 questions: 25 answerable (with expected clause IDs and the key numbers a correct
+answer must contain), 7 asking for a specific clause ID, and 6 that the rules cannot answer; 8 of them are about
+the real 46 CFR 190 text. `eval/rcrv_expected.json` and `eval/compliance_expected.json` label the two example designs.
+
+**Planted defects** (`python eval/seeded.py`, also part of `eval/run.py`): every value the checker passes is moved
+3 % past the limit that decided it (must not PASS) and set exactly at that limit (must not FAIL). This measures
+the two things that matter for trust: missed violations and false alarms at the boundary, including unit
+conversion (a 1.0 m bulwark is 39.37 in, below the 39 1/2 in minimum). The script prints a Markdown table (also saved to
 `eval/results/latest.md`) with retrieval hit@5 and MRR, correct "not found" rate, wrongly refused rate, verified /
 excerpts share, key-number recall, citation precision (sentence-clause word overlap plus number check), guardrail
-rejection rate, answer latency p50/p95 and compliance accuracy, followed by a threshold calibration table.
+rejection rate, answer latency p50/p95, compliance accuracy and planted-defect results per design, followed by a
+threshold calibration table.
 
 When the real documents arrive, replace the questions with ones about them (keep the four types) and rerun.
 
@@ -170,8 +216,15 @@ See `DEMO.md` for the 3-minute script and the pitch outline. Before presenting, 
 
 ## Using the real challenge data
 
-1. Delete `data/rules/SAMPLE_SYNTHETIC_rules.md` and `data/designs/sample_design.csv`.
-2. Copy the rule documents into `data/rules/`.
-3. Run `python -m rulemate ingest` and check the style column and the `unres.` (unresolved references) count.
+Meyer provides a public design (the OSU Regional Class Research Vessel: GA drawings, technical documents, a
+Navisworks model) rather than rule documents, and a small curated rule set is explicitly fine.
+
+1. Measure or read the values from the RCRV drawings into a CSV like `data/designs/rcrv_example_design.csv`,
+   filling `source` with the drawing and sheet. Keep US notation if that is what the drawing says.
+2. Add rule documents to `data/rules/` (PDF, DOCX, HTML, TXT, MD), e.g. more CFR parts with `scripts/fetch_cfr.py`,
+   DNV rules (free access) or PVAG / ADA. Then `python -m rulemate ingest && python -m rulemate index &&
+   python -m rulemate limits --force`, and check the style column and the `unres.` (unresolved references) count.
+3. Review the rule table in the UI (Compliance tab), then `python -m rulemate check your.csv --rules <docs>`.
+4. To drop the synthetic data: delete `data/rules/SAMPLE_SYNTHETIC_rules.md` and `data/designs/sample_design.csv`.
 
 The synthetic sample is invented data for development only and is flagged `synthetic: true` on every clause.
