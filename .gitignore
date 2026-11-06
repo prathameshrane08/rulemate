@@ -10,3 +10,4 @@ eval/results/*.json
 
 # challenge material from Meyer (not ours to redistribute)
 /MEYER*.pdf
+/MeyerTurku_SinceAI2026/
