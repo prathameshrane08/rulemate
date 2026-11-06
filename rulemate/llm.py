@@ -7,11 +7,29 @@ if the first one fails or times out, the next is tried. Keys come from .env only
 from __future__ import annotations
 
 import os
+import re
+import time
 from dataclasses import dataclass
 
 import httpx
 
 from . import config  # noqa: F401  (loads .env)
+
+
+RATE_LIMIT_WAIT = float(os.getenv("LLM_RATE_LIMIT_WAIT", "30"))
+
+
+def _retry_after(r: httpx.Response) -> float:
+    """Seconds to wait from a 429: Retry-After header, or "try again in 1.5s" / "in 2m3.4s" in the message."""
+    try:
+        return max(0.5, float(r.headers.get("retry-after", "")))
+    except ValueError:
+        pass
+    m = re.search(r"try again in (?:(\d+)m)?([\d.]+)(ms|s)", r.text)
+    if m:
+        secs = float(m.group(2)) / (1000 if m.group(3) == "ms" else 1) + 60 * int(m.group(1) or 0)
+        return max(0.5, secs + 0.2)
+    return 5.0
 
 
 class LLMError(RuntimeError):
@@ -33,15 +51,26 @@ class OpenAICompatible:
         body: dict = {"model": self.model, "messages": messages, "temperature": temperature, "max_tokens": max_tokens}
         if self.reasoning_effort and "gpt-oss" in self.model:
             body["reasoning_effort"] = self.reasoning_effort
-        try:
-            r = httpx.post(
-                f"{self.base_url.rstrip('/')}/chat/completions",
-                headers={"Authorization": f"Bearer {self.api_key}"},
-                json=body,
-                timeout=self.timeout,
-            )
-        except httpx.HTTPError as e:
-            raise LLMError(f"{self.name}: {type(e).__name__}: {e}") from e
+        waited = 0.0
+        while True:
+            try:
+                r = httpx.post(
+                    f"{self.base_url.rstrip('/')}/chat/completions",
+                    headers={"Authorization": f"Bearer {self.api_key}"},
+                    json=body,
+                    timeout=self.timeout,
+                )
+            except httpx.HTTPError as e:
+                raise LLMError(f"{self.name}: {type(e).__name__}: {e}") from e
+            if r.status_code != 429:
+                break
+            # rate limited (free tiers cap tokens per minute): wait as told, up to LLM_RATE_LIMIT_WAIT seconds
+            # in total, then fail so a chained provider (e.g. ollama) can take over
+            wait = _retry_after(r)
+            if waited + wait > RATE_LIMIT_WAIT:
+                break
+            time.sleep(wait)
+            waited += wait
         if r.status_code != 200:
             raise LLMError(f"{self.name}: HTTP {r.status_code}: {r.text[:300]}")
         content = r.json()["choices"][0]["message"].get("content") or ""

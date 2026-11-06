@@ -110,7 +110,7 @@ _BAD_QUALIFIERS = {"any", "all", "none", "table", "min", "max", "degrees", "divi
 
 
 def _num(tok: str) -> float:
-    if " " in tok:  # mixed fraction "39 1/2"
+    if re.search(r"\s", tok):  # mixed fraction "39 1/2" (any space, incl. narrow no-break)
         whole, frac = tok.split()
         n, d = frac.split("/")
         return float(whole) + float(n) / float(d)

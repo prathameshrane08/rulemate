@@ -257,3 +257,10 @@ def test_rejects_number_borrowed_from_another_documents_clause():
 def test_rejects_bare_citation_answer():
     res = check_answer("[46CFR190 § 190.10-25(b)]", [CFR_STAIR])
     assert not res.ok and "format" in [v.kind for v in res.violations]
+
+
+def test_unicode_spaces_from_hosted_models_are_normalised():
+    ans = f"Escape corridors must be at least 1200\u202fmm wide, \u201cnot less than 1200\u202fmm\u201d [{D} § II-2/13.3.1.1]."
+    res = check_answer(ans, RETRIEVED)
+    assert res.ok, res.violations
+    assert "\u202f" not in res.text

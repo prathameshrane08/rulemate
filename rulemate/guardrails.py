@@ -104,7 +104,7 @@ def extract_numbers(text: str) -> list[tuple[float, str | None]]:
             continue  # 3.1.1 is a clause number
         if _ID_CONTEXT_RE.search(text[max(0, m.start() - 14) : m.start()]):
             continue  # "Table 13.1", "regulation 9"
-        if " " in raw:  # mixed fraction "39 1/2"
+        if re.search(r"\s", raw):  # mixed fraction "39 1/2" (any space, incl. narrow no-break)
             whole, frac = raw.split()
             n, d = frac.split("/")
             value = float(whole) + float(n) / float(d)
@@ -156,6 +156,8 @@ def _is_exempt(sentence_wo_cites: str) -> bool:
 # ------------------------------------------------------------------ main check
 
 
+_UNICODE_SPACES = re.compile(r"[\u00a0\u2007\u2009\u200a\u202f]")
+
 # a cited clause must contain at least this share of its sentence's content words (clause text + title + path,
 # limit wording like "maximum" ignored). On the eval answers correct citations scored >= 0.58 and wrong ones
 # (a number taken from another document, a claim the clause does not make) <= 0.38.
@@ -196,6 +198,7 @@ def check_answer(
     ``extra_text``: words the answer may use besides the sources, e.g. the design row's space and parameter."""
     from .retrieval import tokenize
 
+    answer = _UNICODE_SPACES.sub(" ", answer)  # hosted models write "10\u202fmm"; check and show plain spaces
     extra_words = set(tokenize(extra_text))
     extra = [(float(v), _ALIAS_TO_UNIT.get(u or "") or _ALIAS_TO_UNIT.get((u or "").lower())) for v, u in (extra_numbers or [])]
     violations: list[Violation] = []

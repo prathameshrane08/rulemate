@@ -190,3 +190,9 @@ def test_change_impact():
     ch = diff_results(before, after)
     assert [(c.item_id, c.kind) for c in ch] == [("A", "verdict"), ("E", "new"), ("D", "removed"), ("B", "value")]
     assert "PASS -> FAIL" in ch[0].summary
+
+
+def test_fraction_with_unicode_space():
+    # hosted models write "39\u202f1/2 inches" (narrow no-break space)
+    assert extract_numbers("at least 39\u202f1/2 inches") == [(39.5, "in")]
+    assert extract_numbers("at least 39\u00a01/2 inches") == [(39.5, "in")]

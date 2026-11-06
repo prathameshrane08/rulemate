@@ -5,9 +5,8 @@ interpretation** (understands the design, shows *why* something fails) and **qua
 foundation an engineer can use). The demo shows each one, on the vessel type Meyer gave us: a US research vessel,
 checked against the real US regulation for it, 46 CFR Part 190.
 
-> Numbers marked **[update]** come from the eval run with the local llama3.2 model. Rerun
-> `python eval/run.py --provider groq` and copy in the new numbers. Design values in the research-vessel example are
-> SYNTHETIC placeholders until they are measured on the RCRV drawings; say so.
+> Numbers come from `python eval/run.py --provider groq` (gpt-oss-120b, 6 Nov 2026). Design values in the
+> research-vessel example are SYNTHETIC placeholders until they are measured on the RCRV drawings; say so.
 
 ## Before going on stage
 
@@ -20,6 +19,7 @@ uvicorn rulemate.api:app --port 8000                         # terminal 1
 streamlit run ui/app.py                                      # terminal 2 -> http://localhost:8501
 ```
 
+- Groq's free tier is rate-limited: run the warm-up at least a minute before going on stage, and don't run the eval right before.
 - Sidebar: provider **groq,ollama**, **Use answer cache** on (same provider as the warm-up, or the cache misses).
 - Clear the chat. Open the Compliance tab once so it loads; leave *Research vessel example* selected.
 - No Wi-Fi: set `LLM_PROVIDER=ollama` in `.env` and rerun the warm-up with `--provider ollama`. Everything runs on
@@ -37,7 +37,7 @@ streamlit run ui/app.py                                      # terminal 2 -> htt
 | 1:35-2:00 | **Demo 2, cited answer.** *Ask the rules* tab, sidebar: *How high must guard rails be on a research vessel?* Click the 📄 citation. | "The same rules answer questions. Verified badge: every sentence is cited, and code checked after generation that the cited clause was retrieved, that it actually supports the sentence, and that every number and unit is in it. 39 and a half inches, from 190.25-5(a)." |
 | 2:00-2:20 | **Demo 3, cross-reference.** Sidebar: *How is the corridor width calculated when many people use it?* Point at Sources. | "Rules point at each other. This clause only says *in accordance with 4.2*; RuleMate followed the reference in code, you see it in Sources as *xref*, and both clauses are cited. This one runs on our synthetic cruise-ship sample, marked as such." (If the answer stops at "in accordance with 4.2", open the clause and click *Refers to*.) |
 | 2:20-2:35 | **Demo 4, refusal.** Sidebar: *What is the required size of a helicopter landing area?* | "Part 190 does not cover helidecks. Instead of guessing, RuleMate says *Not found in the provided rules* and lists the closest clauses. Decided in code from the retrieval score, before any model was called." |
-| 2:35-3:00 | Eval table (slide 5) or `eval/results/latest.md` | "We measure it. We planted defects: every passing value pushed 3 % past its limit. 100 % were caught, and with values exactly at the limit, 0 false FAILs. 100 % retrieval hit@5, 100 % correct refusals **[update]**. To add a rule set: drop the file in a folder, run one command." |
+| 2:35-3:00 | Eval table (slide 5) or `eval/results/latest.md` | "We measure it. We planted defects: every passing value pushed 3 % past its limit. 100 % were caught, and with values exactly at the limit, 0 false FAILs. 100 % retrieval hit@5, 100 % correct refusals, 91 % of answers verified and the rest shown as excerpts, never unchecked. To add a rule set: drop the file in a folder, run one command." |
 
 Optional if there is time, in a terminal (change impact after a late design change):
 
@@ -78,9 +78,7 @@ python -m rulemate check new_design.csv --baseline data/designs/rcrv_example_des
 - Every answer is checked after generation: each sentence cited, each cited clause retrieved *and* supporting the sentence, every number and unit present, quotes word for word, no guessing words. Fails twice: clause excerpts, labelled.
 - Traceable both ways: the clause that sets the limit and the drawing the value came from.
 
-## 4. Evaluation **[update with Groq]**
-
-Fill from `eval/results/latest.md`.
+## 4. Evaluation (Groq gpt-oss-120b; `eval/results/latest.md`)
 
 | Metric (Meyer criterion) | Result |
 |---|---|
@@ -89,8 +87,9 @@ Fill from `eval/results/latest.md`.
 | Compliance verdicts correct, research vessel / cruise sample | 100 % of 14 / 100 % of 15 |
 | Retrieval hit@5 (interpretation) | 100 % (MRR 0.96) |
 | Correct "not found" on unanswerable questions | 100 % of 6 |
-| Answers verified by every guardrail | 81 % (rest shown as labelled excerpts) **[update]** |
-| Citation precision (each citation supports its sentence) | 93 % **[update]** |
+| Answers verified by every guardrail | 91 % (rest shown as labelled excerpts; 81 % with the offline 3B model) |
+| Citation precision (each citation supports its sentence) | 93 % |
+| Verified answers containing the key numbers | 89 % |
 | Drafts that failed a guardrail shown to the user | 0 (by construction) |
 
 38 questions (8 on the real 46 CFR 190 text). Caveat to say out loud: the questions and design values were written by the team; real design data will score lower and we will show those numbers too.
