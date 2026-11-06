@@ -1,0 +1,15 @@
+{
+ "_about": "Berth labels on NOAA SWATH GA Dwg 2175-000-05 (second deck, PDF page 42), read by eye from the drawing. WIPER & OILER has no berth count on the drawing.",
+ "source_file": "data/designs/sources/NOAA_SWATH_research_ship_1990.pdf",
+ "page": 42,
+ "labels": [
+  ["CHIEF SCIENTIST", 1], ["SENIOR SCIENTIST", 1], ["SENIOR SCIENTIST", 2], ["SENIOR SCIENTIST", 2],
+  ["SCIENTIST", 2], ["TECH", 2], ["TECH", 2], ["TECH", 2], ["MESSMAN", 1], ["CHIEF STEWARD", 1],
+  ["MESSMAN", 2], ["COOK", 2], ["SCIENTIST", 2], ["TECHNICIAN", 2], ["SCIENTIST", 2], ["ORDINARY SEAMAN", 2],
+  ["COMMISSIONED OFFICER", 2], ["COMMISSIONED OFFICER", 2], ["COMMISSIONED OFFICER", 2], ["SCIENTIST", 2],
+  ["SCIENTIST", 2], ["SURVEY TECHNICIAN", 2], ["SURVEY TECHNICIAN", 2], ["SEAMAN", 1], ["CHIEF BOATSWAIN", 1],
+  ["ELECTRICAL TECHNICIAN", 2], ["AB SEAMAN", 2], ["JR ENGINEER", 1], ["3RD ENGINEER", 1], ["SCIENTIST", 2],
+  ["SCIENTIST", 2], ["SENIOR SCIENTIST", 2], ["CHIEF ENGINEER", 1], ["COMMANDING OFFICER", 1]
+ ],
+ "roles_without_count": ["OILER", "WIPER"]
+}

@@ -26,3 +26,7 @@ python-multipart>=0.0.9
 
 # tests
 pytest>=8.0
+
+# OCR of design drawings (runs locally)
+rapidocr>=3.0
+onnxruntime>=1.18

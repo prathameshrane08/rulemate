@@ -21,7 +21,8 @@ streamlit run ui/app.py                                      # terminal 2 -> htt
 
 - Groq's free tier is rate-limited: run the warm-up at least a minute before going on stage, and don't run the eval right before.
 - Sidebar: provider **groq,ollama**, **Use answer cache** on (same provider as the warm-up, or the cache misses).
-- Clear the chat. Open the Compliance tab once so it loads; leave *Research vessel example* selected.
+- `python scripts/fetch_design_sources.py` once (the NOAA PDF is needed to show the drawing evidence).
+- Clear the chat. Open the Compliance tab once so it loads; leave *NOAA research ship* selected.
 - No Wi-Fi: set `LLM_PROVIDER=ollama` in `.env` and rerun the warm-up with `--provider ollama`. Everything runs on
   the laptop; that is also the answer to "can it run on our own servers?".
 - If an answer comes back as **excerpts only**, that is the safety net working; say so and move on.
@@ -31,13 +32,13 @@ streamlit run ui/app.py                                      # terminal 2 -> htt
 
 | Time | Do | Say |
 |---|---|---|
-| 0:00-0:20 | UI open on *Compliance check* | "You told us: the earlier a compliance defect is found, the cheaper. A door opening the wrong way is an hour in design and expensive in production. RuleMate checks design values against the rules, code decides every verdict, and every finding is traceable to a clause and to the drawing it came from." |
-| 0:20-1:15 | **Demo 1, compliance on your vessel type.** *Research vessel example – 46 CFR 190* is selected, rule set *46CFR190*. *Run check*. Click **R12**, then the clause button. | "A US research vessel like the RCRV, against the real US regulation for research vessels, 46 CFR Part 190, fetched from the official eCFR. The values are placeholders until we measure them on the GA. Fourteen items: seven PASS, six FAIL, one for review. R12: an aft bulwark of 1.0 metre. The rule says 39 and a half **inches**. 1.0 m is 39.37 inches, so **FAIL**. American drawings, American rule, metric value: units are converted by code, not by the model. Here is the clause, word for word, and here is where the design value came from." |
-| 1:15-1:35 | Click **R01**, then **R14**. | "R01 is written the way the drawing writes it, 2 foot 6: 30 inches against a 28-inch minimum, PASS. R14, two-tier berths: the 30 cm limit applies only *where two tiers are fitted*. Code cannot confirm that from a CSV, so it says **NEEDS REVIEW** instead of guessing. That is how we keep misleading findings out." |
-| 1:35-2:00 | **Demo 2, cited answer.** *Ask the rules* tab, sidebar: *How high must guard rails be on a research vessel?* Click the 📄 citation. | "The same rules answer questions. Verified badge: every sentence is cited, and code checked after generation that the cited clause was retrieved, that it actually supports the sentence, and that every number and unit is in it. 39 and a half inches, from 190.25-5(a)." |
-| 2:00-2:20 | **Demo 3, cross-reference.** Sidebar: *How is the corridor width calculated when many people use it?* Point at Sources. | "Rules point at each other. This clause only says *in accordance with 4.2*; RuleMate followed the reference in code, you see it in Sources as *xref*, and both clauses are cited. This one runs on our synthetic cruise-ship sample, marked as such." (If the answer stops at "in accordance with 4.2", open the clause and click *Refers to*.) |
-| 2:20-2:35 | **Demo 4, refusal.** Sidebar: *What is the required size of a helicopter landing area?* | "Part 190 does not cover helidecks. Instead of guessing, RuleMate says *Not found in the provided rules* and lists the closest clauses. Decided in code from the retrieval score, before any model was called." |
-| 2:35-3:00 | Eval table (slide 5) or `eval/results/latest.md` | "We measure it. We planted defects: every passing value pushed 3 % past its limit. 100 % were caught, and with values exactly at the limit, 0 false FAILs. 100 % retrieval hit@5, 100 % correct refusals, 91 % of answers verified and the rest shown as excerpts, never unchecked. To add a rule set: drop the file in a folder, run one command." |
+| 0:00-0:15 | UI open on *Compliance check* | "You told us: the earlier a compliance defect is found, the cheaper. RuleMate reads the design, checks it against the rules in code, and every finding is traceable to a clause and to the place in the drawing it came from." |
+| 0:15-0:55 | **Demo 1, reading a real drawing.** Select *NOAA research ship – read from its GA drawing*, open the *Read from…* box, *Run check*, click any row (e.g. **G02**). | "This is the NOAA research-ship study from your brief: a 1990 scanned GA, no text layer. RuleMate read it with OCR on this laptop: 34 berth labels, 58 berths, each with drawing number and position. Here is the part of the drawing this value came from, boxed. Every room meets 46 CFR 190.20-20(b), at most four persons per room. And it reads across documents: crew 21 and 60 days endurance mean a hospital is required, and there it is on page 42. Mess room seats 32 of 60: that is flagged for review, not guessed. Against our reading by eye: 34 of 34 labels." |
+| 0:55-1:35 | **Demo 2, non-compliant design.** Select *Research vessel example – 46 CFR 190*, *Run check*, click **R12**, then **R14**. | "Now a design with planted defects, values in US notation. R12: a 1.0 m bulwark against 39 and a half **inches**: 39.37 inches, **FAIL**, computed by code. R14: two-tier berths, the limit only applies *where two tiers are fitted*: code cannot confirm that, so **NEEDS REVIEW**, never a guess." |
+| 1:35-2:00 | **Demo 3, cited answer.** *Ask the rules* tab, sidebar: *How high must guard rails be on a research vessel?* Click the 📄 citation. | "The same rules answer questions. Verified: every sentence cited, and code checked that the cited clause supports it and that every number and unit is in it." |
+| 2:00-2:20 | **Demo 4, cross-reference.** Sidebar: *How is the corridor width calculated when many people use it?* Point at Sources. | "Rules point at each other. This clause says *in accordance with 4.2*; RuleMate followed the reference in code, and the answer gives 4.2's actual requirement. (Synthetic cruise-ship sample, marked as such.)" |
+| 2:20-2:35 | **Demo 5, refusal.** Sidebar: *What is the required size of a helicopter landing area?* | "Part 190 does not cover helidecks: *Not found in the provided rules*, with the closest clauses. Decided in code before any model was called." |
+| 2:35-3:00 | Eval table (slide 5) or `eval/results/latest.md` | "We measure it: 34 of 34 drawing labels read, every planted defect caught, 0 false FAILs at the exact limit, 100 % correct refusals, 91 % of answers verified and the rest shown as excerpts, never unchecked. It runs fully offline, so your designs can stay on your servers." |
 
 Optional if there is time, in a terminal (change impact after a late design change):
 
@@ -51,7 +52,7 @@ python -m rulemate check new_design.csv --baseline data/designs/rcrv_example_des
 
 | Problem | Do |
 |---|---|
-| Demo 3 answer does not mention 4.2's content | Open the 13.3.1.4 clause dialog and click *Refers to*. The cross-reference is shown by code whatever the model writes. |
+| Demo 4 answer does not mention 4.2's content | Open the 13.3.1.4 clause dialog and click *Refers to*. The cross-reference is shown by code whatever the model writes. |
 | API is down | The UI falls back to in-process calls by itself; carry on. |
 | LLM slow or down | Cached answers return instantly; uncached ones show excerpts after the timeout (25 s). Compliance verdicts never need the LLM. |
 | A question comes back with cruise-ship clauses | Set *Rule sets for questions* in the sidebar to 46CFR190 (the demo buttons do this). |
@@ -67,6 +68,7 @@ python -m rulemate check new_design.csv --baseline data/designs/rcrv_example_des
 - Generic AI is not usable here: it invents clause numbers and values, and you cannot tell when.
 
 ## 2. Solution: RuleMate
+- **Read the design**: GA drawings read with OCR on the laptop (a real 1990 NOAA GA: 34 of 34 berth labels), report text and particulars sheets; every value keeps its page, drawing number and position, shown boxed next to the verdict.
 - **Check the design**: design values (as the drawing writes them, e.g. `2'-6"`, with their source drawing) checked against the rule sets that apply to the vessel; PASS / FAIL / NEEDS REVIEW per item with the clause, the computed comparison and an explanation.
 - **Ask the rules**: plain-language questions, answers with exact clause citations, one click to the clause text.
 - **After a change**: re-check and list only what changed verdict.
@@ -82,6 +84,7 @@ python -m rulemate check new_design.csv --baseline data/designs/rcrv_example_des
 
 | Metric (Meyer criterion) | Result |
 |---|---|
+| GA drawing labels read by OCR, real NOAA drawing (interpretation) | 34 of 34 labels, 58 of 58 berths |
 | Planted defects caught (accuracy) | 100 % of 14 across both designs |
 | False FAIL with values exactly at the limit (accuracy) | 0 % of 14 |
 | Compliance verdicts correct, research vessel / cruise sample | 100 % of 14 / 100 % of 15 |
@@ -95,7 +98,7 @@ python -m rulemate check new_design.csv --baseline data/designs/rcrv_example_des
 38 questions (8 on the real 46 CFR 190 text). Caveat to say out loud: the questions and design values were written by the team; real design data will score lower and we will show those numbers too.
 
 ## 5. Next steps for Meyer
-- Read design values straight from the RCRV drawings and 3D model (Navisworks export of spaces and properties) instead of a CSV.
+- Read more from drawings: room areas, corridor and stair widths from vector GAs with a known scale; the RCRV GA and 3D model (Navisworks export of spaces and properties).
 - More rule sets per vessel type: SOLAS, DNV class rules, PVAG/ADA, plus interpretations (IACS unified interpretations) that say how a vague rule is applied.
 - Change impact in the design tool: "you added a cabin: these items must be rechecked".
 - Engineer sign-off: reviewed rule table, accepted review items, an audit trail of which clause version a decision used; role-based access.

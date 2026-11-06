@@ -211,10 +211,36 @@ def compliance_metrics() -> list[dict]:
     return out
 
 
+# ------------------------------------------------------------------ design interpretation
+
+
+def drawing_metrics() -> dict | None:
+    """OCR of a real GA drawing against labels read by eye (eval/noaa_ga_truth.json)."""
+    from collections import Counter
+
+    truth_file = EVAL_DIR / "noaa_ga_truth.json"
+    if not truth_file.exists():
+        return None
+    truth = json.loads(truth_file.read_text())
+    pdf = ROOT / truth["source_file"]
+    if not pdf.exists():
+        return None
+    from rulemate.design.extract import ocr_page, room_labels
+
+    got = room_labels(ocr_page(pdf, truth["page"]))
+    t = Counter((r.upper(), n) for r, n in truth["labels"])
+    g = Counter((l.roles[0], l.counts[0]) for l in got)
+    exact = sum((t & g).values())
+    counts_ok = sum((Counter(n for _, n in truth["labels"]) & Counter(l.counts[0] for l in got)).values())
+    return {"n": len(truth["labels"]), "found": len(got), "exact": exact, "counts_ok": counts_ok,
+            "berths_truth": sum(n for _, n in truth["labels"]), "berths_read": sum(l.persons for l in got),
+            "uncounted_flagged": sorted({w.text for w in room_labels.unlabelled}) == sorted(truth["roles_without_count"])}
+
+
 # ------------------------------------------------------------------ report
 
 
-def report(rm: dict, am: dict | None, cm: dict | None, calib: list[dict], meta: dict) -> str:
+def report(rm: dict, am: dict | None, cm: dict | None, calib: list[dict], meta: dict, dm: dict | None = None) -> str:
     L = ["## RuleMate evaluation", ""]
     L.append(f"{meta['n_questions']} questions ({meta['n_answerable']} answerable incl. {meta['n_clause_id']} clause-ID, "
              f"{meta['n_unanswerable']} unanswerable) · LLM: {meta['llm']} · retrieval: {meta['retrieval']} · {meta['when']}")
@@ -244,10 +270,13 @@ def report(rm: dict, am: dict | None, cm: dict | None, calib: list[dict], meta: 
                      f"({sd['violating_fail']} FAIL, {sd['violating_review']} REVIEW) |")
             L.append(f"| False FAIL with the value exactly at the limit ({c['label']}) | **{pct(sd['false_fail_at_limit'])}** "
                      f"of {sd['n_at_limit']} |")
+    if dm:
+        L.append(f"| GA drawing read by OCR (NOAA, second deck): berth labels found | **{dm['found']} of {dm['n']}**, "
+                 f"{dm['berths_read']} of {dm['berths_truth']} berths, role text exact for {dm['exact']} |")
     L.append("")
-    L.append("_Caveats: the questions and design values are synthetic and were written by the team (46 CFR 190 is the real "
-             "regulation text; the cruise-ship rules are synthetic), and thresholds were tuned on them; expect lower numbers "
-             "on real design data. Planted defects: every passing value moved 3 % past the limit that decided it, and "
+    L.append("_Caveats: the questions and the example design values were written by the team, and thresholds were tuned "
+             "on them; 46 CFR 190 and the NOAA GA drawing are real documents, the cruise-ship rules are synthetic. Expect "
+             "lower numbers on other real design data. Planted defects: every passing value moved 3 % past the limit that decided it, and "
              "set exactly at that limit._")
     L.append("")
     L.append(f"Threshold calibration (current: low={LOW_SCORE}, high={HIGH_SCORE}; answerable = non-ID questions)")
@@ -291,7 +320,8 @@ def main() -> None:
         "retrieval": retriever.mode,
         "when": datetime.now().strftime("%Y-%m-%d %H:%M"),
     }
-    md = report(rm, am, cm, calib, meta)
+    dm = drawing_metrics()
+    md = report(rm, am, cm, calib, meta, dm)
     print("\n" + md)
 
     misses = [r for r in rrows if r["type"] != "unanswerable" and not r["hit5"]]
@@ -306,7 +336,7 @@ def main() -> None:
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     (RESULTS_DIR / f"{stamp}.json").write_text(json.dumps(
-        {"meta": meta, "retrieval": rm, "answers": am, "compliance": cm, "calibration": calib,
+        {"meta": meta, "retrieval": rm, "answers": am, "compliance": cm, "drawing": dm, "calibration": calib,
          "retrieval_rows": rrows, "answer_rows": arows}, indent=1, default=str))
     (RESULTS_DIR / "latest.md").write_text(md + "\n")
     print(f"\nSaved eval/results/{stamp}.json and eval/results/latest.md")

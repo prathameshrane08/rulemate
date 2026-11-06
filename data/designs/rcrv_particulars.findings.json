@@ -1,0 +1,75 @@
+{
+ "document": "RCRV Particulars and Principal Equipment (OSU)",
+ "file": "data/designs/sources/RCRV_particulars.pdf",
+ "drawings": [],
+ "facts": [
+  {
+   "item_id": "T01",
+   "space": "Ship",
+   "parameter": "crew",
+   "value": 13.0,
+   "unit": "persons",
+   "source": "RCRV Particulars and Principal Equipment (OSU), p.1: \"Science berths) number 1 AGOR -27/28, URN target @ 8 knots Crew number 13 DNV Silent A, Silen\"",
+   "notes": "",
+   "source_file": "data/designs/sources/RCRV_particulars.pdf",
+   "source_page": 1,
+   "source_bbox": "",
+   "checkable": false
+  },
+  {
+   "item_id": "T02",
+   "space": "Ship",
+   "parameter": "scientific personnel berths",
+   "value": 16.0,
+   "unit": "persons",
+   "source": "RCRV Particulars and Principal Equipment (OSU), p.1: \"Thruster hp Berths Retractable 375 Main Propulsion hp 1740 Science + Mar Techs number 16 Bollard Pull lb 18,\"",
+   "notes": "",
+   "source_file": "data/designs/sources/RCRV_particulars.pdf",
+   "source_page": 1,
+   "source_bbox": "",
+   "checkable": false
+  },
+  {
+   "item_id": "T03",
+   "space": "Ship",
+   "parameter": "total complement",
+   "value": 29.0,
+   "unit": "persons",
+   "source": "RCRV Particulars and Principal Equipment (OSU), p.1: \"ion Yes-4 person Dynamic Positioning Capabilities ABS DPS-1 Total without Berthing Van number 29 Notes: 1. ITC is \"I\"",
+   "notes": "",
+   "source_file": "data/designs/sources/RCRV_particulars.pdf",
+   "source_page": 1,
+   "source_bbox": "",
+   "checkable": false
+  },
+  {
+   "item_id": "T04",
+   "space": "Ship",
+   "parameter": "endurance",
+   "value": 21.0,
+   "unit": "days",
+   "source": "RCRV Particulars and Principal Equipment (OSU), p.1: \"nots Coring Device Portable, Over the stern handling system Endurance days 21 minimum Communicati\"",
+   "notes": "",
+   "source_file": "data/designs/sources/RCRV_particulars.pdf",
+   "source_page": 1,
+   "source_bbox": "",
+   "checkable": false
+  },
+  {
+   "item_id": "T05",
+   "space": "Ship",
+   "parameter": "length overall",
+   "value": 199.5,
+   "unit": "ft",
+   "source": "RCRV Particulars and Principal Equipment (OSU), p.1: \"cipal Equipment Dimensions Over the side handling equipment Length (overall) ft 199.5 A-frame Dimensions\"",
+   "notes": "",
+   "source_file": "data/designs/sources/RCRV_particulars.pdf",
+   "source_page": 1,
+   "source_bbox": "",
+   "checkable": false
+  }
+ ],
+ "findings": [
+  "[46CFR190 \u00a7 190.20-35(a)] applies (crew 13 persons (p.1), endurance 21 days (p.1)): no GA drawing was read - confirm a hospital space on the GA. Status: not shown."
+ ]
+}

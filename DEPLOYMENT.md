@@ -33,6 +33,7 @@ python scripts/fetch_cfr.py          # optional: real 46 CFR Part 190 text into 
 python -m rulemate ingest            # split rule documents into clauses
 python -m rulemate index             # embeddings (downloads BAAI/bge-small-en-v1.5 once)
 python -m rulemate limits --force    # rule table of numeric limits
+python scripts/fetch_design_sources.py   # optional: public design documents for the drawing examples
 pytest -q                            # 120 tests, about 10 s
 ```
 
@@ -57,7 +58,7 @@ pytest -q                            # 120 tests, about 10 s
 
 | Mode | Set | What leaves the machine |
 |---|---|---|
-| **Fully offline / on-premises** | `LLM_PROVIDER=ollama` | Nothing. Parsing, embeddings, checks and the LLM all run locally. |
+| **Fully offline / on-premises** | `LLM_PROVIDER=ollama` | Nothing. Parsing, drawing OCR, embeddings, checks and the LLM all run locally. |
 | **Own or EU-hosted model** | `LLM_PROVIDER=openai`, `OPENAI_BASE_URL=https://<your endpoint>/v1` | The question and the retrieved clause text go to that endpoint, nothing else. |
 | **Hosted (demo)** | `LLM_PROVIDER=groq,ollama` | The question and retrieved clause text go to Groq (US). Fine for public rule texts; not for confidential designs. |
 

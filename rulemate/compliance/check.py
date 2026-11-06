@@ -51,6 +51,9 @@ class DesignRow(BaseModel):
     notes: str = ""
     raw_value: str = ""
     source: str = ""  # where the design value comes from: drawing / sheet / model element, measured or stated
+    source_file: str = ""  # document the value was read from (relative to the project), for showing the evidence
+    source_page: int | None = None
+    source_bbox: str = ""  # "x0,y0,x1,y1" in PDF points on that page
 
     @property
     def display(self) -> str:
@@ -102,6 +105,9 @@ _COLS = {
     "unit": ["unit", "units", "uom"],
     "notes": ["notes", "note", "comment", "comments", "remarks"],
     "source": ["source", "design_source", "drawing", "reference", "measured_from", "provenance"],
+    "source_file": ["source_file"],
+    "source_page": ["source_page"],
+    "source_bbox": ["source_bbox"],
 }
 
 
@@ -119,7 +125,10 @@ def read_design_csv(data: str | bytes) -> list[DesignRow]:
         raw = get("value")
         value, unit = parse_value(raw, get("unit"))  # also US feet-inch notation: 3'-6" -> 42 in
         rows.append(DesignRow(item_id=get("item_id") or f"R{i}", space=get("space"), parameter=get("parameter"),
-                              value=value, unit=unit, notes=get("notes"), raw_value=raw, source=get("source")))
+                              value=value, unit=unit, notes=get("notes"), raw_value=raw, source=get("source"),
+                              source_file=get("source_file"),
+                              source_page=int(get("source_page")) if get("source_page").isdigit() else None,
+                              source_bbox=get("source_bbox")))
     return rows
 
 

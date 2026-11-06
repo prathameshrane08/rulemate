@@ -150,6 +150,38 @@ def cmd_limits(args) -> None:
             print(f"  rejected {r['clause']}: {r['reason']}")
 
 
+def cmd_design(args) -> None:
+    import json
+
+    from .design.extract import extract, facts_to_csv
+
+    pages = None
+    if args.pages:
+        pages = []
+        for part in args.pages.split(","):
+            lo, _, hi = part.partition("-")
+            pages += list(range(int(lo), int(hi or lo) + 1))
+    src = Path(args.pdf)
+    ex = extract(src, pages=pages, doc_label=args.label, progress=lambda p: print(f"  reading page {p} ...", flush=True))
+    for d in ex.drawings:
+        print(f"GA p.{d['page']} Dwg {d['drawing'] or '?'} {d['title']}: {d['rooms']} berth labels, {d['berths']} berths")
+    for f in ex.facts:
+        mark = "" if f.checkable else "  (context)"
+        print(f"  {f.item_id:4} {f.parameter:34} {f.value:g} {f.unit:8} p.{f.source_page}{mark}")
+    print("\nFindings for an engineer:")
+    for x in ex.findings:
+        print(f"  - {x}")
+    if args.out:
+        out = Path(args.out)
+        out.write_text(facts_to_csv(ex.facts))
+        out.with_suffix(".findings.json").write_text(json.dumps(
+            {"document": args.label or src.stem, "file": ex.file, "drawings": [{k: v for k, v in d.items() if k != "words"}
+                                                                             for d in ex.drawings],
+             "facts": [f.__dict__ for f in ex.facts], "findings": ex.findings}, indent=1))
+        print(f"\nwrote {out} (checkable values) and {out.with_suffix('.findings.json')}")
+        print(f"next: python -m rulemate check {out} --rules 46CFR190")
+
+
 def cmd_check(args) -> None:
     from .compliance.check import read_design_csv, results_to_csv
     from .compliance.service import check_rows
@@ -227,6 +259,13 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--force", action="store_true", help="re-extract everything")
     p.add_argument("-v", "--verbose", action="store_true", help="show rejected proposals")
     p.set_defaults(fn=cmd_limits)
+
+    p = sub.add_parser("design", help="read design values from a design document (GA drawings by OCR, report text)")
+    p.add_argument("pdf")
+    p.add_argument("--pages", help="pages to read as drawings, e.g. 41-43 (default: GA / scanned pages)")
+    p.add_argument("--label", help="document name used in the evidence")
+    p.add_argument("--out", help="write the checkable values as a design CSV (+ .findings.json)")
+    p.set_defaults(fn=cmd_design)
 
     p = sub.add_parser("check", help="check a design CSV against the rule table")
     p.add_argument("csv")

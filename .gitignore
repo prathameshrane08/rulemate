@@ -11,3 +11,5 @@ eval/results/*.json
 # challenge material from Meyer (not ours to redistribute)
 /MEYER*.pdf
 /MeyerTurku_SinceAI2026/
+# source design documents (large; fetch from the links in data/designs/README.md)
+/data/designs/sources/

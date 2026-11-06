@@ -259,6 +259,40 @@ def limit_buttons(res: RowResult, key: str) -> None:
                                        args=(uid,), width="stretch")
 
 
+@st.cache_data(show_spinner=False)
+def _evidence_png(path: str, page: int, bbox: str) -> bytes | None:
+    """The part of the drawing a design value was read from, with the label boxed."""
+    import io
+
+    import pdfplumber
+
+    try:
+        x0, y0, x1, y1 = (float(v) for v in bbox.split(","))
+        with pdfplumber.open(path) as pdf:
+            pg = pdf.pages[page - 1]
+            m = 70
+            box = (max(0, x0 - m), max(0, y0 - m), min(pg.width, x1 + m), min(pg.height, y1 + m))
+            im = pg.crop(box).to_image(resolution=170)
+            im.draw_rect((x0 - 3, y0 - 3, x1 + 3, y1 + 3), stroke="#d62728", fill=(214, 39, 40, 30), stroke_width=3)
+            buf = io.BytesIO()
+            im.annotated.save(buf, format="PNG")
+            return buf.getvalue()
+    except Exception:
+        return None
+
+
+def evidence_image(r) -> None:
+    if not (r.source_file and r.source_page and r.source_bbox):
+        return
+    path = ROOT / r.source_file
+    if not path.exists():
+        st.caption(f"(source document {r.source_file} not on this machine)")
+        return
+    png = _evidence_png(str(path), r.source_page, r.source_bbox)
+    if png:
+        st.image(png, caption=f"{r.source_file}, page {r.source_page}: the label this value was read from", width=420)
+
+
 def row_detail(res: RowResult, idx: int) -> None:
     label, icon, color = VERDICT_BADGE[res.verdict]
     r = res.row
@@ -266,6 +300,7 @@ def row_detail(res: RowResult, idx: int) -> None:
     st.markdown(f"**{r.item_id} · {r.space}** — {r.parameter}: **{r.display}**")
     if r.source:
         st.caption(f":material/architecture: Design value from: {r.source}")
+    evidence_image(r)
     st.markdown("**Decided by code**")
     st.markdown(render_text(res.reason))
     limit_buttons(res, f"lim-{idx}")
@@ -345,6 +380,7 @@ with tab_check:
 
     # example designs and the rule sets that apply to that vessel type
     designs = {
+        "NOAA research ship – read from its GA drawing": ("noaa_swath_from_ga.csv", ["46CFR190"]),
         "Research vessel example – 46 CFR 190 (US units)": ("rcrv_example_design.csv", ["46CFR190"]),
         "Cruise-ship sample – synthetic rules": ("sample_design.csv", ["SAMPLE_SYNTHETIC_rules"]),
     }
@@ -365,6 +401,21 @@ with tab_check:
         path = ROOT / "data" / "designs" / fname
         if path.exists():
             rows = read_design_csv(path.read_bytes())
+            fj = path.with_suffix(".findings.json")
+            if fj.exists():
+                import json as _json
+
+                info = _json.loads(fj.read_text())
+                with st.expander(f"Read from **{info['document']}**: {len(rows)} checkable values, "
+                                 f"{len(info['findings'])} findings for an engineer", expanded=False):
+                    for d in info["drawings"]:
+                        if d["rooms"]:
+                            st.markdown(f"- GA p.{d['page']}, Dwg `{d['drawing']}` {d['title'].title()}: "
+                                        f"{d['rooms']} berth labels read by OCR, {d['berths']} berths")
+                    st.markdown("**Findings** (not verdicts: for an engineer to confirm)")
+                    for x in info["findings"]:
+                        st.markdown(f"- {render_text(x)}")
+                    st.caption("Created with `python -m rulemate design <pdf> --out <csv>`.")
         else:
             st.warning(f"{fname} not found in data/designs/.")
     docs = st.multiselect("Rule sets that apply to this vessel", all_docs,

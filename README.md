@@ -138,6 +138,37 @@ extractor handles: inches and feet, mixed fractions ("39 1/2 inches"), the same 
 40 feet in length shall not be permitted" means `<= 40 ft`), and per-person quantities ("2.78 square meters ... for
 each person") that are not room limits.
 
+## Design interpretation: reading design documents
+
+```bash
+python scripts/fetch_design_sources.py     # public documents from Meyer's brief -> data/designs/sources/
+python -m rulemate design data/designs/sources/NOAA_SWATH_research_ship_1990.pdf --pages 41-43 \
+    --label "NOAA SWATH research ship conceptual design (BSM 1990)" --out data/designs/noaa_swath_from_ga.csv
+python -m rulemate check data/designs/noaa_swath_from_ga.csv --rules 46CFR190
+```
+
+`rulemate design` (`rulemate/design/`) reads design values out of design documents, with the same principle as the
+rule side: code reads, and every value keeps its evidence.
+
+- **GA drawings.** Scanned sheets have no text layer, so each page is rendered and read with OCR (RapidOCR, runs
+  locally; large sheets in overlapping tiles). Words are grouped into berth labels: each word belongs to the nearest
+  occupancy marker directly below it, e.g. `SENIOR / SCIENTIST / (2)`. Each label becomes a design value
+  (persons berthed per sleeping room) with its file, page, drawing number, label text and position on the sheet.
+  The UI shows that part of the drawing, boxed, next to the verdict. Role labels without a count (`WIPER & OILER`)
+  are reported, not guessed.
+- **Report text and particulars sheets.** Stated facts with a fixed wording (complement, crew, endurance, mess
+  seating, stateroom counts) are kept with page and sentence.
+- **Findings** (`rulemate/design/findings.py`): consistency between drawing and text (58 berths drawn vs 60 persons
+  stated), and requirements the facts trigger, each tied to a clause, e.g. crew 13 and 21 days endurance means
+  46 CFR 190.20-35(a) requires a hospital space, which is then looked for on the drawings. Findings are for an
+  engineer to confirm, never a verdict.
+
+On the NOAA second-deck GA (a real 1990 design, the "study" link in Meyer's brief), OCR found 34 of 34 berth labels
+and 58 of 58 berths compared with a reading by eye (`eval/noaa_ga_truth.json`); 2 role names have OCR typos.
+Limits: room sizes, corridor and stair widths are not measured from drawings yet (the scans have no reliable scale),
+and the G.O. Sars GA labels rooms by number, not occupancy. The RCRV GA and 3D model are on Box and must be
+downloaded in a browser; the RCRV particulars sheet gives crew, berths and endurance (`data/designs/rcrv_particulars.findings.json`).
+
 ## Compliance check
 
 ```bash
