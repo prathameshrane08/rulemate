@@ -23,12 +23,7 @@ from ui.backend import Backend  # noqa: E402
 
 st.set_page_config(page_title="RuleMate", page_icon="⚓", layout="wide")
 
-DEMO_QUESTIONS = [
-    "What is the minimum corridor width?",
-    "How is the corridor width calculated when many people use it?",
-    "What does 13.3.2.1 say?",
-    "What is the required size of a helicopter landing area?",
-]
+from rulemate.config import DEMO_QUESTIONS  # noqa: E402  (question, rule documents)
 PROVIDERS = ["groq,ollama", "groq", "ollama", "openai"]
 BADGES = {
     "verified": ("Verified", ":material/verified:", "green"),
@@ -109,17 +104,24 @@ with st.sidebar:
     st.caption("Ship design rules, answered with clause citations.")
     st.markdown("**Rule documents**")
     for d in health["documents"]:
-        tag = " · :orange[SYNTHETIC]" if d.get("synthetic") else ""
+        tag = " · :orange[SYNTHETIC]" if d.get("synthetic") else " · :green[real text]"
         st.markdown(f"- `{d['doc']}`  \n  {d['n_clauses']} clauses · {d['n_tables']} tables · {d['style']}{tag}")
+    doc_names = [d["doc"] for d in health["documents"]]
+    ask_docs = st.multiselect("Rule sets for questions", doc_names, key="ask_docs",
+                              help="The rules that apply to the vessel you are working on. Empty = all.")
     st.divider()
     provider = st.selectbox("LLM provider", PROVIDERS, help="Comma = try in order (fallback on error or timeout)")
     use_cache = st.toggle("Use answer cache", value=True, help="Cached answers return instantly (demo safety)")
     st.caption(f"Retrieval: {health['retrieval_mode']} · Backend: {backend.mode}")
     st.divider()
     st.markdown("**Demo questions**")
-    for q in DEMO_QUESTIONS:
-        if st.button(q, key=f"demo-{q}", width="stretch"):
-            ss.pending = q
+    def _demo(q: str, docs: list[str]) -> None:
+        ss.pending = q
+        ss.ask_docs = [d for d in docs if d in doc_names]
+
+    for q, qdocs in DEMO_QUESTIONS:
+        st.button(q, key=f"demo-{q}", width="stretch", on_click=_demo, args=(q, qdocs),
+                  help=f"Asked against: {', '.join(qdocs)}")
     if st.button("Clear chat", type="tertiary"):
         ss.messages, ss.selected = [], None
 
@@ -127,8 +129,8 @@ st.markdown("# RuleMate")
 st.caption("Every answer is traceable to a clause, or it says *not found in the provided rules*.")
 if health.get("synthetic_data"):
     st.warning(
-        "Development data: the loaded rules include **SAMPLE_SYNTHETIC_rules**, an invented document. "
-        "Nothing shown here is a real regulation.",
+        "Development data: **SAMPLE_SYNTHETIC_rules** is an invented document; anything cited from it is not a real "
+        "regulation. Other documents marked *real text* are copied verbatim from the official source.",
         icon=":material/science:",
     )
 
@@ -214,7 +216,7 @@ with tab_ask:
     if question:
         ss.messages.append({"role": "user", "content": question})
         with st.spinner("Retrieving clauses and checking the answer..."):
-            ans = backend.ask(question, provider, use_cache)
+            ans = backend.ask(question, provider, use_cache, ss.get("ask_docs") or None)
         ss.messages.append({"role": "assistant", "content": ans})
         ss.selected = len(ss.messages) - 1
 
@@ -261,7 +263,9 @@ def row_detail(res: RowResult, idx: int) -> None:
     label, icon, color = VERDICT_BADGE[res.verdict]
     r = res.row
     st.badge(label, icon=icon, color=color)
-    st.markdown(f"**{r.item_id} · {r.space}** — {r.parameter}: **{r.raw_value or r.value} {r.unit}**")
+    st.markdown(f"**{r.item_id} · {r.space}** — {r.parameter}: **{r.display}**")
+    if r.source:
+        st.caption(f":material/architecture: Design value from: {r.source}")
     st.markdown("**Decided by code**")
     st.markdown(render_text(res.reason))
     limit_buttons(res, f"lim-{idx}")
@@ -337,28 +341,49 @@ with tab_check:
     ss.setdefault("extra_rows", [])
     ss.setdefault("check_results", None)
 
-    src = st.radio("Design values", ["Sample design (synthetic)", "Upload CSV"], horizontal=True)
+    from rulemate.compliance.service import rule_documents
+
+    # example designs and the rule sets that apply to that vessel type
+    designs = {
+        "Research vessel example – 46 CFR 190 (US units)": ("rcrv_example_design.csv", ["46CFR190"]),
+        "Cruise-ship sample – synthetic rules": ("sample_design.csv", ["SAMPLE_SYNTHETIC_rules"]),
+    }
+    all_docs = rule_documents()
+    src = st.radio("Design values", [*designs, "Upload CSV"], horizontal=True)
     rows: list[DesignRow] = []
+    default_docs = all_docs
     if src == "Upload CSV":
-        up = st.file_uploader("CSV with columns: item_id, space, parameter, value, unit, notes", type=["csv"])
+        up = st.file_uploader("CSV with columns: item_id, space, parameter, value, unit, source, notes. "
+                              "Values may be written as 3'-6\" or 39 1/2.", type=["csv"])
         if up is not None:
             try:
                 rows = read_design_csv(up.getvalue())
             except ValueError as e:
                 st.error(str(e))
     else:
-        rows = read_design_csv((ROOT / "data" / "designs" / "sample_design.csv").read_bytes())
+        fname, default_docs = designs[src]
+        path = ROOT / "data" / "designs" / fname
+        if path.exists():
+            rows = read_design_csv(path.read_bytes())
+        else:
+            st.warning(f"{fname} not found in data/designs/.")
+    docs = st.multiselect("Rule sets that apply to this vessel", all_docs,
+                          default=[d for d in default_docs if d in all_docs], key=f"docs-{src}",
+                          help="Only limits from these documents are checked. Empty = all documents.")
 
     with st.expander("Add a single value"):
         with st.form("one-row", clear_on_submit=True, border=False):
             f1, f2, f3, f4 = st.columns([3, 3, 1.3, 1])
             sp = f1.text_input("Space", placeholder="Deck 4 corridor")
             pa = f2.text_input("Parameter", placeholder="corridor clear width")
-            va = f3.number_input("Value", value=None, step=1.0, format="%g")
+            va_raw = f3.text_input("Value", placeholder="1200 or 3'-6\"")
             un = f4.text_input("Unit", placeholder="mm")
-            if st.form_submit_button("Add") and pa and va is not None:
+            if st.form_submit_button("Add") and pa and va_raw:
+                from rulemate.compliance.units import parse_value
+
+                va, un = parse_value(va_raw, un)
                 ss.extra_rows.append(DesignRow(item_id=f"F{len(ss.extra_rows) + 1}", space=sp, parameter=pa,
-                                               value=va, unit=un, raw_value=f"{va:g}"))
+                                               value=va, unit=un, raw_value=va_raw, source="entered by hand"))
     rows = rows + ss.extra_rows
     if ss.extra_rows:
         st.caption(f"{len(ss.extra_rows)} value(s) added by hand.")
@@ -371,7 +396,7 @@ with tab_check:
                         help="Slower: one LLM call per row. Verdicts do not change.")
     if o1.button("Run check", type="primary", disabled=not rows, icon=":material/play_arrow:"):
         with st.spinner(f"Checking {len(rows)} values..."):
-            ss.check_results = backend.check(rows, explain, provider)
+            ss.check_results = backend.check(rows, explain, provider, docs or None)
 
     results = ss.check_results
     if results:
@@ -385,9 +410,10 @@ with tab_check:
             st.caption(":orange[Limits come from SYNTHETIC sample rules.]")
         table_df = pd.DataFrame([{
             "item": r.row.item_id, "space": r.row.space, "parameter": r.row.parameter,
-            "value": f"{r.row.raw_value or r.row.value} {r.row.unit}", "verdict": r.verdict,
+            "value": r.row.display, "verdict": r.verdict,
             "limit(s)": "; ".join(x.limit.describe() + (" (if …)" if x.limit.condition else "") for x in r.applied),
             "clause(s)": ", ".join(sorted({x.limit.clause_id for x in r.applied})),
+            "design source": r.row.source,
         } for r in results])
         styled = table_df.style.map(lambda v: VERDICT_STYLE.get(v, ""), subset=["verdict"])
         ev = st.dataframe(styled, hide_index=True, width="stretch", on_select="rerun",

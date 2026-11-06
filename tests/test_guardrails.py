@@ -229,3 +229,31 @@ def test_pipeline_no_retrieval_no_llm_call(retriever):
     llm = FakeLLM([GOOD])
     a = ask(retriever, llm, "what does 99.9.9 say")
     assert a.status == "not_found" and llm.calls == 0
+
+
+# ---------------------------------------------------------------- support: each cited clause must back its sentence
+
+CFR_STAIR = Clause(uid="46CFR190::190.10-25(b)", doc="46CFR190", clause_id="190.10-25(b)", title="Stairway size",
+                   text="(b) All interior stairways, other than those within the machinery spaces, shall have minimum "
+                        "width of 28 inches.")
+CFR_BRIDGE = Clause(uid="46CFR190::190.02-1(a)", doc="46CFR190", clause_id="190.02-1(a)",
+                    title="Navigation bridge visibility",
+                    text="(a) The field of vision from the navigation bridge shall extend over an arc from right ahead "
+                         "to at least 22.5 degrees abaft the beam on either side of the vessel.")
+SYN_STAIR = C("II-2/13.3.2.2", "The clear width of stairways shall be not less than 900 mm.")
+
+
+def test_rejects_number_borrowed_from_another_documents_clause():
+    # seen in the eval with both rule sets loaded: the 900 mm of the synthetic cruise rules attributed to the
+    # research-vessel regulation, citing an unrelated clause that passed the number check only through the other one
+    bad = (f"The minimum width of an interior stairway on an oceanographic research vessel must be at least 900 mm "
+           f"[46CFR190 § 190.02-1(a)] and [{D} § II-2/13.3.2.2].")
+    res = check_answer(bad, [CFR_STAIR, CFR_BRIDGE, SYN_STAIR])
+    assert not res.ok and "support" in [v.kind for v in res.violations]
+    good = "Interior stairways must be at least 28 inches wide [46CFR190 § 190.10-25(b)]."
+    assert check_answer(good, [CFR_STAIR, CFR_BRIDGE, SYN_STAIR]).ok
+
+
+def test_rejects_bare_citation_answer():
+    res = check_answer("[46CFR190 § 190.10-25(b)]", [CFR_STAIR])
+    assert not res.ok and "format" in [v.kind for v in res.violations]

@@ -180,21 +180,35 @@ def answer_metrics(questions: list[dict], retriever, llm) -> tuple[dict, list[di
 # ------------------------------------------------------------------ compliance
 
 
-def compliance_metrics() -> dict | None:
-    exp_file = EVAL_DIR / "compliance_expected.json"
-    csv_file = ROOT / "data" / "designs" / "sample_design.csv"
-    if not exp_file.exists() or not csv_file.exists():
-        return None
-    from rulemate.compliance.check import read_design_csv
-    from rulemate.compliance.service import check_rows
+# (label, design CSV, expected verdicts, rule documents that apply to that vessel)
+DESIGN_SETS = [
+    ("research vessel, 46 CFR 190", "rcrv_example_design.csv", "rcrv_expected.json", ["46CFR190"]),
+    ("cruise-ship sample, synthetic rules", "sample_design.csv", "compliance_expected.json", ["SAMPLE_SYNTHETIC_rules"]),
+]
 
-    expected = json.loads(exp_file.read_text())
-    results = check_rows(read_design_csv(csv_file.read_bytes()))
-    got = {r.row.item_id: r.verdict for r in results}
-    correct = [k for k, v in expected.items() if got.get(k) == v]
-    return {"accuracy": len(correct) / len(expected), "n": len(expected),
+
+def compliance_metrics() -> list[dict]:
+    from rulemate.compliance.check import read_design_csv
+    from rulemate.compliance.service import check_rows, rule_documents
+    from seeded import seeded_metrics
+
+    out = []
+    have = set(rule_documents())
+    for label, csv_name, exp_name, docs in DESIGN_SETS:
+        csv_file, exp_file = ROOT / "data" / "designs" / csv_name, EVAL_DIR / exp_name
+        if not csv_file.exists() or not exp_file.exists() or not set(docs) <= have:
+            continue
+        expected = json.loads(exp_file.read_text())
+        rows = read_design_csv(csv_file.read_bytes())
+        got = {r.row.item_id: r.verdict for r in check_rows(rows, docs=docs)}
+        correct = [k for k, v in expected.items() if got.get(k) == v]
+        out.append({
+            "label": label, "accuracy": len(correct) / len(expected), "n": len(expected),
             "wrong": {k: {"expected": v, "got": got.get(k)} for k, v in expected.items() if got.get(k) != v},
-            "counts": {v: sum(x == v for x in got.values()) for v in ("PASS", "FAIL", "NEEDS REVIEW")}}
+            "counts": {v: sum(x == v for x in got.values()) for v in ("PASS", "FAIL", "NEEDS REVIEW")},
+            "seeded": seeded_metrics(rows, docs),
+        })
+    return out
 
 
 # ------------------------------------------------------------------ report
@@ -221,12 +235,20 @@ def report(rm: dict, am: dict | None, cm: dict | None, calib: list[dict], meta: 
         L.append("| Drafts that failed a guardrail shown to the user | **0** (by construction) |")
         L.append(f"| Answer latency p50 / p95 | {am['latency_p50_s']:.1f} s / {am['latency_p95_s']:.1f} s |")
     L.append(f"| Retrieval latency p50 | {rm['retrieval_p50_ms']:.0f} ms |")
-    if cm:
-        L.append(f"| Compliance verdicts correct (sample design) | **{pct(cm['accuracy'])}** ({cm['n']} items: "
-                 f"{cm['counts']['PASS']} PASS, {cm['counts']['FAIL']} FAIL, {cm['counts']['NEEDS REVIEW']} REVIEW) |")
+    for c in cm or []:
+        L.append(f"| Compliance verdicts correct ({c['label']}) | **{pct(c['accuracy'])}** ({c['n']} items: "
+                 f"{c['counts']['PASS']} PASS, {c['counts']['FAIL']} FAIL, {c['counts']['NEEDS REVIEW']} REVIEW) |")
+        sd = c["seeded"]
+        if sd.get("n_violating"):
+            L.append(f"| Planted defects caught ({c['label']}) | **{pct(sd['caught'])}** of {sd['n_violating']} "
+                     f"({sd['violating_fail']} FAIL, {sd['violating_review']} REVIEW) |")
+            L.append(f"| False FAIL with the value exactly at the limit ({c['label']}) | **{pct(sd['false_fail_at_limit'])}** "
+                     f"of {sd['n_at_limit']} |")
     L.append("")
-    L.append("_Caveats: the rules, questions and design values are synthetic and were written by the team, and "
-             "thresholds were tuned on them; expect lower numbers on the real documents._")
+    L.append("_Caveats: the questions and design values are synthetic and were written by the team (46 CFR 190 is the real "
+             "regulation text; the cruise-ship rules are synthetic), and thresholds were tuned on them; expect lower numbers "
+             "on real design data. Planted defects: every passing value moved 3 % past the limit that decided it, and "
+             "set exactly at that limit._")
     L.append("")
     L.append(f"Threshold calibration (current: low={LOW_SCORE}, high={HIGH_SCORE}; answerable = non-ID questions)")
     L.append("")
@@ -275,8 +297,11 @@ def main() -> None:
     misses = [r for r in rrows if r["type"] != "unanswerable" and not r["hit5"]]
     if misses:
         print("\nRetrieval misses:", ", ".join(f"{r['id']} (rank {r['rank']})" for r in misses))
-    if cm and cm["wrong"]:
-        print("Compliance mismatches:", cm["wrong"])
+    for c in cm or []:
+        if c["wrong"]:
+            print(f"Compliance mismatches ({c['label']}):", c["wrong"])
+        for w in c["seeded"].get("wrong", []):
+            print(f"Planted-defect miss ({c['label']}):", w)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")

@@ -23,7 +23,7 @@ from pydantic import BaseModel, Field
 from ..config import INDEX_DIR
 from ..guardrails import UNIT_ALIASES, _norm_text, extract_numbers
 from ..models import Clause
-from .units import UnitError, parse_unit
+from .units import UnitError, compatible, convert, parse_unit
 
 LIMITS_FILE = INDEX_DIR / "limits.json"
 Comparator = Literal[">=", "<=", ">", "<"]
@@ -67,7 +67,8 @@ class RuleTable(BaseModel):
 
 _LIMIT_WORDS = re.compile(
     r"\b(not less than|not more than|not exceed(?:ing)?|shall not exceed|at least|minimum|maximum|"
-    r"no(?:t)? greater than|no(?:t)? smaller than|up to|min\.|max\.|increased to|reduced to)\b",
+    r"no(?:t)? greater than|no(?:t)? smaller than|up to|min\.|max\.|increased to|reduced to|"
+    r"not be (?:less|more) than|more than .{0,60}not (?:be )?permitted)\b",
     re.I,
 )
 
@@ -92,16 +93,35 @@ _CMP_WORDS = {
 }
 
 
-_MIN_PHRASE = re.compile(r"(not less than|at least|no less than|minimum(?: of)?|min\.)\s*$", re.I)
-_MAX_PHRASE = re.compile(r"(not more than|not exceeding|shall not exceed|not exceed|no more than|up to|maximum(?: of)?|max\.|increased to)\s*$", re.I)
+_MIN_PHRASE = re.compile(
+    r"(not less than|not be less than|at least|no less than|minimum(?: \w+)?(?: of)?|min\.)\s*$", re.I)
+_MAX_PHRASE = re.compile(
+    r"(not more than|not be more than|not exceeding|shall not exceed|not exceed|no more than|up to|"
+    r"maximum(?: \w+)?(?: of)?|max\.|increased to)\s*$", re.I)
+_PROHIBITED_ABOVE = re.compile(r"\bmore than\s*$", re.I)  # "more than 40 feet ... shall not be permitted"
+_PROHIBITED = re.compile(r"\b(?:shall|must|may) not be permitted|\bnot permitted\b|\bprohibited\b", re.I)
+# unit words, US customary included; longest first
+UNIT_RX = (
+    r"(?:square (?:feet|foot|met(?:er|re)s?)|cubic (?:feet|foot|met(?:er|re)s?)|centimet(?:er|re)s?|"
+    r"millimet(?:er|re)s?|met(?:er|re)s?|inches|inch|feet|foot|ft|mm|cm|m2|m²|m3|m³|m|degrees|°|min|s|kN|N|%)"
+)
+_NUM_TOKEN = r"\d+(?:\s\d/\d+|\.\d+)?"
 _BAD_QUALIFIERS = {"any", "all", "none", "table", "min", "max", "degrees", "division class", "both sides", "n/a"}
 
 
+def _num(tok: str) -> float:
+    if " " in tok:  # mixed fraction "39 1/2"
+        whole, frac = tok.split()
+        n, d = frac.split("/")
+        return float(whole) + float(n) / float(d)
+    return float(tok)
+
+
 def _value_spans(text: str, value: float) -> list[re.Match]:
-    return [m for m in re.finditer(r"(?<![\w.])\d+(?:\.\d+)?", text) if float(m.group(0)) == value]
+    return [m for m in re.finditer(rf"(?<![\w./]){_NUM_TOKEN}(?![\d/])", text) if _num(m.group(0)) == value]
 
 
-_UNIT_NUM = re.compile(r"\d+(?:\.\d+)?\s?(?:mm|cm|m2|m²|m|degrees|°|min|s|kN|N|%)(?![A-Za-z])")
+_UNIT_NUM = re.compile(rf"{_NUM_TOKEN}\s?{UNIT_RX}(?![A-Za-z])")
 
 
 def comparator_from_text(text: str, value: float) -> str | None:
@@ -113,7 +133,18 @@ def comparator_from_text(text: str, value: float) -> str | None:
             found.add(">=")
         elif _MAX_PHRASE.search(before):
             found.add("<=")
+        elif _PROHIBITED_ABOVE.search(before) and _PROHIBITED.search(_sentence_at(text, m.start())):
+            found.add("<=")
     return found.pop() if len(found) == 1 else None
+
+
+def _sentence_at(text: str, pos: int) -> str:
+    start = max(text.rfind(". ", 0, pos), text.rfind("\n", 0, pos)) + 1
+    end = text.find(". ", pos)
+    return text[start : end if end > 0 else len(text)]
+
+
+_PER_PERSON = re.compile(r"\b(?:for each|per)\s+(?:person|member|occupant|passenger|berth)\b", re.I)
 
 
 def context_sentence(text: str, value: float) -> str:
@@ -171,6 +202,8 @@ def validate(raw: dict, clause: Clause, n: int, method: str) -> tuple[Limit | No
         re.match(r"\s?[A-Za-z%°²]*\s+per\s+\w", clause.text[m.end():]) for m in _value_spans(clause.text, value)
     ):
         return None, f"{value:g} is a per-unit rate in the text; unit '{unit}' is not a rate"
+    if "/" not in unit and any(_PER_PERSON.search(_sentence_at(clause.text, m.start())) for m in _value_spans(clause.text, value)):
+        return None, f"{value:g} is a per-person quantity in the text; unit '{unit}' is not a rate"
 
     quote = raw.get("quote") or None
     if quote and _norm_text(quote) not in _norm_text(clause.text):
@@ -214,7 +247,9 @@ def validate(raw: dict, clause: Clause, n: int, method: str) -> tuple[Limit | No
 
 _RX = re.compile(
     r"(?P<cmp>not less than|at least|not more than|not exceeding|shall not exceed|not exceed|"
-    r"no more than|no less than|(?:be )?increased to|(?:be )?reduced to(?! not))\s+(?P<val>\d+(?:\.\d+)?)\s?(?P<unit>mm|cm|m2|m²|m|degrees|°|min|s|kN|N|%)(?![A-Za-z])",
+    r"no more than|no less than|not be less than|not be more than|minimum \w+ of|"
+    r"(?:be )?increased to|(?:be )?reduced to(?! not)|more than)\s+"
+    rf"(?P<val>{_NUM_TOKEN})\s?(?P<unit>{UNIT_RX})(?![A-Za-z])",
     re.I,
 )
 _COND = re.compile(r"\b(provided that|where|if|unless|subject to)\b(.*)$", re.I)
@@ -227,7 +262,10 @@ def extract_regex(c: Clause) -> list[dict]:
         last_end, subject = 0, ""
         for m in _RX.finditer(sent):
             words = m.group("cmp").lower()
-            cmp = ">=" if words in ("not less than", "at least", "no less than") or "reduced" in words else "<="
+            if words == "more than" and not _PROHIBITED.search(sent):
+                continue  # "more than 300 square feet" without a prohibition is a threshold, not a limit
+            cmp = ">=" if (words in ("not less than", "at least", "no less than", "not be less than")
+                           or words.startswith("minimum") or "reduced" in words) else "<="
             seg = re.sub(r"^\s*(and|or|,)\s+", "", sent[last_end : m.start()], flags=re.I)
             seg = re.sub(r"\b(shall|must|may)\b.*$", "", seg, flags=re.I).strip(" ,")
             subject = seg if len(re.findall(r"[A-Za-z]{3,}", seg)) >= 2 else (subject or c.title)
@@ -240,7 +278,7 @@ def extract_regex(c: Clause) -> list[dict]:
                     "qualifier": q.group(1) if q else None,
                     "condition": cond.group(0).strip(" .") if cond else None,
                     "comparator": cmp,
-                    "value": m.group("val"),
+                    "value": _num(m.group("val")),
                     "unit": m.group("unit"),
                     "quote": m.group(0),
                 }
@@ -292,6 +330,31 @@ def extract_llm(c: Clause, llm) -> list[dict]:
 # ------------------------------------------------------------------ build
 
 
+def _merge_equivalents(limits: list[Limit], clause: Clause) -> list[Limit]:
+    """'190 centimeters (75 inches)' is one limit stated twice. Keep the value written first; record the other."""
+    def pos(l: Limit) -> int:
+        spans = _value_spans(clause.text, l.value)
+        return spans[0].start() if spans else 10**9
+
+    kept: list[Limit] = []
+    for l in sorted(limits, key=pos):
+        twin = None
+        for k in kept:
+            if k.comparator == l.comparator and compatible(k.unit, l.unit) and k.unit != l.unit:
+                try:
+                    v = convert(l.value, l.unit, k.unit)
+                except UnitError:
+                    continue
+                if k.value and abs(v - k.value) / abs(k.value) <= 0.02:
+                    twin = k
+                    break
+        if twin is None:
+            kept.append(l)
+        else:
+            twin.notes.append(f"also stated as {l.value:g} {l.unit} (equivalent, not checked separately)")
+    return kept
+
+
 def build_rule_table(
     clauses: list[Clause],
     llm=None,
@@ -336,6 +399,8 @@ def build_rule_table(
         results = list(ex.map(work, cands))
 
     table = RuleTable(model=getattr(llm, "label", "") if llm else "regex")
+    by_uid = {c.uid: c for c in cands}
+    results = [(_merge_equivalents(lims, by_uid[c.uid]), rej) for c, (lims, rej) in zip(cands, results)]
     for c, (lims, rej) in zip(cands, results):
         table.limits.extend(lims)
         table.rejected.extend(rej)

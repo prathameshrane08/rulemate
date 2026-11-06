@@ -52,8 +52,20 @@ def get_encoder():
     return r._model_obj() if r.mode == "hybrid" else None
 
 
-def check_rows(rows: list[DesignRow], explain: bool = False, provider: str | None = None) -> list[RowResult]:
+def rule_documents() -> list[str]:
+    return sorted({c.doc for c in load_index().clauses})
+
+
+def check_rows(rows: list[DesignRow], explain: bool = False, provider: str | None = None,
+               docs: list[str] | None = None) -> list[RowResult]:
+    """``docs`` = the rule sets that apply to this vessel (e.g. ["46CFR190"] for a US research vessel);
+    None applies every indexed document."""
     table = get_rule_table(provider=provider)
+    if docs:
+        unknown = set(docs) - set(rule_documents())
+        if unknown:
+            raise ValueError(f"unknown rule document(s): {', '.join(sorted(unknown))}; have {', '.join(rule_documents())}")
+        table = table.model_copy(update={"limits": [l for l in table.limits if l.doc in docs]})
     return run_check(
         rows,
         table,
@@ -64,4 +76,4 @@ def check_rows(rows: list[DesignRow], explain: bool = False, provider: str | Non
     )
 
 
-__all__ = ["get_rule_table", "check_rows", "save_edited_table", "LIMITS_FILE"]
+__all__ = ["get_rule_table", "check_rows", "rule_documents", "save_edited_table", "LIMITS_FILE"]

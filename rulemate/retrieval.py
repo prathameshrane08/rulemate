@@ -76,6 +76,7 @@ _ID_PATTERNS = [
     rf"\b[IVX]+-\d+/\d+(?:\.\d+)*{NOT_A_VALUE}",
     rf"\b(?:reg(?:ulation)?\.?|clause|paragraph|section|§)\s*\d+(?:\.\d+)*{NOT_A_VALUE}",
     r"\bTable\s+[A-Z]?\d+(?:\.\d+)*",
+    r"(?<![\w.])\d+\.\d+-\d+(?:\([a-z]\))?",  # CFR section / paragraph: 190.10-25(b)
     rf"(?<![\w.])\d+(?:\.\d+){{1,6}}{NOT_A_VALUE}",
 ]
 _ID_RE = re.compile("|".join(f"(?:{p})" for p in _ID_PATTERNS), re.I)
@@ -175,8 +176,12 @@ class Retriever:
         return np.asarray(self._model_obj().encode([prefix + q], normalize_embeddings=True)[0], dtype=np.float32)
 
     # -- search -------------------------------------------------------------
-    def search(self, query: str, k: int = 5, follow_refs: bool = True, pool: int = 30) -> RetrievalResult:
+    def search(self, query: str, k: int = 5, follow_refs: bool = True, pool: int = 30,
+               docs: list[str] | None = None) -> RetrievalResult:
+        """``docs``: only search these rule documents (the rule sets that apply to the vessel); None = all."""
         hits: list[Hit] = []
+        allowed = set(docs) if docs else None
+        clauses = [c for c in self.clauses if c.doc in allowed] if allowed else self.clauses
         seen: set[str] = set()
 
         def add(h: Hit) -> None:
@@ -187,7 +192,7 @@ class Retriever:
         # 1. exact clause IDs mentioned in the question
         id_queries = extract_clause_ids(query)
         for qid in id_queries:
-            for c in find_clause(self.clauses, qid)[:5]:
+            for c in find_clause(clauses, qid)[:5]:
                 add(Hit(clause=c, score=1.0, source="id", cosine=1.0))
                 for child in self._descendants(c)[:8]:
                     add(Hit(clause=child, score=0.9, source="child", via=c.clause_id))
@@ -200,12 +205,18 @@ class Retriever:
             return RetrievalResult(query=query, hits=hits, found=bool(hits), confidence="high" if hits else "none",
                                    top_score=1.0 if hits else 0.0, mode=self.mode, id_queries=id_queries)
         bm = self.bm25.get_scores(tokenize(query))
+        mask = None
+        if allowed:
+            mask = np.array([self.clauses[i].doc in allowed for i in self.searchable])
+            bm = np.where(mask, bm, 0.0)
         bm_order = [j for j in np.argsort(-bm)[:pool] if bm[j] > 0]
         bm_rank = {j: r for r, j in enumerate(bm_order)}
         dense_rank: dict[int, int] = {}
         cos = None
         if self.embeddings is not None:
             cos = self.embeddings @ self._embed_query(query)
+            if mask is not None:
+                cos = np.where(mask, cos, -1.0)
             dense_rank = {j: r for r, j in enumerate(np.argsort(-cos)[:pool])}
 
         fused: dict[int, float] = {}

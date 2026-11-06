@@ -1,0 +1,15 @@
+item_id,space,parameter,value,unit,source,notes
+R01,Interior stairway ST-1 (Main Deck to 01 Level),stairway clear width,2'-6",,SYNTHETIC - replace with value measured on RCRV GA,
+R02,Interior stairway ST-2 (01 Level to 02 Level),stairway clear width,26,in,SYNTHETIC - replace with value measured on RCRV GA,planted defect
+R03,Interior stairway ST-1 (Main Deck to 01 Level),stairway angle of inclination,45,degree,SYNTHETIC - replace with value from RCRV profile drawing,
+R04,Interior stairway ST-3 (01 Level to 02 Level),stairway angle of inclination,52,degree,SYNTHETIC - replace with value from RCRV profile drawing,planted defect
+R05,Main Deck dead end corridor aft of wet lab,dead end corridor length,32,ft,SYNTHETIC - replace with value measured on RCRV GA,
+R06,01 Level corridor outboard of staterooms,dead end corridor length,12.5,m,SYNTHETIC - replace with value measured on RCRV GA,planted defect (12.5 m = 41 ft)
+R07,Crew stateroom 01-12,clear head room,6'-5",,SYNTHETIC - replace with value from RCRV section drawing,
+R08,Science stateroom 01-20,clear head room,74,in,SYNTHETIC - replace with value from RCRV section drawing,planted defect
+R09,Crew stateroom 01-12,berth width,30,in,SYNTHETIC - replace with value from RCRV accommodation plan,
+R10,Science stateroom 01-20,berth width,26,in,SYNTHETIC - replace with value from RCRV accommodation plan,planted defect
+R11,Main Deck guard rail (forward),guard rail height,42,in,SYNTHETIC - replace with value from RCRV outfitting drawing,
+R12,01 Level bulwark (aft),guard rail height,1.0,m,SYNTHETIC - replace with value from RCRV outfitting drawing,planted defect (1.0 m = 39.37 in)
+R13,Main Deck guard rail (forward),opening below lowest rail course,9,in,SYNTHETIC - replace with value from RCRV outfitting drawing,
+R14,Science stateroom 01-22 (two-tier berths),lower berth height above deck,14,in,SYNTHETIC - replace with value from RCRV accommodation plan,

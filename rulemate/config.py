@@ -22,3 +22,13 @@ CLAUSES_FILE = INDEX_DIR / "clauses.json"
 EMBED_MODEL = os.getenv("EMBED_MODEL", "BAAI/bge-small-en-v1.5")
 
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".html", ".htm", ".txt", ".md"}
+
+# Demo questions and the rule documents each one is asked against (UI sidebar + scripts/warm_demo.py).
+REAL_US_RULES = ["46CFR190"]
+SYNTHETIC_RULES = ["SAMPLE_SYNTHETIC_rules"]
+DEMO_QUESTIONS: list[tuple[str, list[str]]] = [
+    ("How high must guard rails be on a research vessel?", REAL_US_RULES),
+    ("How is the corridor width calculated when many people use it?", SYNTHETIC_RULES),
+    ("What does 46 CFR 190.10-30 say?", REAL_US_RULES),
+    ("What is the required size of a helicopter landing area?", REAL_US_RULES),
+]

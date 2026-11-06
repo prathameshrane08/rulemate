@@ -32,7 +32,7 @@ from ..llm import LLMError
 from ..models import Clause
 from ..retrieval import tokenize
 from .limits import Limit, RuleTable
-from .units import UnitError, compatible, convert
+from .units import UnitError, compatible, convert, parse_number, parse_value
 
 Verdict = Literal["PASS", "FAIL", "NEEDS REVIEW"]
 MIN_SIM = 0.70  # below this, no limit is considered to cover the parameter
@@ -50,6 +50,15 @@ class DesignRow(BaseModel):
     unit: str = ""
     notes: str = ""
     raw_value: str = ""
+    source: str = ""  # where the design value comes from: drawing / sheet / model element, measured or stated
+
+    @property
+    def display(self) -> str:
+        """Value as the designer wrote it, plus the parsed value when they differ: 3'-6" (= 42 in)."""
+        raw = self.raw_value or (f"{self.value:g}" if self.value is not None else "")
+        if self.value is not None and parse_number(raw) is None:
+            return f"{raw} (= {self.value:g} {self.unit})"
+        return f"{raw} {self.unit}".strip()
 
     @property
     def text(self) -> str:
@@ -92,6 +101,7 @@ _COLS = {
     "value": ["value", "val", "design_value"],
     "unit": ["unit", "units", "uom"],
     "notes": ["notes", "note", "comment", "comments", "remarks"],
+    "source": ["source", "design_source", "drawing", "reference", "measured_from", "provenance"],
 }
 
 
@@ -107,12 +117,9 @@ def read_design_csv(data: str | bytes) -> list[DesignRow]:
     for i, r in enumerate(reader, start=1):
         get = lambda k: (r.get(colmap[k]) or "").strip() if colmap[k] else ""  # noqa: E731
         raw = get("value")
-        try:
-            value = float(raw.replace(",", "."))
-        except ValueError:
-            value = None
+        value, unit = parse_value(raw, get("unit"))  # also US feet-inch notation: 3'-6" -> 42 in
         rows.append(DesignRow(item_id=get("item_id") or f"R{i}", space=get("space"), parameter=get("parameter"),
-                              value=value, unit=get("unit"), notes=get("notes"), raw_value=raw))
+                              value=value, unit=unit, notes=get("notes"), raw_value=raw, source=get("source")))
     return rows
 
 
@@ -340,13 +347,15 @@ def explain_row(res: RowResult, clauses: dict[str, Clause], llm, cache: dict | N
     from ..guardrails import extract_numbers
 
     allowed = [(row.value, row.unit)] + [(r.value_in_limit_unit, r.limit.unit) for r in res.applied if r.value_in_limit_unit is not None]
-    allowed += extract_numbers(f"{row.item_id} {row.space} {row.notes}")  # deck numbers, item IDs, notes
+    allowed += extract_numbers(f"{row.item_id} {row.space} {row.notes} {row.source}")  # deck numbers, item IDs, notes
     for _ in range(2):
         try:
             text = llm.complete(messages, max_tokens=800).strip()
         except LLMError:
             return res
-        chk = check_answer(text, used, extra_numbers=allowed)
+        chk = check_answer(text, used, extra_numbers=allowed,
+                           extra_text=f"{row.item_id} {row.space} {row.parameter} {row.notes} {row.source} {row.unit} "
+                                      "design value meets does not meet limit pass fail review condition")
         problems = [str(v) for v in chk.violations] + verdict_violations(text, res.verdict) + claim_violations(chk.text, res)
         if not problems:
             res.explanation, res.explanation_status, res.explanation_violations = chk.text, "verified", []
@@ -387,12 +396,52 @@ def run_check(
 def results_to_csv(results: list[RowResult]) -> str:
     out = io.StringIO()
     w = csv.writer(out)
-    w.writerow(["item_id", "space", "parameter", "value", "unit", "verdict", "limits", "clauses", "reason", "explanation", "synthetic"])
+    w.writerow(["item_id", "space", "parameter", "value", "unit", "design_source", "verdict", "limits", "clauses", "reason",
+                "explanation", "synthetic"])
     for r in results:
         w.writerow([
-            r.row.item_id, r.row.space, r.row.parameter, r.row.raw_value or r.row.value, r.row.unit, r.verdict,
+            r.row.item_id, r.row.space, r.row.parameter, r.row.raw_value or r.row.value, r.row.unit, r.row.source, r.verdict,
             "; ".join(f"{x.limit.describe()}{' if ' + x.limit.condition if x.limit.condition else ''}" for x in r.applied),
             "; ".join(sorted({f'{x.limit.doc} § {x.limit.clause_id}' for x in r.applied})),
             r.reason.replace("\n", " "), r.explanation, "yes" if r.synthetic else "",
         ])
     return out.getvalue()
+
+
+# ------------------------------------------------------------------ change impact
+
+class Change(BaseModel):
+    item_id: str
+    kind: Literal["new", "removed", "verdict", "value"]
+    before: RowResult | None = None
+    after: RowResult | None = None
+
+    @property
+    def summary(self) -> str:
+        b, a = self.before, self.after
+        if self.kind == "new":
+            return f"new item: {a.verdict}"
+        if self.kind == "removed":
+            return f"removed (was {b.verdict})"
+        if self.kind == "verdict":
+            return f"{b.verdict} -> {a.verdict} ({b.row.display} -> {a.row.display})"
+        return f"value {b.row.display} -> {a.row.display}, still {a.verdict}"
+
+
+def diff_results(before: list[RowResult], after: list[RowResult]) -> list[Change]:
+    """What a design change did to compliance, by item_id. Verdict changes first, worst (new FAILs) on top."""
+    old = {r.row.item_id: r for r in before}
+    new = {r.row.item_id: r for r in after}
+    out = []
+    for k, a in new.items():
+        b = old.get(k)
+        if b is None:
+            out.append(Change(item_id=k, kind="new", after=a))
+        elif a.verdict != b.verdict:
+            out.append(Change(item_id=k, kind="verdict", before=b, after=a))
+        elif (a.row.value, a.row.unit) != (b.row.value, b.row.unit):
+            out.append(Change(item_id=k, kind="value", before=b, after=a))
+    out += [Change(item_id=k, kind="removed", before=b) for k, b in old.items() if k not in new]
+    rank = {"FAIL": 0, "NEEDS REVIEW": 1, "PASS": 2}
+    order = {"verdict": 0, "new": 1, "removed": 2, "value": 3}
+    return sorted(out, key=lambda c: (order[c.kind], rank[(c.after or c.before).verdict]))

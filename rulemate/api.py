@@ -45,6 +45,7 @@ class AskRequest(BaseModel):
     question: str
     use_cache: bool = True
     provider: str | None = None  # e.g. "groq", "ollama", "groq,ollama"
+    docs: list[str] | None = None  # rule documents that apply; None = all
 
 
 class ClauseView(BaseModel):
@@ -86,12 +87,13 @@ def health() -> Health:
 def ask(req: AskRequest) -> Answer:
     if not req.question.strip():
         raise HTTPException(422, "Empty question")
-    return answer_question(req.question, retriever=_require_index(), llm=get_llm(req.provider), use_cache=req.use_cache)
+    return answer_question(req.question, retriever=_require_index(), llm=get_llm(req.provider), use_cache=req.use_cache,
+                           docs=req.docs)
 
 
 @app.get("/search", response_model=RetrievalResult)
-def search(q: str, k: int = 5, follow_refs: bool = True) -> RetrievalResult:
-    return _require_index().search(q, k=k, follow_refs=follow_refs)
+def search(q: str, k: int = 5, follow_refs: bool = True, docs: str | None = None) -> RetrievalResult:
+    return _require_index().search(q, k=k, follow_refs=follow_refs, docs=docs.split(",") if docs else None)
 
 
 @app.get("/clause/{clause_id:path}", response_model=list[ClauseView])
@@ -116,22 +118,30 @@ class CheckRequest(BaseModel):
     rows: list[DesignRow]
     explain: bool = False
     provider: str | None = None
+    docs: list[str] | None = None  # rule documents that apply to this vessel; None = all
 
 
 @app.post("/check", response_model=list[RowResult])
 def check(req: CheckRequest) -> list[RowResult]:
     _require_index()
-    return check_rows(req.rows, explain=req.explain, provider=req.provider)
+    try:
+        return check_rows(req.rows, explain=req.explain, provider=req.provider, docs=req.docs)
+    except ValueError as e:
+        raise HTTPException(400, str(e)) from e
 
 
 @app.post("/check/csv", response_model=list[RowResult])
-async def check_csv(file: UploadFile = File(...), explain: bool = False, provider: str | None = None) -> list[RowResult]:
+async def check_csv(file: UploadFile = File(...), explain: bool = False, provider: str | None = None,
+                    docs: str | None = None) -> list[RowResult]:
     _require_index()
     try:
         rows = read_design_csv(await file.read())
     except ValueError as e:
         raise HTTPException(422, str(e)) from e
-    return check_rows(rows, explain=explain, provider=provider)
+    try:
+        return check_rows(rows, explain=explain, provider=provider, docs=docs.split(",") if docs else None)
+    except ValueError as e:
+        raise HTTPException(400, str(e)) from e
 
 
 @app.get("/limits", response_model=RuleTable)

@@ -52,19 +52,20 @@ class Backend:
             "synthetic_data": any(d.synthetic for d in idx.documents),
         }
 
-    def ask(self, question: str, provider: str | None, use_cache: bool) -> Answer:
+    def ask(self, question: str, provider: str | None, use_cache: bool, docs: list[str] | None = None) -> Answer:
         if self.remote:
             try:
                 r = httpx.post(
                     f"{API_URL}/ask",
-                    json={"question": question, "provider": provider, "use_cache": use_cache},
+                    json={"question": question, "provider": provider, "use_cache": use_cache, "docs": docs},
                     timeout=200,
                 )
                 r.raise_for_status()
                 return Answer.model_validate(r.json())
             except httpx.HTTPError:
                 self.remote = False  # fall through to in-process
-        return answer_question(question, retriever=get_retriever(), llm=get_llm(provider), use_cache=use_cache)
+        return answer_question(question, retriever=get_retriever(), llm=get_llm(provider), use_cache=use_cache,
+                               docs=docs)
 
     def clause(self, uid: str) -> ClauseView | None:
         r = get_retriever()  # clause text is tiny; read locally even in API mode
@@ -81,19 +82,20 @@ class Backend:
         return get_retriever().clauses
 
     # ---------------------------------------------------------------- compliance
-    def check(self, rows: list[DesignRow], explain: bool, provider: str | None) -> list[RowResult]:
+    def check(self, rows: list[DesignRow], explain: bool, provider: str | None,
+              docs: list[str] | None = None) -> list[RowResult]:
         if self.remote:
             try:
                 r = httpx.post(
                     f"{API_URL}/check",
-                    json={"rows": [x.model_dump() for x in rows], "explain": explain, "provider": provider},
+                    json={"rows": [x.model_dump() for x in rows], "explain": explain, "provider": provider, "docs": docs},
                     timeout=600,
                 )
                 r.raise_for_status()
                 return [RowResult.model_validate(x) for x in r.json()]
             except httpx.HTTPError:
                 self.remote = False
-        return check_rows(rows, explain=explain, provider=provider)
+        return check_rows(rows, explain=explain, provider=provider, docs=docs)
 
     def rule_table(self, rebuild: bool = False, provider: str | None = None) -> RuleTable:
         return get_rule_table(provider=provider, force=rebuild)

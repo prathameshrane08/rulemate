@@ -4,6 +4,7 @@ Each numbering style gets a small parser:
 
 * ``SolasParser``   - "Chapter II-2" / "Regulation 13" / "3.1.1 ..."  -> "II-2/13.3.1"
 * ``ClassParser``   - "Pt.3 Ch.2" / "Section 4" / "[2.1.3] ..."      -> "Pt.3 Ch.2 Sec.4 [2.1.3]"
+* ``CfrParser``     - US CFR "Subpart 190.10" / "§ 190.10-25" / "(b)" -> "190.10-25(b)"
 * ``DecimalParser`` - plain "4.2.1 ..." numbering                     -> "4.2.1"
 * ``FallbackParser``- headings only (or nothing): sections "S1", "S2", ...
 
@@ -26,7 +27,8 @@ LIST_ITEM = re.compile(r"^(\.\d+|\([a-z0-9ivx]+\)|[a-z]\)|[-•*]\s)")
 # numbers followed by a unit are values, not cross-references
 UNITS = (
     r"(?:mm|cm|m|m²|m2|m3|km|s|sec|min|h|degrees?|deg|°|%|N|kN|kg|t|bar|kPa|MPa|"
-    r"lux|lx|persons?|people|passengers|kW|W|V|A|dB)\b"
+    r"lux|lx|persons?|people|passengers|kW|W|V|A|dB|inch(?:es)?|ft|feet|foot|square|cubic|"
+    r"centimet(?:er|re)s?|millimet(?:er|re)s?|met(?:er|re)s?)\b"
 )
 NOT_A_VALUE = rf"(?!\.?\d)(?!\s*{UNITS})"
 
@@ -437,13 +439,81 @@ class FallbackParser:
         return []
 
 
+class CfrParser:
+    """US Code of Federal Regulations (e.g. 46 CFR Part 190, as written by scripts/fetch_cfr.py).
+
+    "Subpart 190.10—Means of Escape" -> heading 190.10
+    "§ 190.10-25 Stairway size."     -> section 190.10-25 (heading if it has lettered paragraphs)
+    "(b) All interior stairways ..."  -> clause 190.10-25(b); numbered sub-items (1), (i) stay inside it
+    """
+
+    name = "cfr"
+    PART = re.compile(r"^(?:\d+\s+CFR\s+)?Part\s+(?P<n>\d+)\b\s*[-—–:]?\s*(?P<t>.*)$", re.I)
+    SUBPART = re.compile(r"^Subpart\s+(?P<n>\d+\.\d+|[A-Z])\s*[-—–:]?\s*(?P<t>.*)$")
+    SECTION = re.compile(r"^§\s*(?P<n>\d+\.\d+(?:-\d+)?)\s+(?P<t>.*)$")
+    PARA = re.compile(r"^\((?P<p>[a-z])\)\s*(?P<rest>.*)$")
+    REF = re.compile(r"§§?\s*(\d+\.\d+(?:-\d+)?)(\([a-z]\))?")
+    LOCAL = re.compile(r"paragraphs?\s+\(([a-z])\)(?:\(\d+\))?\s+of\s+this\s+section", re.I)
+
+    def parse(self, blocks: list[Block]) -> list[Draft]:
+        drafts: list[Draft] = []
+        part = subpart = section = None
+        cur: Draft | None = None
+        tables = 0
+
+        def start(cid, title, page, kind, parent, ctx) -> Draft:
+            d = Draft(cid, title, page, kind, parent, ctx)
+            drafts.append(d)
+            return d
+
+        for b in blocks:
+            if b.kind == "table":
+                tables += 1
+                owner = cur.clause_id if cur else "doc"
+                start(f"{owner} table {tables}", cur.title if cur else "", b.page, "table", owner, {}).add(b.text)
+                continue
+            line = b.text.strip()
+            if m := self.SUBPART.match(line):
+                subpart, section = m.group("n"), None
+                cur = start(subpart, m.group("t").strip(" ."), b.page, "heading", part, {})
+                continue
+            if m := self.SECTION.match(line):
+                section = m.group("n")
+                cur = start(section, m.group("t").strip(" ."), b.page, "heading", subpart or part, {"section": section})
+                continue
+            if section and (m := self.PARA.match(line)):
+                cur = start(f"{section}({m.group('p')})", "", b.page, "clause", section, {"section": section})
+                cur.add(line)
+                continue
+            if b.heading_level == 1 or (part is None and (m := self.PART.match(line))):
+                m = self.PART.match(line)
+                if m and part is None:
+                    part = m.group("n")
+                    cur = start(part, m.group("t").strip(" .—-") or line, b.page, "heading", None, {})
+                    continue
+            if cur is None:
+                cur = start("preamble", "", b.page, "section", None, {})
+            if cur.kind == "heading" and section and cur.clause_id == section:
+                cur.kind = "clause"  # undivided section: its text is the clause
+            cur.add(line)
+        return drafts
+
+    def find_refs(self, text: str, ctx: dict) -> list[str]:
+        refs = [m.group(1) + (m.group(2) or "") for m in self.REF.finditer(text)]
+        if sec := ctx.get("section"):
+            refs += [f"{sec}({m.group(1)})" for m in self.LOCAL.finditer(text)]
+        return refs
+
+
 # ---------------------------------------------------------------- style detection
 
-PARSERS = {p.name: p for p in (SolasParser, ClassParser, NumberedParser, FallbackParser)}
+PARSERS = {p.name: p for p in (SolasParser, ClassParser, NumberedParser, CfrParser, FallbackParser)}
 
 
 def detect_style(blocks: list[Block]) -> str:
     lines = [b.text.strip() for b in blocks if b.kind == "text"]
+    if sum(1 for l in lines if CfrParser.SECTION.match(l)) >= 3:
+        return "cfr"
     regs = sum(1 for l in lines if (m := SolasParser.REG.match(l)) and _heading_ok(m.group("t")))
     secs = sum(1 for l in lines if (m := ClassParser.SECTION.match(l)) and _heading_ok(m.group("t")))
     ptch = any(PTCH.search(l) for l in lines[:300])

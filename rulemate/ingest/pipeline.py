@@ -37,7 +37,11 @@ def ancestors(cid: str) -> list[str]:
     out = []
     cur = cid
     for _ in range(8):
-        nxt = re.sub(r"(?<=\d)\.\d+(\]?)$", r"\1", cur)
+        nxt = re.sub(r"(?<=\d)\([a-z0-9]+\)$", "", cur)  # CFR paragraph: 190.10-25(b) -> 190.10-25
+        if nxt == cur:
+            nxt = re.sub(r"(?<=\d\.\d)(\d*)-\d+$", r"\1", cur)  # CFR section: 190.10-25 -> 190.10
+        if nxt == cur:
+            nxt = re.sub(r"(?<=\d)\.\d+(\]?)$", r"\1", cur)
         if nxt == cur:
             nxt = re.sub(r"\s*\[\d+\]$", "", cur)
         if nxt == cur or not nxt:

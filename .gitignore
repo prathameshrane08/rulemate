@@ -7,3 +7,6 @@ data/index/
 data/cache/
 .DS_Store
 eval/results/*.json
+
+# challenge material from Meyer (not ours to redistribute)
+/MEYER*.pdf

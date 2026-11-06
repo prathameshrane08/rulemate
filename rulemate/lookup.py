@@ -8,7 +8,14 @@ from .models import Clause
 
 
 def normalize_id(s: str) -> str:
-    s = s.strip().strip(" .,;:?!\"'()")
+    s = s.strip().strip(" .,;:?!\"'")
+    if s[:1] == "(" and s[-1:] == ")" and s.count("(") == 1:
+        s = s[1:-1]
+    while s[:1] == "(" and s.count("(") > s.count(")"):
+        s = s[1:]
+    while s[-1:] == ")" and s.count(")") > s.count("("):
+        s = s[:-1]
+    s = re.sub(r"^\d+\s*C\.?F\.?R\.?\s*", "", s, flags=re.I)  # "46 CFR 190.10-25" -> "190.10-25"
     if s.startswith("[") and s.endswith("]") and s.count("[") == 1:
         s = s[1:-1]
     s = re.sub(r"^(?:reg(?:ulation)?\.?|§|clause|section|para(?:graph)?\.?)\s*", "", s, flags=re.I)

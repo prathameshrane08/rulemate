@@ -42,6 +42,11 @@ UNIT_ALIASES = {
     "mm": ["mm", "millimetres", "millimetre", "millimeters", "millimeter"],
     "cm": ["cm", "centimetres", "centimetre", "centimeters", "centimeter"],
     "m2": ["m2", "m²", "sq m", "square metres", "square metre", "square meters", "square meter"],
+    "m3": ["m3", "m³", "cubic metres", "cubic metre", "cubic meters", "cubic meter"],
+    "ft2": ["ft2", "ft²", "sq ft", "square feet", "square foot"],
+    "ft3": ["ft3", "ft³", "cu ft", "cubic feet", "cubic foot"],
+    "in": ["inches", "inch"],
+    "ft": ["feet", "foot", "ft"],
     "m": ["m", "metres", "metre", "meters", "meter"],
     "deg": ["°", "degrees", "degree", "deg"],
     "min": ["minutes", "minute", "mins", "min"],
@@ -56,7 +61,7 @@ _ALIAS_TO_UNIT = {a.lower() if a not in ("N", "kN") else a: u for u, al in UNIT_
 _UNIT_ALT = "|".join(sorted((re.escape(a) for a in _ALIAS_TO_UNIT), key=len, reverse=True))
 # number, optional unit. Clause-ID-like numbers (two or more dots) are skipped later.
 _NUM_RE = re.compile(
-    rf"(?<![\w.\-/])(\d{{1,3}}(?:,\d{{3}})+|\d+(?:\.\d+)*)(?:\s?({_UNIT_ALT})(?![A-Za-z0-9²]))?"
+    rf"(?<![\w.\-/])(\d+\s\d/\d+|\d{{1,3}}(?:,\d{{3}})+|\d+(?:\.\d+)*)(?:\s?({_UNIT_ALT})(?![A-Za-z0-9²³]))?"
 )
 _ID_CONTEXT_RE = re.compile(r"(?:regulations?|reg\.|paragraphs?|clauses?|sections?|sec\.|table|chapter|part|pt\.|ch\.|§)\s*$", re.I)
 _LIST_MARKER_RE = re.compile(r"^\s*(?:[-*•]|\d+[.)])\s+")
@@ -99,7 +104,12 @@ def extract_numbers(text: str) -> list[tuple[float, str | None]]:
             continue  # 3.1.1 is a clause number
         if _ID_CONTEXT_RE.search(text[max(0, m.start() - 14) : m.start()]):
             continue  # "Table 13.1", "regulation 9"
-        value = float(raw.replace(",", ""))
+        if " " in raw:  # mixed fraction "39 1/2"
+            whole, frac = raw.split()
+            n, d = frac.split("/")
+            value = float(whole) + float(n) / float(d)
+        else:
+            value = float(raw.replace(",", ""))
         canon = None
         if unit:
             canon = _ALIAS_TO_UNIT.get(unit) or _ALIAS_TO_UNIT.get(unit.lower())
@@ -146,10 +156,47 @@ def _is_exempt(sentence_wo_cites: str) -> bool:
 # ------------------------------------------------------------------ main check
 
 
+# a cited clause must contain at least this share of its sentence's content words (clause text + title + path,
+# limit wording like "maximum" ignored). On the eval answers correct citations scored >= 0.58 and wrong ones
+# (a number taken from another document, a claim the clause does not make) <= 0.38.
+MIN_SUPPORT = 0.45
+
+
+# words that only say "this is a limit" and are phrased many ways ("maximum" = "not exceeding")
+_LIMIT_WORDS = set(
+    "maximum minimum max min least most exceed exceeding exceeds less more greater smaller lower higher limit "
+    "limits value required require requires allowed permitted permissible need needs needed has have also "
+    "both only each every one two three ".split()
+)
+
+
+def _covered(w: str, cw: set[str]) -> bool:
+    if w in cw:
+        return True
+    if len(w) >= 4:  # word forms: stair / stairway, thick / thickness
+        return any(len(c) >= 4 and (c.startswith(w) or w.startswith(c)) for c in cw)
+    return False
+
+
+def _support(words: set[str], clause: Clause, extra: set[str]) -> float:
+    from .retrieval import tokenize  # lazy: keeps this module light
+
+    words = words - _LIMIT_WORDS
+    if not words:
+        return 1.0
+    cw = set(tokenize(f"{clause.title} {' '.join(clause.path)} {clause.text}")) | extra
+    return sum(_covered(w, cw) for w in words) / len(words)
+
+
 def check_answer(
-    answer: str, retrieved: list[Clause], extra_numbers: list[tuple[float, str | None]] | None = None
+    answer: str, retrieved: list[Clause], extra_numbers: list[tuple[float, str | None]] | None = None,
+    extra_text: str = "",
 ) -> CheckResult:
-    """``extra_numbers``: (value, unit) pairs the answer may state besides the sources, e.g. a design value."""
+    """``extra_numbers``: (value, unit) pairs the answer may state besides the sources, e.g. a design value.
+    ``extra_text``: words the answer may use besides the sources, e.g. the design row's space and parameter."""
+    from .retrieval import tokenize
+
+    extra_words = set(tokenize(extra_text))
     extra = [(float(v), _ALIAS_TO_UNIT.get(u or "") or _ALIAS_TO_UNIT.get((u or "").lower())) for v, u in (extra_numbers or [])]
     violations: list[Violation] = []
     by_key: dict[tuple[str, str], Clause] = {(c.doc.lower(), normalize_id(c.clause_id)): c for c in retrieved}
@@ -197,6 +244,18 @@ def check_answer(
                 continue  # exempt and nothing else to check
         source = " ".join(c.text for c in sent_clauses) if sent_clauses else ""
         source_n = _norm_text(source)
+
+        # content: a sentence must say something, and every clause it cites must support it
+        if idx:
+            words = {w for w in tokenize(plain) if not w.replace(".", "").replace("/", "").isdigit()}
+            if len(words) < 2:
+                violations.append(Violation("format", "sentence has no content besides the citation", shown))
+            for c in {c.uid: c for c in sent_clauses}.values():
+                sup = _support(words, c, extra_words)
+                if sup < MIN_SUPPORT:
+                    violations.append(Violation(
+                        "support", f"{c.citation} does not support this sentence (only {sup:.0%} of its words are in "
+                        "that clause); cite the clause that states it, or leave the claim out", shown))
 
         # numbers and units
         if sent_clauses:

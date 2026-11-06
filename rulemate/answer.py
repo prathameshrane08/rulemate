@@ -226,6 +226,7 @@ def answer_question(
     llm=None,
     use_cache: bool = True,
     max_attempts: int = 2,
+    docs: list[str] | None = None,
 ) -> Answer:
     t0 = time.perf_counter()
     retriever = retriever or get_retriever()
@@ -235,7 +236,7 @@ def answer_question(
         ans.latency_ms = round((time.perf_counter() - t0) * 1000, 1)
         return ans
 
-    key = _cache_key(question, llm.label)
+    key = _cache_key(question, llm.label + (f"|{','.join(sorted(docs))}" if docs else ""))
     if use_cache:
         hit = _cache_load().get(key)
         if hit:
@@ -243,7 +244,7 @@ def answer_question(
             ans.cached = True
             return done(ans)
 
-    res = retriever.search(question)
+    res = retriever.search(question, docs=docs)
     if not res.found:
         return done(not_found_answer(question, res))
 

@@ -109,7 +109,8 @@ def cmd_ask(args) -> None:
     from .retrieval import get_retriever
 
     _load()
-    ans = answer_question(args.question, retriever=get_retriever(), llm=get_llm(args.provider), use_cache=not args.no_cache)
+    ans = answer_question(args.question, retriever=get_retriever(), llm=get_llm(args.provider), use_cache=not args.no_cache,
+                          docs=args.rules.split(",") if args.rules else None)
     badge = {"verified": "VERIFIED", "excerpts": "EXCERPTS ONLY", "not_found": "NOT FOUND"}[ans.status]
     extra = " (cached)" if ans.cached else ""
     print(f"[{badge}]{extra}  confidence={ans.confidence} top_score={ans.top_score}  "
@@ -155,11 +156,14 @@ def cmd_check(args) -> None:
 
     _load()
     rows = read_design_csv(Path(args.csv).read_bytes())
-    results = check_rows(rows, explain=args.explain, provider=args.provider)
+    docs = args.rules.split(",") if args.rules else None
+    results = check_rows(rows, explain=args.explain, provider=args.provider, docs=docs)
     colour = {"PASS": "\033[32m", "FAIL": "\033[31m", "NEEDS REVIEW": "\033[33m"}
     for r in results:
         print(f"{colour[r.verdict]}{r.verdict:12}\033[0m {r.row.item_id:5} {r.row.parameter[:28]:28} "
-              f"{r.row.raw_value:>6} {r.row.unit:7} {r.row.space[:40]}")
+              f"{r.row.display:>14} {r.row.space[:40]}")
+        if r.row.source:
+            print(f"{'':19}design value from: {r.row.source}")
         for line in r.reason.splitlines():
             print(f"{'':19}{line}")
         if r.explanation:
@@ -168,6 +172,16 @@ def cmd_check(args) -> None:
     print(f"\n{counts}")
     if args.out:
         Path(args.out).write_text(results_to_csv(results))
+    if args.baseline:
+        from .compliance.check import diff_results
+
+        before = check_rows(read_design_csv(Path(args.baseline).read_bytes()), explain=False, provider=args.provider,
+                            docs=docs)
+        changes = diff_results(before, results)
+        print(f"\nChange impact vs {args.baseline}: {len(changes)} item(s) changed")
+        for c in changes:
+            v = (c.after or c.before).verdict
+            print(f"  {colour[v]}{c.item_id:5}\033[0m {c.summary}")
         print(f"written {args.out}")
 
 
@@ -203,6 +217,7 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("question")
     p.add_argument("--provider", help="e.g. groq | openai | ollama | groq,ollama (default: LLM_PROVIDER)")
     p.add_argument("--no-cache", action="store_true")
+    p.add_argument("--rules", help="only these rule documents, comma-separated (default: all), e.g. 46CFR190")
     p.add_argument("-v", "--verbose", action="store_true", help="show guardrail violations")
     p.set_defaults(fn=cmd_ask)
 
@@ -218,6 +233,8 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--explain", action="store_true", help="add LLM explanations (guardrailed)")
     p.add_argument("--provider")
     p.add_argument("--out", help="write results CSV")
+    p.add_argument("--rules", help="rule documents that apply, comma-separated (default: all), e.g. 46CFR190")
+    p.add_argument("--baseline", help="earlier design CSV: also report which items changed verdict")
     p.set_defaults(fn=cmd_check)
 
     args = ap.parse_args(argv)
