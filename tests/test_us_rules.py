@@ -196,3 +196,20 @@ def test_fraction_with_unicode_space():
     # hosted models write "39\u202f1/2 inches" (narrow no-break space)
     assert extract_numbers("at least 39\u202f1/2 inches") == [(39.5, "in")]
     assert extract_numbers("at least 39\u00a01/2 inches") == [(39.5, "in")]
+
+
+def test_unrelated_limits_do_not_match():
+    # read from a real trawler GA: none of these is limited by an accessibility or accommodation rule
+    from rulemate.compliance.check import _plausible
+    from rulemate.compliance.limits import Limit
+
+    berth = Limit(id="b", clause_uid="d::190.20-20(d)", doc="d", clause_id="190.20-20(d)",
+                  parameter="Sleeping accommodations The overall size of a berth", comparator=">=", value=68,
+                  unit="centimeters", method="regex")
+    grab = Limit(id="g", clause_uid="d::609.3", doc="d", clause_id="609.3", parameter="Spacing The space between the grab bar",
+                 comparator=">=", value=1.5, unit="inches", method="regex")
+    row = lambda p, v, u: DesignRow(item_id="x", parameter=p, value=v, unit=u, raw_value=str(v))  # noqa: E731
+    assert not _plausible(row("length overall", 60, "m"), berth)  # 88 times the limit
+    assert not _plausible(row("frame spacing", 2, "in"), grab)  # no specific word in common
+    assert _plausible(row("berth width", 30, "in"), berth)
+    assert _plausible(row("grab bar spacing", 2, "in"), grab)
