@@ -71,3 +71,15 @@ def test_table_units_and_unusual_hyphens_do_not_reject_a_correct_answer():
                text="After release, the closing requirements of 3.3 apply.", kind="clause", path=[], refs=[])
     r = check_answer("After release, the closing requirements of 3.3 (= II‑2/9.3.3) apply [S § II‑2/9.3.4].", [c])
     assert not any("number 2" in str(v) for v in r.violations)
+
+
+def test_mlc_sources_in_general_answers_are_matched_to_the_loaded_text():
+    r = get_retriever()
+    if "MLC2006::A3.1/6(a)" not in r.by_uid:
+        import pytest
+
+        pytest.skip("MLC 2006 not downloaded (scripts/fetch_mlc.py)")
+    out, _ = check_references("x", [{"source": "MLC 2006, Standard A3.1, paragraph 6(a)", "supports": "203 centimetres"},
+                                    {"source": "MLC 2006, Article 2", "supports": "definitions"}], r)
+    assert out[0]["uid"] == "MLC2006::A3.1/6(a)" and out[0]["status"] == "loaded clause: read the sentence"
+    assert out[1]["uid"] == "MLC2006::Art.II"
