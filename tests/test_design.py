@@ -198,3 +198,39 @@ def test_broken_gemini_json_keeps_the_good_items():
           '  {"label": "HOSPITAL", "kind": "hospital", "box_2d": [10, 11, 12, 13]}\n]}```'
     labels = [x["label"] for x in parse_items(raw, "rooms")]
     assert labels == ["KAPTEIN", "CENTRAL", "HOSPITAL"]
+
+
+# ---------------------------------------------------------------- plain-language summaries
+
+from rulemate.design.summary import drawing_facts, summarize_check, summarize_drawing  # noqa: E402
+
+
+def test_summary_when_nothing_was_read():
+    s = summarize_drawing([], {})
+    assert "did not find" in s["headline"] and s["next"]
+    q = summarize_drawing([], {}, error="gemini: HTTP 429 ... quota")
+    assert "allowance is used up" in q["points"][0]
+
+
+def test_summary_of_a_ga():
+    words = [W("GENERAL", 10, 10), W("ARRANGEMENT", 80, 10), W("ACCOMMODATION FOR 48 PERSONS", 10, 30)]
+    facts = drawing_facts(words)
+    items = [{"label": "KAPTEIN", "kind": "stateroom", "berths": 1, "berths_confirmed": False, "confirmed": True},
+             {"label": "HOSPITAL", "kind": "hospital", "berths": None, "berths_confirmed": False, "confirmed": True},
+             {"label": "GALLEY", "kind": "other", "confirmed": True},
+             {"label": "XX", "kind": "other", "confirmed": False}]
+    s = summarize_drawing(items, facts)
+    text = " ".join([s["headline"], *s["points"], *s["next"]])
+    assert "general arrangement" in s["headline"] and "48 persons" in text and "Kaptein" in text
+    assert "hospital is shown" in text and "cannot be counted" in text and "could not be confirmed" in text
+
+
+def test_summary_of_a_check():
+    res = [{"verdict": "FAIL", "parameter": "door clear width", "value": "30 in",
+            "deciding": {"limit": ">= 32 inches", "clause": "36CFR1191AppD § 404.2.3"}},
+           {"verdict": "NO RULE", "parameter": "length overall", "value": "77.5 m", "deciding": None},
+           {"verdict": "CHECK INPUT", "parameter": "crane capacity", "value": "4T/14M", "deciding": None}]
+    s = summarize_check(res, ["46CFR190"])
+    text = " ".join([s["headline"], *s["points"], *s["next"]])
+    assert s["headline"] == "1 of 3 values break a rule."
+    assert "at least 32 inches" in text and "not covered" in text and "unit is unclear" in text
