@@ -130,7 +130,8 @@ def verify(proposals: list[dict], words: list[Word], page_w: float, page_h: floa
         num_ok = bool(num) and any(_sim(num, w.text) >= 0.8 for w in inside)
         r.confirmed = label_ok or num_ok
         r.evidence = f'OCR at that spot: "{text[:60]}"' if inside else "no OCR text at that spot"
-        stated = next((v for k, v in KIND_WORDS.items() if k in label.lower()), None)
+        printed = re.search(r"\((\d{1,2})\)", label)  # "SENIOR SCIENTIST (2)": the drawing prints the berths
+        stated = int(printed.group(1)) if printed else next((v for k, v in KIND_WORDS.items() if k in label.lower()), None)
         if r.berths is not None and stated is not None:
             r.berths_confirmed = r.berths == stated
             if not r.berths_confirmed:

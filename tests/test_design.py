@@ -173,3 +173,10 @@ def test_designer_words_map_to_rule_words():
 
     assert designer_to_rule_terms("desk height") == "desk (work surface) height"
     assert designer_to_rule_terms("WC seat height") == "WC (water closet) seat height"
+
+
+def test_printed_berth_count_in_label_confirms_berths():
+    words = [W("SENIOR", 600, 400), W("SCIENTIST", 600, 409), W("(2)", 610, 418)]
+    [r] = verify([{"label": "SENIOR SCIENTIST (2)", "room_number": None, "kind": "stateroom", "berths": 2,
+                   "box_2d": _box(596, 398, 650, 430)}], words, PAGE_W, PAGE_H)
+    assert r.confirmed and r.berths_confirmed
