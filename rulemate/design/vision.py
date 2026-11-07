@@ -211,8 +211,9 @@ def read_sheet(path: Path, page_no: int, llm, words: list[Word], dpi: int = 150)
     kept: list[dict] = []
     for p in proposals:
         cy, cx = (p["box_2d"][0] + p["box_2d"][2]) / 2, (p["box_2d"][1] + p["box_2d"][3]) / 2
-        if not any(_norm(p.get("label", "")) == _norm(k.get("label", "")) and
-                   abs(cy - (k["box_2d"][0] + k["box_2d"][2]) / 2) < 8 and abs(cx - (k["box_2d"][1] + k["box_2d"][3]) / 2) < 8
+        # same spot and nearly the same text (tiles overlap; "1. STYRMANN" / "1. STYRRMANN")
+        if not any(_sim(p.get("label", ""), k.get("label", "")) >= 0.85 and
+                   abs(cy - (k["box_2d"][0] + k["box_2d"][2]) / 2) < 15 and abs(cx - (k["box_2d"][1] + k["box_2d"][3]) / 2) < 15
                    for k in kept):
             kept.append(p)
     return verify(kept, words, w, h)
