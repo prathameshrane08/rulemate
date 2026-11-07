@@ -1,0 +1,15 @@
+{"id": "f01", "type": "answerable", "question": "How wide must an accessible walkway be?", "expected": ["403.5.1"], "facts": ["36"]}
+{"id": "f02", "type": "answerable", "question": "What riser height and tread depth do accessible stairs need?", "expected": ["504.2"], "facts": ["7", "11"]}
+{"id": "f03", "type": "answerable", "question": "At what height should tactile signs be mounted?", "expected": ["703.4.1"], "facts": ["48", "60"]}
+{"id": "f04", "type": "answerable", "question": "How high can a wheelchair user reach to the side?", "expected": ["308.3.1"], "facts": ["48"]}
+{"id": "f05", "type": "answerable", "question": "How long must the side wall grab bar next to a toilet be?", "expected": ["604.5.1"], "facts": ["42"]}
+{"id": "f06", "type": "answerable", "question": "What size must a transfer type shower be?", "expected": ["608.2.1"], "facts": ["36"]}
+{"id": "f07", "type": "answerable", "question": "How should a seafarer's rest hours be split?", "expected": ["A2.3/6"], "facts": ["6", "14"]}
+{"id": "f08", "type": "answerable", "question": "After how long on board is a seafarer entitled to go home?", "expected": ["A2.5.1/2(b)"], "facts": ["12"]}
+{"id": "f09", "type": "answerable", "question": "How many toilets and showers are needed for seafarers without their own bathroom?", "expected": ["A3.1/11(c)"], "facts": []}
+{"id": "f10", "type": "answerable", "question": "Must men and women have separate sleeping rooms on board?", "expected": ["A3.1/9(b)"], "facts": []}
+{"id": "f11", "type": "answerable", "question": "What clear head room do crew rooms on a research vessel need?", "expected": ["190.20-20(c)"], "facts": ["190"]}
+{"id": "f12", "type": "answerable", "question": "How many means of escape are needed from crew quarters on a research vessel?", "expected": ["190.10-5(a)"], "facts": []}
+{"id": "f13", "type": "unanswerable", "question": "What is the maximum sulphur content allowed in marine fuel oil?", "expected": [], "facts": []}
+{"id": "f14", "type": "unanswerable", "question": "How many anchors must a cruise ship carry?", "expected": [], "facts": []}
+{"id": "f15", "type": "unanswerable", "question": "How long must a voyage data recorder keep its recordings?", "expected": [], "facts": []}

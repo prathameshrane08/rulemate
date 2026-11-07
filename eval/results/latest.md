@@ -1,20 +1,11 @@
 ## RuleMate evaluation
 
-45 questions (38 answerable incl. 8 clause-ID, 7 unanswerable) · LLM: groq:openai/gpt-oss-20b · retrieval: hybrid · 2026-11-07 20:28
+15 questions (12 answerable incl. 0 clause-ID, 3 unanswerable) · LLM: none · retrieval: hybrid · 2026-11-07 21:03
 
 | Metric | Result |
 |---|---|
-| Retrieval hit@5 | **100%** (MRR 0.94) |
-| Correct "not found" on unanswerable questions | **71%** (7 questions) |
-| Answerable questions wrongly refused | 0% |
-| Answers verified (all guardrails passed) | **89%** |
-| Answers shown as excerpts only | 11% |
-| Verified answers containing the key numbers | 97% (31 checked) |
-| Citation precision (overlap check) | **100%** (67 citations) |
-| LLM drafts rejected by guardrails | 23% of 53 drafts (18% of questions) |
-| Drafts that failed a guardrail shown to the user | **0** (by construction) |
-| Answer latency p50 / p95 | 5.3 s / 13.0 s |
-| Retrieval latency p50 | 13 ms |
+| Retrieval hit@5 | **92%** (MRR 0.52) |
+| Retrieval latency p50 | 12 ms |
 | Compliance verdicts correct (research vessel, 46 CFR 190) | **100%** (14 items: 7 PASS, 6 FAIL, 1 REVIEW) |
 | Planted defects caught (research vessel, 46 CFR 190) | **100%** of 7 (7 FAIL, 0 REVIEW) |
 | False FAIL with the value exactly at the limit (research vessel, 46 CFR 190) | **0%** of 7 |
@@ -34,11 +25,11 @@ Threshold calibration (current: low=0.6, high=0.7; answerable = non-ID questions
 
 | low threshold | unanswerable refused by retrieval | answerable wrongly refused |
 |---|---|---|
-| 0.55 | 0/7 | 0/30 |
-| 0.58 | 0/7 | 0/30 |
-| 0.60 | 0/7 | 0/30 |
-| 0.62 | 0/7 | 0/30 |
-| 0.64 | 1/7 | 0/30 |
-| 0.66 | 2/7 | 0/30 |
-| 0.68 | 4/7 | 0/30 |
-| 0.70 | 5/7 | 0/30 |
+| 0.55 | 0/3 | 0/12 |
+| 0.58 | 0/3 | 0/12 |
+| 0.60 | 0/3 | 0/12 |
+| 0.62 | 2/3 | 0/12 |
+| 0.64 | 2/3 | 0/12 |
+| 0.66 | 2/3 | 0/12 |
+| 0.68 | 3/3 | 0/12 |
+| 0.70 | 3/3 | 0/12 |
