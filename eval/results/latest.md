@@ -1,6 +1,6 @@
 ## RuleMate evaluation
 
-38 questions (32 answerable incl. 7 clause-ID, 6 unanswerable) · LLM: none · retrieval: hybrid · 2026-11-07 13:50
+38 questions (32 answerable incl. 7 clause-ID, 6 unanswerable) · LLM: none · retrieval: hybrid · 2026-11-07 17:49
 
 | Metric | Result |
 |---|---|
@@ -17,7 +17,7 @@
 | False FAIL with the value exactly at the limit (cruise-ship sample, synthetic rules) | **0%** of 7 |
 | GA drawing read by OCR (NOAA, second deck): berth labels found | **34 of 34**, 58 of 58 berths, role text exact for 32 |
 | Same NOAA drawing read by Gemini (gemini-3.5-flash), readings confirmed in code | **33 of 34** role and berth count exact, 34 of 34 confirmed on the sheet (`eval/gemini_drawing.py`, 2026-11-07 13:37) |
-| RCRV GA (vector), stair flights measured on the inboard profile | **3 of 3**, angle 50 deg, room number read for 2 |
+| RCRV GA (vector), stair flights measured on the inboard profile | **3 of 3**, angle 50 deg, room number read for 3 |
 
 _Caveats: the questions and the example design values were written by the team, and thresholds were tuned on them; 46 CFR 190 and the NOAA GA drawing are real documents, the cruise-ship rules are synthetic. Expect lower numbers on other real design data. Planted defects: every passing value moved 3 % past the limit that decided it, and set exactly at that limit._
 
