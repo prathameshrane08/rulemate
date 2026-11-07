@@ -1,10 +1,19 @@
 ## RuleMate evaluation
 
-15 questions (12 answerable incl. 0 clause-ID, 3 unanswerable) · LLM: none · retrieval: hybrid · 2026-11-07 21:03
+45 questions (38 answerable incl. 8 clause-ID, 7 unanswerable) · LLM: ollama:llama3.2:3b · retrieval: hybrid · 2026-11-07 21:30
 
 | Metric | Result |
 |---|---|
-| Retrieval hit@5 | **92%** (MRR 0.52) |
+| Retrieval hit@5 | **100%** (MRR 0.92) |
+| Correct "not found" on unanswerable questions | **100%** (7 questions) |
+| Answerable questions wrongly refused | 0% |
+| Answers verified (all guardrails passed) | **82%** |
+| Answers shown as excerpts only | 18% |
+| Verified answers containing the key numbers | 93% (30 checked) |
+| Citation precision (overlap check) | **91%** (58 citations) |
+| LLM drafts rejected by guardrails | 29% of 56 drafts (24% of questions) |
+| Drafts that failed a guardrail shown to the user | **0** (by construction) |
+| Answer latency p50 / p95 | 5.0 s / 14.8 s |
 | Retrieval latency p50 | 12 ms |
 | Compliance verdicts correct (research vessel, 46 CFR 190) | **100%** (14 items: 7 PASS, 6 FAIL, 1 REVIEW) |
 | Planted defects caught (research vessel, 46 CFR 190) | **100%** of 7 (7 FAIL, 0 REVIEW) |
@@ -25,11 +34,11 @@ Threshold calibration (current: low=0.6, high=0.7; answerable = non-ID questions
 
 | low threshold | unanswerable refused by retrieval | answerable wrongly refused |
 |---|---|---|
-| 0.55 | 0/3 | 0/12 |
-| 0.58 | 0/3 | 0/12 |
-| 0.60 | 0/3 | 0/12 |
-| 0.62 | 2/3 | 0/12 |
-| 0.64 | 2/3 | 0/12 |
-| 0.66 | 2/3 | 0/12 |
-| 0.68 | 3/3 | 0/12 |
-| 0.70 | 3/3 | 0/12 |
+| 0.55 | 0/7 | 0/30 |
+| 0.58 | 0/7 | 0/30 |
+| 0.60 | 0/7 | 0/30 |
+| 0.62 | 0/7 | 0/30 |
+| 0.64 | 1/7 | 0/30 |
+| 0.66 | 2/7 | 0/30 |
+| 0.68 | 4/7 | 0/30 |
+| 0.70 | 5/7 | 0/30 |
