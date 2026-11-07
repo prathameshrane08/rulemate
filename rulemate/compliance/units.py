@@ -92,6 +92,7 @@ def parse_value(raw: str, unit: str = "") -> tuple[float | None, str]:
     """Design value as written -> (value, unit). Handles US feet-inch notation:
     3'-6" -> (42.0, "in"), 3 ft 6 in -> (42.0, "in"), 39 1/2 with unit in -> (39.5, "in")."""
     raw = (raw or "").strip()
+    unit = {'"': "in", "\u2033": "in", "'": "ft", "\u2032": "ft"}.get((unit or "").strip(), unit)
     v = parse_number(raw)
     if v is not None:
         return v, unit
@@ -99,7 +100,8 @@ def parse_value(raw: str, unit: str = "") -> tuple[float | None, str]:
     if m and parse_number(m.group(1)) is not None:
         try:
             parse_unit(m.group(2))
-            return parse_number(m.group(1)), m.group(2).strip()
+            u = m.group(2).strip()
+            return parse_number(m.group(1)), {'"': "in", "\u2033": "in", "'": "ft", "\u2032": "ft"}.get(u, u)
         except UnitError:
             pass
     m = _FT_IN.match(raw)

@@ -136,3 +136,40 @@ def test_gemini_berths_must_agree_with_the_label():
 
 def test_bad_box_is_skipped():
     assert verify([{"label": "X", "box_2d": None}], [], PAGE_W, PAGE_H) == []
+
+
+# ---------------------------------------------------------------- picture check: Gemini reads, code confirms
+
+def _png(w=1000, h=500):
+    import io
+
+    from PIL import Image
+
+    buf = io.BytesIO()
+    Image.new("RGB", (w, h), "white").save(buf, format="PNG")
+    return buf.getvalue()
+
+
+def test_picture_values_confirmed_by_ocr(monkeypatch):
+    from rulemate.design import picture
+
+    proposals = [
+        {"space": "Bathroom", "parameter": "door clear width", "value_text": '30"', "unit": '"',
+         "box_2d": [100, 100, 140, 300]},  # written there
+        {"space": "Cabin", "parameter": "turning space diameter", "value_text": "1500", "unit": "mm",
+         "box_2d": [600, 600, 650, 800]},  # Gemini claims it, nothing written there
+    ]
+    monkeypatch.setattr(picture, "ask_gemini", lambda llm, png, **k: proposals)
+    words = [('BATH DOOR CLEAR 30"', 90, 45, 320, 75)]  # OCR (text, x0, y0, x1, y1) in pixels
+    values, _ = picture.read_picture(_png(), llm=None, words=words)
+    assert [v.confirmed for v in values] == [True, False]
+    assert values[0].value == 30 and values[0].unit == "in"
+    rows = picture.to_rows(values, "x.png")
+    assert len(rows) == 1 and rows[0].parameter == "door clear width" and rows[0].source_file == "upload:x.png"
+
+
+def test_designer_words_map_to_rule_words():
+    from rulemate.compliance.check import designer_to_rule_terms
+
+    assert designer_to_rule_terms("desk height") == "desk (work surface) height"
+    assert designer_to_rule_terms("WC seat height") == "WC (water closet) seat height"

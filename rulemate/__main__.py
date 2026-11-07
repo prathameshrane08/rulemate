@@ -150,6 +150,30 @@ def cmd_limits(args) -> None:
             print(f"  rejected {r['clause']}: {r['reason']}")
 
 
+def cmd_picture(args) -> None:
+    import os
+
+    from .compliance.service import check_rows
+    from .design.picture import read_picture, to_rows
+    from .llm import make_provider
+
+    llm = make_provider("gemini")
+    llm.model = os.getenv("GEMINI_VISION_MODEL", llm.model)
+    llm.timeout = max(llm.timeout, 240)
+    path = Path(args.image)
+    values, _ = read_picture(path.read_bytes(), llm)
+    print(f"Gemini ({llm.model}) read {len(values)} values; code confirmed {sum(v.confirmed for v in values)}:")
+    for v in values:
+        print(f"  {'OK ' if v.confirmed else '-- '} {v.space[:30]:30} {v.parameter[:34]:34} {v.value_text:>10}  {v.evidence}")
+    rows = to_rows(values, path.name)
+    colour = {"PASS": "\033[32m", "FAIL": "\033[31m", "NEEDS REVIEW": "\033[33m"}
+    print()
+    for r in check_rows(rows, docs=args.rules.split(",") if args.rules else None):
+        print(f"{colour[r.verdict]}{r.verdict:12}\033[0m {r.row.parameter[:34]:34} {r.row.display:>12}")
+        for line in r.reason.splitlines()[1:3]:
+            print(f"{'':13}{line}")
+
+
 def cmd_design(args) -> None:
     import json
 
@@ -271,6 +295,11 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--force", action="store_true", help="re-extract everything")
     p.add_argument("-v", "--verbose", action="store_true", help="show rejected proposals")
     p.set_defaults(fn=cmd_limits)
+
+    p = sub.add_parser("picture", help="check a picture of a layout (Gemini reads the values, code confirms and checks)")
+    p.add_argument("image")
+    p.add_argument("--rules", default="36CFR1191AppD", help="rule documents, comma-separated")
+    p.set_defaults(fn=cmd_picture)
 
     p = sub.add_parser("design", help="read design values from a design document (GA drawings by OCR, report text)")
     p.add_argument("pdf")

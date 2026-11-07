@@ -65,18 +65,19 @@ def render_png(path: Path, page_no: int, dpi: int = 150) -> tuple[bytes, float, 
 CACHE = Path(__file__).resolve().parents[2] / "data" / "cache" / "gemini"
 
 
-def ask_gemini(llm, png: bytes, max_tokens: int = 32000) -> list[dict]:
+def ask_gemini(llm, png: bytes, max_tokens: int = 32000, prompt: str | None = None, list_key: str = "rooms") -> list[dict]:
     """One request per sheet. Responses are cached by image, model and prompt (the free tier allows 20 requests
     per day per model), and the raw answer is kept next to the parsed one for review."""
     import hashlib
 
-    key = hashlib.sha1(png + llm.model.encode() + PROMPT.encode()).hexdigest()[:20]
+    prompt = prompt or PROMPT
+    key = hashlib.sha1(png + llm.model.encode() + prompt.encode()).hexdigest()[:20]
     cache = CACHE / f"{key}.json"
     if cache.exists():
         raw = json.loads(cache.read_text())["raw"]
     else:
         url = "data:image/png;base64," + base64.b64encode(png).decode()
-        messages = [{"role": "user", "content": [{"type": "text", "text": PROMPT},
+        messages = [{"role": "user", "content": [{"type": "text", "text": prompt},
                                                  {"type": "image_url", "image_url": {"url": url}}]}]
         raw = llm.complete(messages, max_tokens=max_tokens)
         CACHE.mkdir(parents=True, exist_ok=True)
@@ -86,7 +87,7 @@ def ask_gemini(llm, png: bytes, max_tokens: int = 32000) -> list[dict]:
     if not m:
         return []
     try:
-        return list(json.loads(m.group(0)).get("rooms") or [])
+        return list(json.loads(m.group(0)).get(list_key) or [])
     except json.JSONDecodeError:
         return []
 

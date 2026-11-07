@@ -213,6 +213,16 @@ decides a verdict. The verdicts are still computed by code against the clauses.
 | RCRV GA Rev J, sheets 6-12 | 160 readings, 143 confirmed; 8 science staterooms (summary: 8), 7 single + 3 double crew cabins (summary: 7 + 3), hospital on the 01-level plan |
 | Where Gemini is wrong | it counts 1 berth in science cabins the summary calls double (bunks drawn in plan look like one outline) - the label does not confirm it, so it is not used |
 
+**Check a picture (for interior designers).** Drop a screenshot from the design tool, a drawing excerpt, a sketch or
+a photo with dimensions written on it (Compliance tab, *Picture of a layout*, or
+`python -m rulemate picture <image> --rules 36CFR1191AppD`). Gemini reads every written value, what it measures and
+which space it belongs to (`rulemate/design/picture.py`); local OCR of the same picture must find that value at the
+position Gemini gives, or it is not used; the value and unit are parsed as written (`30"`, `2'-6"`, `1500 mm`) and
+checked like any design value, with the spot boxed on the picture next to the verdict. Designers' words are mapped
+to the rules' words before matching (desk = work surface, WC = water closet, passage = walking surface). On the
+synthetic sample sketch (`data/designs/pictures/`): 7 of 7 values read and confirmed, 4 PASS, 3 FAIL (1500 mm turning
+circle = 59.06 in < 60 in, 38 in grab bar, 30 in bath door).
+
 Gemini is also an answer provider (`LLM_PROVIDER=gemini,ollama`); its answers go through the same guardrails.
 Free-tier keys allow about 20 requests per model per day: drawing readings are cached in `data/cache/gemini/`
 (one request per sheet), and a daily-quota error falls back to the next provider instead of waiting.

@@ -281,8 +281,79 @@ def _evidence_png(path: str, page: int, bbox: str) -> bytes | None:
         return None
 
 
+def picture_input() -> list:
+    """Interior designer flow: drop a picture, Gemini reads the written values, code confirms and checks them."""
+    import os
+
+    st.caption("Drop a screenshot from your design tool, a drawing excerpt, a sketch or a photo with dimensions "
+               "written on it. **Gemini** reads each value and what it measures; code confirms the value is written "
+               "at that spot (local OCR) and checks it against the rules. Gemini never decides PASS or FAIL.")
+    c1, c2 = st.columns([3, 1])
+    up = c1.file_uploader("Picture", type=["png", "jpg", "jpeg", "webp"], label_visibility="collapsed")
+    sample = ROOT / "data" / "designs" / "pictures" / "SYNTHETIC_accessible_cabin_sketch.png"
+    if c2.button("Use sample sketch", help="SYNTHETIC accessible cabin sketch with invented values",
+                 disabled=not sample.exists()):
+        ss.picture = ("SYNTHETIC_accessible_cabin_sketch.png", sample.read_bytes())
+    if up is not None:
+        ss.picture = (up.name, up.getvalue())
+    pic = ss.get("picture")
+    if not pic:
+        return []
+    if not os.getenv("GEMINI_API_KEY"):
+        st.warning("Set GEMINI_API_KEY in .env to read pictures.")
+        return []
+    name, data = pic
+    key = f"pic-{hash(data)}"
+    if key not in ss:
+        from rulemate.design.picture import read_picture
+        from rulemate.llm import make_provider
+
+        llm = make_provider("gemini")
+        llm.model = os.getenv("GEMINI_VISION_MODEL", llm.model)
+        llm.timeout = max(llm.timeout, 240)
+        with st.spinner("Gemini is reading the picture; code is confirming each value..."):
+            try:
+                ss[key] = read_picture(data, llm)
+            except Exception as e:
+                st.error(f"Gemini could not read the picture: {str(e)[:200]}")
+                return []
+    values, png = ss[key]
+    ss.picture_png = {name: png}
+    i1, i2 = st.columns([2, 3])
+    i1.image(png, caption=name, width="stretch")
+    i2.markdown(f"**Read by Gemini:** {len(values)} values, **{sum(v.confirmed for v in values)} confirmed** on the "
+                "picture and checked; the rest are not used.")
+    i2.dataframe(pd.DataFrame([{
+        "space": v.space, "measures": v.parameter, "written": v.value_text, "unit": v.unit,
+        "status": "confirmed" if v.confirmed else "not found on the picture - not used",
+        "note": "; ".join(v.notes),
+    } for v in values]), hide_index=True, width="stretch", height=table_height(len(values)))
+    from rulemate.design.picture import to_rows
+
+    return to_rows(values, name)
+
+
+def table_height(n: int, cap: int = 900) -> int:
+    """Tall enough to show every row (35 px per row + header), up to ``cap``."""
+    return min(cap, 38 + 35 * max(1, n))
+
+
 def evidence_image(r) -> None:
     if not (r.source_file and r.source_page and r.source_bbox):
+        return
+    if r.source_file.startswith("upload:"):  # a picture checked in this session
+        png = (ss.get("picture_png") or {}).get(r.source_file[7:])
+        if png:
+            import io
+
+            from PIL import Image, ImageDraw
+
+            x0, y0, x1, y1 = (int(float(v)) for v in r.source_bbox.split(","))
+            im = Image.open(io.BytesIO(png)).convert("RGB")
+            ImageDraw.Draw(im).rectangle((x0 - 6, y0 - 6, x1 + 6, y1 + 6), outline=(214, 39, 40), width=4)
+            m = 160
+            st.image(im.crop((max(0, x0 - m), max(0, y0 - m), min(im.width, x1 + m), min(im.height, y1 + m))),
+                     caption=f"{r.source_file[7:]}: the value this check used", width=420)
         return
     path = ROOT / r.source_file
     if not path.exists():
@@ -387,10 +458,14 @@ with tab_check:
         "Cruise-ship sample – synthetic rules": ("sample_design.csv", ["SAMPLE_SYNTHETIC_rules"]),
     }
     all_docs = rule_documents()
-    src = st.radio("Design values", [*designs, "Upload CSV"], horizontal=True)
+    PICTURE = "Picture of a layout (Gemini)"
+    src = st.radio("Design values", [PICTURE, *designs, "Upload CSV"], horizontal=True,
+                   help="Picture: a screenshot, drawing excerpt, sketch or photo with dimensions written on it.")
     rows: list[DesignRow] = []
     default_docs = all_docs
-    if src == "Upload CSV":
+    if src == PICTURE:
+        rows, default_docs = picture_input(), ["36CFR1191AppD"]
+    elif src == "Upload CSV":
         up = st.file_uploader("CSV with columns: item_id, space, parameter, value, unit, source, notes. "
                               "Values may be written as 3'-6\" or 39 1/2.", type=["csv"])
         if up is not None:
@@ -418,13 +493,20 @@ with tab_check:
                     if gem:
                         st.markdown(f"**Read by Gemini, confirmed in code**: {sum(r['confirmed'] for r in gem)} of "
                                     f"{len(gem)} readings found on the drawing at the reported position")
+                        show = st.segmented_control(
+                            "Show", ["All", "Cabins, hospital, stairs", "Not confirmed"], default="All",
+                            key=f"gem-filter-{src}")
+                        pick_g = [r for r in gem if show in (None, "All")
+                                  or (show == "Not confirmed" and not r["confirmed"])
+                                  or (show == "Cabins, hospital, stairs" and r["kind"] in ("stateroom", "hospital", "stairway"))]
                         st.dataframe(pd.DataFrame([{
-                            "page": r["page"], "label": r["label"], "room no.": r["room_number"] or "",
+                            "page": r["page"], "label": " ".join(r["label"].split()), "room no.": r["room_number"] or "",
                             "kind": r["kind"], "berths": r["berths"],
                             "status": ("confirmed" if r["confirmed"] else "Gemini only - not used")
                                       + (", berths from label" if r["berths_confirmed"] else ""),
-                        } for r in gem if r["kind"] in ("stateroom", "hospital", "stairway") or not r["confirmed"]]),
-                            hide_index=True, width="stretch", height=240)
+                        } for r in pick_g]), hide_index=True, width="stretch", height=table_height(len(pick_g)),
+                            column_config={"label": st.column_config.TextColumn(width="large"),
+                                           "status": st.column_config.TextColumn(width="medium")})
                     st.markdown("**Findings** (not verdicts: for an engineer to confirm)")
                     for x in info["findings"]:
                         st.markdown(f"- {render_text(x)}")
@@ -481,7 +563,10 @@ with tab_check:
         } for r in results])
         styled = table_df.style.map(lambda v: VERDICT_STYLE.get(v, ""), subset=["verdict"])
         ev = st.dataframe(styled, hide_index=True, width="stretch", on_select="rerun",
-                          selection_mode="single-row", key="check-table")
+                          selection_mode="single-row", key="check-table", height=table_height(len(results)),
+                          column_config={"space": st.column_config.TextColumn(width="large"),
+                                         "design source": st.column_config.TextColumn(width="large"),
+                                         "limit(s)": st.column_config.TextColumn(width="medium")})
         st.download_button("Download results (CSV)", results_to_csv(results), file_name="rulemate_compliance.csv",
                            mime="text/csv", icon=":material/download:")
         sel = ev.selection.rows

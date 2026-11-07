@@ -39,6 +39,20 @@ MIN_SIM = 0.70  # below this, no limit is considered to cover the parameter
 MARGIN = 0.02  # limits within this similarity of the best match are evaluated together
 EXPLAIN_CACHE = ROOT / "data" / "cache" / "explanations.json"
 ABBREVIATIONS = {"mvz": "main vertical zone", "lll": "low-location lighting", "fd": "fire door"}
+# what designers write -> the words the rules use; applied before matching a design value to a limit
+DESIGNER_TERMS = {
+    "desk": "work surface", "vanity": "lavatory counter", "wc": "water closet", "toilet": "water closet",
+    "bunk": "berth", "bed": "berth", "cabin": "stateroom", "passage": "walking surface", "aisle": "walking surface",
+    "turning circle": "turning space", "door width": "door clear width", "bath": "toilet room",
+    "counter": "work surface", "table": "dining surface",
+}
+
+
+def designer_to_rule_terms(text: str) -> str:
+    """'desk height' -> 'desk (work surface) height': keeps the designer's word, adds the rule's."""
+    for k, v in DESIGNER_TERMS.items():
+        text = re.sub(rf"\b{re.escape(k)}\b(?! \()", lambda m, v=v: f"{m.group(0)} ({v})", text, flags=re.I)
+    return text
 _GENERIC = {"space", "area", "room", "item", "general", "other"}
 
 
@@ -60,6 +74,8 @@ class DesignRow(BaseModel):
         """Value as the designer wrote it, plus the parsed value when they differ: 3'-6" (= 42 in)."""
         raw = self.raw_value or (f"{self.value:g}" if self.value is not None else "")
         if self.value is not None and parse_number(raw) is None:
+            if re.fullmatch(r"[\d.,\s/]+\s*(mm|cm|m|in|ft|inch(es)?|feet|\"|\u2033)", raw, re.I):
+                return raw  # "1500 mm", "30\"": already says it
             return f"{raw} (= {self.value:g} {self.unit})"
         return f"{raw} {self.unit}".strip()
 
@@ -147,6 +163,7 @@ class Matcher:
 
     def similarities(self, row: DesignRow) -> np.ndarray:
         query = f"{row.parameter} ({row.space})" if row.space else row.parameter
+        query = designer_to_rule_terms(query)
         if self.emb is not None:
             return self.emb @ self._encode([query])[0]
         # lexical fallback: share of the row's parameter words found in the limit text
