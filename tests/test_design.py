@@ -188,3 +188,13 @@ def test_man_count_cabin_labels_state_berths():
     [r] = verify([{"label": "2M", "room_number": None, "kind": "stateroom", "berths": 2,
                    "box_2d": _box(596, 398, 640, 420)}], words, PAGE_W, PAGE_H)
     assert r.confirmed and r.berths_confirmed and r.berths == 2
+
+
+def test_broken_gemini_json_keeps_the_good_items():
+    from rulemate.design.vision import parse_items
+
+    raw = '```json\n{"rooms": [\n  {"label": "KAPTEIN", "kind": "stateroom", "berths": 1, "box_2d": [1, 2, 3, 4]},\n' \
+          '  {"label": "CENTRAL", "box_2d": [5, 6, 7, 8]}, "kind": "other", "box_2d": [9, 9, 9, 9]},\n' \
+          '  {"label": "HOSPITAL", "kind": "hospital", "box_2d": [10, 11, 12, 13]}\n]}```'
+    labels = [x["label"] for x in parse_items(raw, "rooms")]
+    assert labels == ["KAPTEIN", "CENTRAL", "HOSPITAL"]

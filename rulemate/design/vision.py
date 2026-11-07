@@ -89,15 +89,29 @@ def ask_gemini(llm, png: bytes, max_tokens: int = 32000, prompt: str | None = No
         CACHE.mkdir(parents=True, exist_ok=True)
         (CACHE / f"{hashlib.sha1(png + used.encode() + prompt.encode()).hexdigest()[:20]}.json").write_text(
             json.dumps({"model": used, "raw": raw}))
+    return parse_items(raw, list_key)
+
+
+def parse_items(raw: str, list_key: str) -> list[dict]:
+    """Gemini's JSON list, tolerant: if the whole answer is not valid JSON (a missing brace, a repeated field),
+    every item that parses on its own is kept and the broken ones are dropped. Each kept item is still confirmed
+    on the drawing by code before it is used."""
     raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw.strip())
     m = re.search(r"\{.*\}", raw, re.S)
-    if not m:
-        return []
-    try:
-        return list(json.loads(m.group(0)).get(list_key) or [])
-    except json.JSONDecodeError:
-        return []
-
+    if m:
+        try:
+            return list(json.loads(m.group(0), strict=False).get(list_key) or [])
+        except (json.JSONDecodeError, AttributeError):
+            pass
+    items = []
+    for frag in re.findall(r"\{[^{}]*\}", raw):  # one flat object per room / value ([...] boxes have no braces)
+        try:
+            d = json.loads(frag, strict=False)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(d, dict) and d.get("box_2d") and (d.get("label") or d.get("value_text")):
+            items.append(d)
+    return items
 
 def _norm(s: str) -> str:
     return re.sub(r"[^A-Z0-9]", "", (s or "").upper())
