@@ -213,3 +213,25 @@ def test_unrelated_limits_do_not_match():
     assert not _plausible(row("frame spacing", 2, "in"), grab)  # no specific word in common
     assert _plausible(row("berth width", 30, "in"), berth)
     assert _plausible(row("grab bar spacing", 2, "in"), grab)
+
+
+
+def test_no_rule_is_not_needs_review():
+    from rulemate.compliance.check import RowResult
+
+    r = RowResult(row=DesignRow(item_id="x", parameter="frame spacing", value=600, unit="mm"), verdict="NEEDS REVIEW",
+                  reason="No limit in the rules matches 'frame spacing' (none measures this kind of value).")
+    assert r.no_rule and r.shown_verdict == "NO RULE"
+    c = RowResult(row=DesignRow(item_id="y", parameter="p", value=1, unit="mm"), verdict="NEEDS REVIEW",
+                  reason="Only conditional limits apply; confirm the condition.")
+    assert not c.no_rule and c.shown_verdict == "NEEDS REVIEW"
+
+
+def test_large_sheets_are_read_in_tiles():
+    from rulemate.design.vision import tile_grid
+
+    assert len(tile_grid(1224, 792)) == 1  # A3/B sheet: one request
+    a0 = tile_grid(2384, 3370, max_tiles=4)
+    assert len(a0) == 4 and all(x1 > x0 and y1 > y0 for x0, y0, x1, y1 in a0)
+    xs = sorted({round(t[0]) for t in a0})
+    assert xs[0] == 0 and a0[0][2] > a0[1][0]  # neighbouring tiles overlap

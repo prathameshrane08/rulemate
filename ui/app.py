@@ -241,6 +241,7 @@ VERDICT_STYLE = {
     "PASS": "background-color: #d1fadf; color: #05603a; font-weight: 600",
     "FAIL": "background-color: #fee4e2; color: #b42318; font-weight: 600",
     "NEEDS REVIEW": "background-color: #fef0c7; color: #b54708; font-weight: 600",
+    "NO RULE": "background-color: #eaecf0; color: #475467; font-weight: 600",
 }
 VERDICT_BADGE = {"PASS": ("PASS", ":material/check_circle:", "green"),
                  "FAIL": ("FAIL", ":material/cancel:", "red"),
@@ -546,12 +547,13 @@ with tab_check:
 
     results = ss.check_results
     if results:
-        counts = {v: sum(r.verdict == v for r in results) for v in ("PASS", "FAIL", "NEEDS REVIEW")}
-        m1, m2, m3, m4 = st.columns(4)
+        counts = {v: sum(r.shown_verdict == v for r in results) for v in ("PASS", "FAIL", "NEEDS REVIEW", "NO RULE")}
+        m1, m2, m3, m4, m5 = st.columns(5)
         m1.metric("Items", len(results))
         m2.metric("PASS", counts["PASS"])
         m3.metric("FAIL", counts["FAIL"])
-        m4.metric("NEEDS REVIEW", counts["NEEDS REVIEW"])
+        m4.metric("NEEDS REVIEW", counts["NEEDS REVIEW"], help="A rule applies, but a condition must be confirmed")
+        m5.metric("NO RULE", counts["NO RULE"], help="None of the loaded rule texts limits this value")
         if any(r.synthetic for r in results):
             st.caption(":orange[Limits come from SYNTHETIC sample rules.]")
         def deciding(r):
@@ -575,7 +577,7 @@ with tab_check:
         rows_t = []
         for r in results:
             lim, cl = short(r)
-            row_t = {"Item": r.row.item_id, "Verdict": r.verdict,
+            row_t = {"Item": r.row.item_id, "Verdict": r.shown_verdict,
                      "Checked": f"{r.row.parameter} — {r.row.space}" if r.row.space else r.row.parameter,
                      "Value": r.row.display, "Deciding limit": f"{lim} [{cl}]" if cl else "no matching limit"}
             if full_text:

@@ -106,6 +106,15 @@ class RowResult(BaseModel):
     synthetic: bool = False
 
     @property
+    def no_rule(self) -> bool:
+        """No loaded rule sets a limit for this value: not 'unclear', just not covered by these rule texts."""
+        return self.verdict == "NEEDS REVIEW" and self.reason.startswith("No limit in the rules")
+
+    @property
+    def shown_verdict(self) -> str:
+        return "NO RULE" if self.no_rule else self.verdict
+
+    @property
     def applied(self) -> list[LimitResult]:
         return [l for l in self.limits if l.role in ("applied", "conditional")]
 
