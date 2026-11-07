@@ -5,6 +5,7 @@ Each numbering style gets a small parser:
 * ``SolasParser``   - "Chapter II-2" / "Regulation 13" / "3.1.1 ..."  -> "II-2/13.3.1"
 * ``ClassParser``   - "Pt.3 Ch.2" / "Section 4" / "[2.1.3] ..."      -> "Pt.3 Ch.2 Sec.4 [2.1.3]"
 * ``CfrParser``     - US CFR "Subpart 190.10" / "§ 190.10-25" / "(b)" -> "190.10-25(b)"
+* ``AdaParser``     - ADA / ABA standards "403 Walking Surfaces" / "403.5.1 Clear Width. ..." -> "403.5.1"
 * ``DecimalParser`` - plain "4.2.1 ..." numbering                     -> "4.2.1"
 * ``FallbackParser``- headings only (or nothing): sections "S1", "S2", ...
 
@@ -505,15 +506,78 @@ class CfrParser:
         return refs
 
 
+class AdaParser:
+    """ADA / ABA accessibility standards (36 CFR 1191 App. D): three-digit sections per chapter.
+
+    "403 Walking Surfaces"            -> heading 403
+    "403.5.1 Clear Width. The ..."    -> clause 403.5.1 (parent 403.5, then 403)
+    "Exception: ..." and numbered exception items stay inside the clause above them.
+    """
+
+    name = "ada"
+    LINE = re.compile(r"^(?P<num>[1-9]\d{2,3}(?:\.\d+){0,5})\s+(?P<rest>[A-Z].*)$")
+    REF = re.compile(rf"\b(?:comply with|complying with|in|of|and|or|see)\s+([1-9]\d{{2,3}}(?:\.\d+)*){NOT_A_VALUE}")
+
+    def parse(self, blocks: list[Block]) -> list[Draft]:
+        drafts: list[Draft] = []
+        cur: Draft | None = None
+        tables = 0
+        for b in blocks:
+            if b.kind == "table":
+                tables += 1
+                owner = cur.clause_id if cur else "doc"
+                if cur is not None and cur.kind == "table" and not any(l.startswith("|") for l in cur.lines):
+                    cur.add(b.text)
+                    continue
+                t = Draft(f"{owner} table {tables}", cur.title if cur else "", b.page, "table", owner, {})
+                t.add(b.text)
+                drafts.append(t)
+                continue
+            line = b.text.strip()
+            cap = CAPTION.match(line)
+            if cap:
+                cur = Draft(f"Table {cap.group('n')}", cap.group("title").strip(), b.page, "table",
+                            cur.clause_id if cur else None, {})
+                cur.add(line)
+                drafts.append(cur)
+                continue
+            m = self.LINE.match(line)
+            if m:
+                num, rest = m.group("num"), m.group("rest")
+                parent = num.rsplit(".", 1)[0] if "." in num else None
+                title_m = re.match(r"^([^.]{2,80})\.\s*(.*)$", rest)
+                if "." not in num and not title_m:  # "403 Walking Surfaces"
+                    cur = Draft(num, rest.strip(), b.page, "heading", None, {})
+                else:
+                    title = title_m.group(1) if title_m else ""
+                    cur = Draft(num, title.strip(), b.page, "clause", parent, {})
+                    cur.add(line)
+                drafts.append(cur)
+                continue
+            if cur is None:
+                cur = Draft("preamble", "", b.page, "section", None, {})
+                drafts.append(cur)
+            if b.heading_level is not None and not cur.lines and cur.kind == "heading":
+                continue
+            cur.add(line)
+        return drafts
+
+    def find_refs(self, text: str, ctx: dict) -> list[str]:
+        return [m.group(1) for m in self.REF.finditer(text)] + [
+            f"Table {m.group(1)}" for m in re.finditer(r"\bTable\s+(\d{3}(?:\.\d+)*)", text)]
+
+
 # ---------------------------------------------------------------- style detection
 
-PARSERS = {p.name: p for p in (SolasParser, ClassParser, NumberedParser, CfrParser, FallbackParser)}
+PARSERS = {p.name: p for p in (SolasParser, ClassParser, NumberedParser, CfrParser, AdaParser, FallbackParser)}
 
 
 def detect_style(blocks: list[Block]) -> str:
     lines = [b.text.strip() for b in blocks if b.kind == "text"]
     if sum(1 for l in lines if CfrParser.SECTION.match(l)) >= 3:
         return "cfr"
+    if sum(1 for l in lines if re.match(r"^[1-9]\d{2}\.\d+(?:\.\d+)*\s+[A-Z][^.]{2,60}\.", l)) >= 20:
+        return "ada"
     regs = sum(1 for l in lines if (m := SolasParser.REG.match(l)) and _heading_ok(m.group("t")))
     secs = sum(1 for l in lines if (m := ClassParser.SECTION.match(l)) and _heading_ok(m.group("t")))
     ptch = any(PTCH.search(l) for l in lines[:300])

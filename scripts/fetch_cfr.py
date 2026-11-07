@@ -97,6 +97,46 @@ def convert(xml: str, title: int, part: int, date: str, keep_old: bool) -> tuple
     return "\n".join(lines).rstrip() + "\n", kept, skipped
 
 
+def convert_appendix(xml: str, title: int, part: int, appendix: str, date: str,
+                     skip_chapters: set[str] = frozenset()) -> tuple[str, int]:
+    """One appendix (e.g. the ADA/ABA technical requirements, 36 CFR 1191 Appendix D) as Markdown: headings stay
+    headings, every paragraph one line, so the numbered-clause parser splits it ("403.5.1 Clear Width. ...")."""
+    m = re.search(rf'<DIV9 N="Appendix {appendix} to Part {part}"[^>]*>(.*?)</DIV9>', xml, re.S)
+    if not m:
+        sys.exit(f"Appendix {appendix} not found in part {part}")
+    body = m.group(1)
+    head = text_of(re.search(r"<HEAD>(.*?)</HEAD>", body, re.S).group(1))
+    lines = [f"<!-- SOURCE: {title} CFR Part {part}, {head}, eCFR (https://www.ecfr.gov), current as of {date}. "
+             "US federal regulation, public domain. Text verbatim; layout converted by scripts/fetch_cfr.py. -->",
+             f"# {re.sub(r'^Appendix', 'Appendix', head)} ({title} CFR Part {part})", ""]
+    n = 0
+    chapter, skipping = "", False
+    for el in re.finditer(r"<(HD\d?|P|FP|GPOTABLE)\b[^>]*>(.*?)</\1>", body, re.S):
+        tag, inner = el.group(1), el.group(2)
+        if tag == "GPOTABLE":
+            t = table_md(inner)
+        else:
+            t = text_of(inner)
+        if not t:
+            continue
+        ch_head = re.match(r"^Chapter (\d+):", t, re.I) if tag.startswith("HD") else None
+        if ch_head:
+            chapter = ch_head.group(1)
+            skipping = chapter in skip_chapters
+            if skipping:
+                lines += [f"<!-- chapter {chapter} ({t}) left out of this rule set: --skip-chapters -->", ""]
+        if skipping:
+            continue
+        if tag.startswith("HD"):
+            ch = re.match(r"^Chapter (\d+):\s*(.*)$", t, re.I)
+            # "Chapter 4: Accessible Routes" would read as numbering context; keep the chapter as a plain title
+            lines += [f"## {ch.group(2).title()} (chapter {ch.group(1)})" if ch else f"## {t}", ""]
+        else:
+            lines += [t, ""]
+            n += 1
+    return "\n".join(lines).rstrip() + "\n", n
+
+
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--title", type=int, default=46)
@@ -104,6 +144,10 @@ def main(argv=None) -> None:
     ap.add_argument("--date", help="issue date YYYY-MM-DD (default: latest)")
     ap.add_argument("--out", help="output file (default: data/rules/<title>CFR<part>.md)")
     ap.add_argument("--keep-old", action="store_true", help="keep -90 sections for pre-1968 vessels")
+    ap.add_argument("--skip-chapters", default="", help="appendix chapters to leave out, comma-separated, "
+                                                         "e.g. 10 (ADA recreation facilities)")
+    ap.add_argument("--appendix", help="fetch one appendix instead of the sections, e.g. D (36 CFR 1191 App. D = "
+                                       "ADA/ABA technical requirements)")
     args = ap.parse_args(argv)
 
     date = args.date
@@ -113,8 +157,15 @@ def main(argv=None) -> None:
     xml = get(f"{API}/full/{date}/title-{args.title}.xml?part={args.part}").decode("utf-8")
     if "<DIV5" not in xml:
         sys.exit(f"eCFR returned no part text: {xml[:300]}")
-    md, kept, skipped = convert(xml, args.title, args.part, date, args.keep_old)
-    out = Path(args.out) if args.out else ROOT / "data" / "rules" / f"{args.title}CFR{args.part}.md"
+    if args.appendix:
+        md, kept = convert_appendix(xml, args.title, args.part, args.appendix, date,
+                                    {c.strip() for c in args.skip_chapters.split(",") if c.strip()})
+        skipped = 0
+        name = f"{args.title}CFR{args.part}App{args.appendix}.md"
+    else:
+        md, kept, skipped = convert(xml, args.title, args.part, date, args.keep_old)
+        name = f"{args.title}CFR{args.part}.md"
+    out = Path(args.out) if args.out else ROOT / "data" / "rules" / name
     out.write_text(md, encoding="utf-8")
     print(f"wrote {out.relative_to(ROOT) if out.is_relative_to(ROOT) else out}: {kept} sections"
           f"{f', {skipped} pre-1968 sections omitted' if skipped else ''} (eCFR {date})")

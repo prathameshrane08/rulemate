@@ -183,6 +183,8 @@ def answer_metrics(questions: list[dict], retriever, llm) -> tuple[dict, list[di
 # (label, design CSV, expected verdicts, rule documents that apply to that vessel)
 DESIGN_SETS = [
     ("research vessel, 46 CFR 190", "rcrv_example_design.csv", "rcrv_expected.json", ["46CFR190"]),
+    ("accessible stateroom, ADA 36 CFR 1191", "accessible_stateroom_example.csv", "accessible_expected.json",
+     ["36CFR1191AppD"]),
     ("cruise-ship sample, synthetic rules", "sample_design.csv", "compliance_expected.json", ["SAMPLE_SYNTHETIC_rules"]),
 ]
 

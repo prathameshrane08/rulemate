@@ -99,10 +99,10 @@ _CMP_WORDS = {
 
 
 _MIN_PHRASE = re.compile(
-    r"(not less than|not be less than|at least|no less than|minimum(?: \w+)?(?: of)?|min\.)\s*$", re.I)
+    r"(not less than|not be less than|at least|no less than|minimum(?: (?!and\b|or\b)\w+)?(?: of)?|min\.)\s*$", re.I)
 _MAX_PHRASE = re.compile(
     r"(not more than|not be more than|not exceeding|shall not exceed|not exceed|no more than|up to|"
-    r"maximum(?: \w+)?(?: of)?|max\.|increased to)\s*$", re.I)
+    r"maximum(?: (?!and\b|or\b)\w+)?(?: of)?|max\.|increased to)\s*$", re.I)
 _PROHIBITED_ABOVE = re.compile(r"\bmore than\s*$", re.I)  # "more than 40 feet ... shall not be permitted"
 _PROHIBITED = re.compile(
     r"\b(?:shall|must|may) not be permitted|\bnot permitted\b|\bprohibited\b|\bno one of which\b", re.I)
@@ -112,6 +112,8 @@ UNIT_RX = (
     r"millimet(?:er|re)s?|met(?:er|re)s?|inches|inch|feet|foot|ft|mm|cm|m2|m²|m3|m³|m|degrees|°|min|s|kN|N|%)"
 )
 _NUM_TOKEN = r"\d+(?:\s\d/\d+|\.\d+)?"
+_POST_CMP = re.compile(rf"^\s?{UNIT_RX}?(?![A-Za-z])(?:\s*\([^)]*\))?(?:\s+(?:diameter|wide|high|long|deep))?"
+                       rf"\s+(minimum|maximum|min\.|max\.)", re.I)
 _BAD_QUALIFIERS = {"any", "all", "none", "table", "min", "max", "degrees", "division class", "both sides", "n/a"}
 
 
@@ -135,12 +137,16 @@ def comparator_from_text(text: str, value: float) -> str | None:
     found = set()
     for m in _value_spans(text, value):
         before = text[max(0, m.start() - 30) : m.start()]
-        if _MIN_PHRASE.search(before):
+        post = _POST_CMP.match(text[m.end() : m.end() + 60])
+        if post:  # "36 inches (915 mm) maximum": the word after the value binds tighter than one before it
+            found.add(">=" if post.group(1).lower().startswith("min") else "<=")
+        elif _MIN_PHRASE.search(before):
             found.add(">=")
         elif _MAX_PHRASE.search(before):
             found.add("<=")
         elif _PROHIBITED_ABOVE.search(before) and _PROHIBITED.search(_sentence_at(text, m.start())):
             found.add("<=")
+
     return found.pop() if len(found) == 1 else None
 
 
@@ -261,18 +267,34 @@ _RX = re.compile(
 _COND = re.compile(r"\b(provided that|where|if|unless|subject to)\b(.*)$", re.I)
 
 
+_RX_POST = re.compile(
+    rf"(?P<val>{_NUM_TOKEN})\s?(?P<unit>{UNIT_RX})(?![A-Za-z])(?:\s*\([^)]*\))?(?:\s+(?:diameter|wide|high|long|deep))?"
+    rf"\s+(?P<cmp>minimum|maximum|min\.|max\.)",
+    re.I,
+)
+
+
 def extract_regex(c: Clause) -> list[dict]:
     out = []
     for sent in re.split(r"(?<=[.;])\s+", c.text):
         cond = _COND.search(sent)
         last_end, subject = 0, ""
-        for m in _RX.finditer(sent):
+        found = sorted([*_RX.finditer(sent), *_RX_POST.finditer(sent)], key=lambda m: m.start("val"))
+        seen_vals: set[int] = set()
+        for m in found:
+            if m.start("val") in seen_vals:
+                continue
+            seen_vals.add(m.start("val"))
             words = m.group("cmp").lower()
+            if m.re is _RX_POST:
+                words = "minimum" if words.startswith("min") else "maximum"
             if words == "more than" and not _PROHIBITED.search(sent):
                 continue  # "more than 300 square feet" without a prohibition is a threshold, not a limit
             cmp = ">=" if (words in ("not less than", "at least", "no less than", "not be less than")
                            or words.startswith("minimum") or "reduced" in words) else "<="
             seg = re.sub(r"^\s*(and|or|,)\s+", "", sent[last_end : m.start()], flags=re.I)
+            if m.re is _RX_POST:  # "the clear width of walking surfaces shall be 36 inches minimum"
+                seg = re.sub(r"\s*\b(shall be|must be|is)\s*$", "", seg, flags=re.I)
             seg = re.sub(r"\b(shall|must|may)\b.*$", "", seg, flags=re.I).strip(" ,")
             subject = seg if len(re.findall(r"[A-Za-z]{3,}", seg)) >= 2 else (subject or c.title)
             last_end = m.end()
