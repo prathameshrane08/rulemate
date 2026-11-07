@@ -41,3 +41,33 @@ def test_a_subject_the_rules_never_mention_stays_not_found():
               "Can the travel distance be longer if the escape route goes through a lobby?",
               "What clear width must an accessible door have?"]:
         assert unknown_terms(q, r) == [], q
+
+
+def test_numbers_left_out_by_the_model_are_quoted_from_the_cited_clause():
+    from rulemate.answer import with_key_values
+
+    r = get_retriever()
+    c = r.by_uid["36CFR1191AppD::404.2.3"]
+    text, uids = with_key_values("Door openings shall provide a clear width of 32 inches (815 mm) minimum "
+                                 "[36CFR1191AppD § 404.2.3].", [c], [])
+    assert "quoted word for word" in text and "36 inches (915 mm) minimum" in text and uids
+    assert not text.rstrip().endswith("2.")
+    full, none = with_key_values(text, [c], [])  # nothing missing any more -> unchanged
+    assert none == [] or full.count("quoted word for word") == 1
+
+
+def test_table_units_and_unusual_hyphens_do_not_reject_a_correct_answer():
+    from rulemate.guardrails import check_answer
+    from rulemate.models import Clause
+
+    t = Clause(uid="S::II-2 Table 13.1", doc="S", clause_id="II-2 Table 13.1", title="Minimum clear widths",
+               text="| Escape route element | Minimum clear width (mm) |\n| Crew corridor | 900 |\n| Passenger corridor | 1200 |",
+               kind="table", path=[], refs=[])
+    ok = check_answer("Crew corridors need a minimum clear width of 900 mm [S § II-2 Table 13.1].", [t])
+    assert ok.ok, ok.violations
+    bad = check_answer("Crew corridors need a minimum clear width of 900 m [S § II-2 Table 13.1].", [t])
+    assert not bad.ok  # a wrong unit is still caught
+    c = Clause(uid="S::II-2/9.3.4", doc="S", clause_id="II-2/9.3.4", title="Fire doors",
+               text="After release, the closing requirements of 3.3 apply.", kind="clause", path=[], refs=[])
+    r = check_answer("After release, the closing requirements of 3.3 (= II‑2/9.3.3) apply [S § II‑2/9.3.4].", [c])
+    assert not any("number 2" in str(v) for v in r.violations)

@@ -23,6 +23,7 @@ Results: printed as Markdown and written to eval/results/<timestamp>.json and ev
 from __future__ import annotations
 
 import argparse
+import re
 import json
 import statistics
 import sys
@@ -131,6 +132,9 @@ def citation_pairs(answer) -> list[bool]:
     return pairs
 
 
+_NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"]
+
+
 def answer_metrics(questions: list[dict], retriever, llm) -> tuple[dict, list[dict]]:
     rows = []
     for i, q in enumerate(questions, 1):
@@ -138,7 +142,9 @@ def answer_metrics(questions: list[dict], retriever, llm) -> tuple[dict, list[di
         pairs = citation_pairs(a) if a.status == "verified" else []
         facts_ok = None
         if a.status == "verified" and q.get("facts"):
-            nums = {v for v, _ in extract_numbers(CITATION_RE.sub("", a.text))}
+            plain = CITATION_RE.sub("", a.text)
+            nums = {v for v, _ in extract_numbers(plain)} | {
+                float(n) for n, w in enumerate(_NUMBER_WORDS) if re.search(rf"\b{w}\b", plain, re.I)}  # "four" = 4
             facts_ok = all(float(f) in nums for f in q["facts"])
         cited = [c.clause_id for c in a.citations]
         rows.append({

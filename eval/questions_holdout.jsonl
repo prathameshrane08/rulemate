@@ -1,0 +1,20 @@
+{"id": "h01", "type": "answerable", "question": "At what height should grab bars be installed?", "expected": ["609.4"], "facts": ["33", "36"]}
+{"id": "h02", "type": "answerable", "question": "What is the highest forward reach allowed when nothing is in the way?", "expected": ["308.2.1"], "facts": ["48"]}
+{"id": "h03", "type": "answerable", "question": "How high must a toilet seat be in an accessible bathroom?", "expected": ["604.4"], "facts": ["17", "19"]}
+{"id": "h04", "type": "answerable", "question": "How steep may an accessible ramp be?", "expected": ["405.2"], "facts": ["12"]}
+{"id": "h05", "type": "answerable", "question": "What height range applies to work surfaces and dining tables?", "expected": ["902.3"], "facts": ["28", "34"]}
+{"id": "h06", "type": "answerable", "question": "How big must the clear floor space for a wheelchair be?", "expected": ["305.3"], "facts": ["30", "48"]}
+{"id": "h07", "type": "answerable", "question": "How many hours may a seafarer work in a 24-hour period at most?", "expected": ["A2.3/5(a)"], "facts": ["14"]}
+{"id": "h08", "type": "answerable", "question": "What is the minimum rest a seafarer must get in seven days?", "expected": ["A2.3/5(b)"], "facts": ["77"]}
+{"id": "h09", "type": "answerable", "question": "What is the minimum age to work on board a ship?", "expected": ["A1.1/1"], "facts": ["16"]}
+{"id": "h10", "type": "answerable", "question": "Does every seafarer need their own sleeping room on a cargo ship?", "expected": ["A3.1/9(a)"], "facts": []}
+{"id": "h11", "type": "answerable", "question": "Who handles medical care on a ship without a doctor?", "expected": ["A4.1/4(c)"], "facts": []}
+{"id": "h12", "type": "answerable", "question": "What is the minimum width of interior stairways on a research vessel?", "expected": ["190.10-25(b)"], "facts": ["28"]}
+{"id": "h13", "type": "answerable", "question": "How much deck area per person does a crew sleeping room on a research vessel need?", "expected": ["190.20-20(c)"], "facts": ["2.78"]}
+{"id": "h14", "type": "answerable", "question": "When may the guard rail requirements be relaxed on a research vessel?", "expected": ["190.25-5(b)"], "facts": []}
+{"id": "h15", "type": "unanswerable", "question": "What metacentric height must a passenger ship have for intact stability?", "expected": [], "facts": []}
+{"id": "h16", "type": "unanswerable", "question": "How many portable fire extinguishers are required in a galley?", "expected": [], "facts": []}
+{"id": "h17", "type": "unanswerable", "question": "Which antifouling paints are banned on ship hulls?", "expected": [], "facts": []}
+{"id": "h18", "type": "unanswerable", "question": "What radar equipment must the bridge have?", "expected": [], "facts": []}
+{"id": "h19", "type": "unanswerable", "question": "What is the required sprinkler density in a cruise ship theatre?", "expected": [], "facts": []}
+{"id": "h20", "type": "unanswerable", "question": "How thick must the glass of a cabin window be?", "expected": [], "facts": []}

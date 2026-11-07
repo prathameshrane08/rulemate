@@ -1,19 +1,19 @@
 ## RuleMate evaluation
 
-45 questions (38 answerable incl. 8 clause-ID, 7 unanswerable) · LLM: groq:openai/gpt-oss-120b · retrieval: hybrid · 2026-11-07 20:06
+45 questions (38 answerable incl. 8 clause-ID, 7 unanswerable) · LLM: groq:openai/gpt-oss-20b · retrieval: hybrid · 2026-11-07 20:28
 
 | Metric | Result |
 |---|---|
 | Retrieval hit@5 | **100%** (MRR 0.94) |
 | Correct "not found" on unanswerable questions | **71%** (7 questions) |
 | Answerable questions wrongly refused | 0% |
-| Answers verified (all guardrails passed) | **82%** |
-| Answers shown as excerpts only | 18% |
-| Verified answers containing the key numbers | 90% (30 checked) |
-| Citation precision (overlap check) | **100%** (46 citations) |
-| LLM drafts rejected by guardrails | 29% of 55 drafts (22% of questions) |
+| Answers verified (all guardrails passed) | **89%** |
+| Answers shown as excerpts only | 11% |
+| Verified answers containing the key numbers | 97% (31 checked) |
+| Citation precision (overlap check) | **100%** (67 citations) |
+| LLM drafts rejected by guardrails | 23% of 53 drafts (18% of questions) |
 | Drafts that failed a guardrail shown to the user | **0** (by construction) |
-| Answer latency p50 / p95 | 5.3 s / 11.4 s |
+| Answer latency p50 / p95 | 5.3 s / 13.0 s |
 | Retrieval latency p50 | 13 ms |
 | Compliance verdicts correct (research vessel, 46 CFR 190) | **100%** (14 items: 7 PASS, 6 FAIL, 1 REVIEW) |
 | Planted defects caught (research vessel, 46 CFR 190) | **100%** of 7 (7 FAIL, 0 REVIEW) |

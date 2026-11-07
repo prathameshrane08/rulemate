@@ -29,12 +29,12 @@
 {"id": "u04", "type": "unanswerable", "question": "What bottom shell plating thickness is required?", "expected": [], "facts": []}
 {"id": "u05", "type": "unanswerable", "question": "What capacity must the bilge pumps have?", "expected": [], "facts": []}
 {"id": "r01", "type": "answerable", "question": "What is the minimum width of an interior stairway on an oceanographic research vessel?", "expected": ["190.10-25(b)"], "facts": ["28"]}
-{"id": "r02", "type": "answerable", "question": "How high must guard rails be on a research vessel?", "expected": ["190.25-5(a)"], "facts": ["39"]}
+{"id": "r02", "type": "answerable", "question": "How high must guard rails be on a research vessel?", "expected": ["190.25-5(a)"], "facts": ["39.5"]}
 {"id": "r03", "type": "answerable", "question": "What clear head room is required in crew sleeping rooms?", "expected": ["190.20-20(c)"], "facts": ["190"]}
 {"id": "r04", "type": "answerable", "question": "How many crew members may be berthed in one sleeping room?", "expected": ["190.20-20(b)"], "facts": ["4"]}
 {"id": "r05", "type": "answerable", "question": "When does a public space on a research vessel need two exits?", "expected": ["190.10-35(a)"], "facts": ["300"]}
 {"id": "r06", "type": "clause_id", "question": "What does 46 CFR 190.10-30 say?", "expected": ["190.10-30(a)", "190.10-30"], "facts": ["40"]}
-{"id": "r07", "type": "clause_id", "question": "Show me § 190.25-5(a)", "expected": ["190.25-5(a)"], "facts": ["39"]}
+{"id": "r07", "type": "clause_id", "question": "Show me § 190.25-5(a)", "expected": ["190.25-5(a)"], "facts": ["39.5"]}
 {"id": "r08", "type": "unanswerable", "question": "What fuel tank capacity is required on an oceanographic research vessel?", "expected": [], "facts": []}
 {"id": "m01", "type": "answerable", "question": "What is the minimum headroom in seafarer accommodation?", "expected": ["A3.1/6(a)"], "facts": ["203"]}
 {"id": "m02", "type": "answerable", "question": "What are the minimum inside dimensions of a seafarer's berth?", "expected": ["A3.1/9(e)"], "facts": ["198", "80"]}
