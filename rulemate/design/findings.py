@@ -67,7 +67,8 @@ def gemini_findings(ex) -> list[str]:
     rooms = {}
     for r in conf:
         if r["kind"] == "stateroom":
-            key = (r["label"].upper(), r["room_number"] or f"p{r['bbox']}")
+            # the same cabin appears on a plan and on the profile ("SCIENCE 01-15-0" / "SCI 01-15-0"): one room
+            key = r["room_number"] or f"{r['label'].upper()} {r['bbox']}"
             rooms[key] = r
     crew = [r for r in rooms.values() if "CREW" in r["label"].upper()]
     sci = [r for r in rooms.values() if re.search(r"SCI|TECH", r["label"].upper())]
@@ -79,6 +80,33 @@ def gemini_findings(ex) -> list[str]:
         stated = facts["science double staterooms"]
         out.append(f"Science staterooms: {len(sci)} on the drawings vs {stated.value:g} in the text "
                    f"(p.{stated.source_page}){'' if len(sci) == stated.value else ' - check'}.")
+    crew_rooms = [r for r in rooms.values() if r not in sci and r["kind"] == "stateroom"]
+    crew_double = [r for r in crew_rooms if "DOUBLE" in r["label"].upper()]
+    # a cabin named for a role (CAPTAIN, CHIEF ENG) exists once; the same name with two room numbers is one cabin
+    crew_single = list({" ".join(r["label"].upper().split()): r for r in crew_rooms if r not in crew_double}.values())
+    if "crew single berths" in facts and "crew double berths" in facts and crew_rooms:
+        fs, fd = facts["crew single berths"].value, facts["crew double berths"].value
+        ok = len(crew_single) == fs and len(crew_double) == fd
+        out.append(f"Crew cabins: {len(crew_single)} single (named for a role: "
+                   f"{', '.join(sorted({r['label'].title() for r in crew_single}))}) and {len(crew_double)} CREW DOUBLE on "
+                   f"the drawings vs {fs:g} single and {fd:g} double in the text (p.{facts['crew single berths'].source_page})"
+                   f"{'' if ok else ' - check'}.")
+    if "science double staterooms" in facts:
+        low = [r for r in sci if r["berths"] == 1]
+        if low:
+            out.append(f"Gemini counted 1 drawn berth in {len(low)} science stateroom(s) that the text calls double: "
+                       "upper and lower berths drawn in plan look like one outline. Berth counts not confirmed by the "
+                       "label are not used for checks.")
+    unlabelled = [r for r in conf if r["kind"] == "stateroom" and r["berths"] and not r["berths_confirmed"]
+                  and not re.search(r"\(\d+\)", r["label"])]
+    if unlabelled and any(d.get("roles_without_count") for d in ex.drawings):
+        add = sum(r["berths"] for r in unlabelled if any(w in r["label"].upper() for d in ex.drawings
+                                                         for w in d.get("roles_without_count", [])))
+        if add:
+            drawn = sum(d["berths"] for d in ex.drawings)
+            out.append(f"Gemini counts {add} drawn berth(s) in rooms that have no berth number on the drawing "
+                       f"({', '.join(' '.join(r['label'].split()) for r in unlabelled if any(w in r['label'].upper() for d in ex.drawings for w in d.get('roles_without_count', [])))}): "
+                       f"{drawn} + {add} = {drawn + add} berths. Not confirmed by a printed number - for an engineer to check.")
     disagree = [r for r in readings if any("but the label says" in n for n in r.get("notes", []))]
     for r in disagree:
         out.append(f"Gemini counted berths that disagree with the label {r['label']} {r['room_number'] or ''}: "

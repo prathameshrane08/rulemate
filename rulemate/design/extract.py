@@ -392,6 +392,9 @@ def extract(path: Path, pages: list[int] | None = None, doc_label: str | None = 
                 ex.findings.append(f"p.{page}: Gemini reading failed ({str(e)[:80]}); OCR and vector results only.")
             where = f"Dwg {meta['drawing']} " if meta["drawing"] else ""
             for v in vision:
+                done = {x.space for x in ex.facts if x.item_id.startswith("V")}
+                if v.room_number and any(v.room_number in d for d in done):
+                    continue  # same cabin already read on another sheet
                 if v.kind == "stateroom" and v.confirmed and v.berths_confirmed and v.berths:
                     n_v = sum(1 for f in ex.facts if f.item_id.startswith("V")) + 1
                     name = f"{v.label.title()} {v.room_number or ''}".strip()

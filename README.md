@@ -186,6 +186,37 @@ and the G.O. Sars GA labels rooms by number, not occupancy. The RCRV GA and desi
 browser, see `scripts/fetch_design_sources.py`); the Navisworks model (`.nwd`) needs Autodesk software and is not read.
 OCR of the RCRV CAD font is noisy, so room names there are only used through fuzzy matching, not counted.
 
+## Google Gemini: reading drawings, confirmed in code
+
+```bash
+# .env: GEMINI_API_KEY=...   GEMINI_VISION_MODEL=gemini-3.5-flash   GEMINI_MODEL=gemini-3.6-flash
+python -m rulemate design data/designs/sources/RCRV_GA_6096-070-001_RevJ.pdf --pages 6-12 --dpi 300 --gemini \
+    --with "data/designs/sources/RCRV_design_summary_12100-000-01_RevA.pdf=RCRV Design Summary 12100-000-01 Rev A" \
+    --out data/designs/rcrv_from_ga.csv
+python eval/gemini_drawing.py        # Gemini vs the NOAA labels read by eye
+python -m rulemate ask "How high must guard rails be on a research vessel?" --provider gemini
+```
+
+OCR reads characters, not drawings: on CAD sheets it returns "SARWAY" and "HOSPNAL", and it cannot count berths that
+are drawn rather than written. Gemini (multimodal) reads each GA sheet the way an engineer does and returns every
+labelled space: name, room number, kind, berths drawn, and where the label is (`rulemate/design/vision.py`).
+
+**Gemini proposes, code confirms.** A reading is used only when the label or room number Gemini reports is found
+on the sheet at the position Gemini gives (OCR words inside the box, fuzzy-matched for the CAD font), and a berth
+count only when the label itself states it (CREW DOUBLE = 2). Everything else is shown as "Gemini only" and never
+decides a verdict. The verdicts are still computed by code against the clauses.
+
+| Result (gemini-3.5-flash) | |
+|---|---|
+| NOAA GA, second deck, against the labels read by eye | 33 of 34 role + berth count exact; 34 of 34 readings confirmed on the sheet (OCR alone: 32 of 34) |
+| NOAA: the WIPER & OILER room has no berth number | Gemini counts 2 drawn berths: 58 + 2 = 60, the stated complement (reported, not used) |
+| RCRV GA Rev J, sheets 6-12 | 160 readings, 143 confirmed; 8 science staterooms (summary: 8), 7 single + 3 double crew cabins (summary: 7 + 3), hospital on the 01-level plan |
+| Where Gemini is wrong | it counts 1 berth in science cabins the summary calls double (bunks drawn in plan look like one outline) - the label does not confirm it, so it is not used |
+
+Gemini is also an answer provider (`LLM_PROVIDER=gemini,ollama`); its answers go through the same guardrails.
+Free-tier keys allow about 20 requests per model per day: drawing readings are cached in `data/cache/gemini/`
+(one request per sheet), and a daily-quota error falls back to the next provider instead of waiting.
+
 ## Compliance check
 
 ```bash

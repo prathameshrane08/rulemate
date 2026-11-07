@@ -14,3 +14,4 @@ eval/results/*.json
 # source design documents (large; fetch from the links in data/designs/README.md)
 /data/designs/sources/
 /data2/
+!eval/results/gemini_drawing.json

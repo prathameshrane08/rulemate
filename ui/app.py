@@ -414,6 +414,17 @@ with tab_check:
                         if d["rooms"]:
                             st.markdown(f"- GA p.{d['page']}, Dwg `{d['drawing']}` {d['title'].title()}: "
                                         f"{d['rooms']} berth labels read by OCR, {d['berths']} berths")
+                    gem = [dict(page=d["page"], **r) for d in info["drawings"] for r in d.get("gemini", [])]
+                    if gem:
+                        st.markdown(f"**Read by Gemini, confirmed in code**: {sum(r['confirmed'] for r in gem)} of "
+                                    f"{len(gem)} readings found on the drawing at the reported position")
+                        st.dataframe(pd.DataFrame([{
+                            "page": r["page"], "label": r["label"], "room no.": r["room_number"] or "",
+                            "kind": r["kind"], "berths": r["berths"],
+                            "status": ("confirmed" if r["confirmed"] else "Gemini only - not used")
+                                      + (", berths from label" if r["berths_confirmed"] else ""),
+                        } for r in gem if r["kind"] in ("stateroom", "hospital", "stairway") or not r["confirmed"]]),
+                            hide_index=True, width="stretch", height=240)
                     st.markdown("**Findings** (not verdicts: for an engineer to confirm)")
                     for x in info["findings"]:
                         st.markdown(f"- {render_text(x)}")

@@ -286,6 +286,12 @@ def report(rm: dict, am: dict | None, cm: dict | None, calib: list[dict], meta: 
     if dm:
         L.append(f"| GA drawing read by OCR (NOAA, second deck): berth labels found | **{dm['found']} of {dm['n']}**, "
                  f"{dm['berths_read']} of {dm['berths_truth']} berths, role text exact for {dm['exact']} |")
+        gf = RESULTS_DIR / "gemini_drawing.json"
+        if gf.exists():
+            g = json.loads(gf.read_text())
+            L.append(f"| Same NOAA drawing read by Gemini ({g['model']}), readings confirmed in code | **{g['correct']} of "
+                     f"{g['n_truth']}** role and berth count exact, {g['confirmed']} of {g['readings']} confirmed on the "
+                     f"sheet (`eval/gemini_drawing.py`, {g['when']}) |")
         if dm.get("stairs"):
             st = dm["stairs"]
             L.append(f"| RCRV GA (vector), stair flights measured on the inboard profile | **{st['found']} of {st['n']}**, "

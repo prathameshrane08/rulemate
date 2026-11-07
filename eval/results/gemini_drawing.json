@@ -1,0 +1,14 @@
+{
+ "model": "gemini-3.5-flash",
+ "seconds": 1,
+ "n_truth": 34,
+ "readings": 34,
+ "correct": 33,
+ "confirmed": 34,
+ "berths_read": 59,
+ "berths_truth": 58,
+ "wrong": [
+  "WIPER\n&\nOILER (2)"
+ ],
+ "when": "2026-11-07 13:37"
+}

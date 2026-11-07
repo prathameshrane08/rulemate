@@ -62,11 +62,26 @@ def render_png(path: Path, page_no: int, dpi: int = 150) -> tuple[bytes, float, 
     return buf.getvalue(), w, h
 
 
-def ask_gemini(llm, png: bytes, max_tokens: int = 8000) -> list[dict]:
-    url = "data:image/png;base64," + base64.b64encode(png).decode()
-    messages = [{"role": "user", "content": [{"type": "text", "text": PROMPT},
-                                             {"type": "image_url", "image_url": {"url": url}}]}]
-    raw = llm.complete(messages, max_tokens=max_tokens)
+CACHE = Path(__file__).resolve().parents[2] / "data" / "cache" / "gemini"
+
+
+def ask_gemini(llm, png: bytes, max_tokens: int = 32000) -> list[dict]:
+    """One request per sheet. Responses are cached by image, model and prompt (the free tier allows 20 requests
+    per day per model), and the raw answer is kept next to the parsed one for review."""
+    import hashlib
+
+    key = hashlib.sha1(png + llm.model.encode() + PROMPT.encode()).hexdigest()[:20]
+    cache = CACHE / f"{key}.json"
+    if cache.exists():
+        raw = json.loads(cache.read_text())["raw"]
+    else:
+        url = "data:image/png;base64," + base64.b64encode(png).decode()
+        messages = [{"role": "user", "content": [{"type": "text", "text": PROMPT},
+                                                 {"type": "image_url", "image_url": {"url": url}}]}]
+        raw = llm.complete(messages, max_tokens=max_tokens)
+        CACHE.mkdir(parents=True, exist_ok=True)
+        cache.write_text(json.dumps({"model": llm.model, "raw": raw}))
+    raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw.strip())
     m = re.search(r"\{.*\}", raw, re.S)
     if not m:
         return []

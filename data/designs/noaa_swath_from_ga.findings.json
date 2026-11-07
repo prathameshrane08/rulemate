@@ -3,40 +3,1493 @@
  "file": "data/designs/sources/NOAA_SWATH_research_ship_1990.pdf",
  "drawings": [
   {
-   "page": 41,
-   "drawing": "2175-000-04",
-   "title": "MAIN DECK AND 01 LEVEL",
-   "deck": "Main Deck",
-   "is_ga": true,
-   "scale": "1/8\u00b0=1'-0\u00b0",
-   "rooms": 0,
-   "berths": 0,
-   "roles_without_count": []
-  },
-  {
    "page": 42,
    "drawing": "2175-000-05",
    "title": "SECOND DECK",
    "deck": "Second Deck",
    "is_ga": true,
+   "view": "",
    "scale": "1/8\u00b0=1'-0\u00b0",
    "rooms": 34,
    "berths": 58,
+   "gemini": [
+    {
+     "label": "CHIEF SCIENTIST\n(1)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      211.3,
+      106.1,
+      247.9,
+      127.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"CHIEF SCIENTIST SCIENTIST SENIOR (1)\"",
+     "notes": []
+    },
+    {
+     "label": "SENIOR SCIENTIST\n(1)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      208.8,
+      129.1,
+      254.0,
+      155.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SCIENTIST SCIENTIST SENIOR (1) (1) T/S\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      262.5,
+      116.4,
+      288.2,
+      127.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"CHIEF VENT SCIENTIST SCIENTIST SENIOR T/S SHIP\"",
+     "notes": []
+    },
+    {
+     "label": "SHIP STORES",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      269.9,
+      136.2,
+      301.6,
+      155.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S STORES SHIP\"",
+     "notes": []
+    },
+    {
+     "label": "SENIOR SCIENTIST\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      317.5,
+      127.5,
+      360.2,
+      153.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SCIENTIST SENIOR (2)\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      346.8,
+      168.7,
+      371.2,
+      183.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S\"",
+     "notes": []
+    },
+    {
+     "label": "VAN 1",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      460.4,
+      112.5,
+      498.2,
+      121.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"VAN 1\"",
+     "notes": []
+    },
+    {
+     "label": "VAN 3",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      460.4,
+      150.5,
+      499.4,
+      159.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"VAN 3\"",
+     "notes": []
+    },
+    {
+     "label": "VAN 2",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      581.2,
+      112.5,
+      619.1,
+      121.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"VAN 2\"",
+     "notes": []
+    },
+    {
+     "label": "VAN 4",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      581.2,
+      150.5,
+      619.1,
+      159.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"VAN 4 CRANE FOUNDATION\"",
+     "notes": []
+    },
+    {
+     "label": "DRY STORES",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      718.0,
+      127.5,
+      746.1,
+      143.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"STORES DRY ROOM THAW\"",
+     "notes": []
+    },
+    {
+     "label": "THAW ROOM",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      759.5,
+      125.1,
+      782.7,
+      141.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"VENT STORES ROOM THAW\"",
+     "notes": []
+    },
+    {
+     "label": "FREEZER",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      808.4,
+      122.8,
+      841.3,
+      131.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"FREEZER\"",
+     "notes": []
+    },
+    {
+     "label": "CHILL STORAGE",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      813.3,
+      161.6,
+      848.7,
+      178.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"CHILL STORAGE VT\"",
+     "notes": []
+    },
+    {
+     "label": "SENIOR SCIENTIST\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      224.7,
+      194.8,
+      267.4,
+      219.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SCIENTIST SENIOR (2)\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      224.7,
+      248.7,
+      250.3,
+      261.4
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"s/1 LKR SCIENTIST\"",
+     "notes": []
+    },
+    {
+     "label": "LKR",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      255.2,
+      250.3,
+      278.4,
+      260.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"s/1 LKR\"",
+     "notes": []
+    },
+    {
+     "label": "SCIENTIST\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      222.2,
+      274.8,
+      256.4,
+      290.7
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"s/1 SCIENTIST (2)\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      225.9,
+      311.3,
+      250.3,
+      323.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S LKR TECHNICIAN\"",
+     "notes": []
+    },
+    {
+     "label": "LKR",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      254.0,
+      311.3,
+      278.4,
+      321.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S LKR\"",
+     "notes": []
+    },
+    {
+     "label": "TECHNICIAN\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      218.6,
+      339.0,
+      263.8,
+      355.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"TECHNICIAN (2)\"",
+     "notes": []
+    },
+    {
+     "label": "SCIENTIST\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      222.2,
+      372.2,
+      256.4,
+      388.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SCIENTIST (2)\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      225.9,
+      407.9,
+      250.3,
+      420.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SCIENTIST s/1 LKR\"",
+     "notes": []
+    },
+    {
+     "label": "LKR",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      254.0,
+      407.9,
+      277.2,
+      419.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SCIENTIST s/1 LKR\"",
+     "notes": []
+    },
+    {
+     "label": "SCIENTIST\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      218.6,
+      436.4,
+      255.2,
+      451.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SCIENTIST (2)\"",
+     "notes": []
+    },
+    {
+     "label": "SCIENTIST\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      305.3,
+      204.3,
+      339.5,
+      221.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SCIENTIST (2) T/S LKR\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      348.0,
+      198.0,
+      371.2,
+      209.9
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SCIENTIST T/S TECH\"",
+     "notes": []
+    },
+    {
+     "label": "LKR",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      346.8,
+      228.1,
+      366.3,
+      237.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"LKR\"",
+     "notes": []
+    },
+    {
+     "label": "TECH\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      384.6,
+      204.3,
+      404.2,
+      220.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"TECH (2)\"",
+     "notes": []
+    },
+    {
+     "label": "TECH\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      423.7,
+      204.3,
+      444.5,
+      220.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"TECH (2) T/S LKR\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      457.9,
+      198.0,
+      482.3,
+      209.9
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"TECH T/S TECH (2)\"",
+     "notes": []
+    },
+    {
+     "label": "LKR",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      457.9,
+      227.3,
+      477.5,
+      237.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"TECH TECH (2) LKR\"",
+     "notes": []
+    },
+    {
+     "label": "TECH\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      488.4,
+      204.3,
+      509.2,
+      220.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S TECH (2)\"",
+     "notes": []
+    },
+    {
+     "label": "TR",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      556.8,
+      183.7,
+      569.0,
+      192.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"CRANE FOUNDATION T/S TR MESSMAN CHIEF (1)\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      531.2,
+      192.5,
+      554.4,
+      204.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S T/S TR MESSMAN STEWARD\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      539.7,
+      218.6,
+      562.9,
+      230.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S STEWARD CHIEF (1) (1)\"",
+     "notes": []
+    },
+    {
+     "label": "CHIEF\nSTEWARD\n(1)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      562.9,
+      205.1,
+      597.1,
+      229.7
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S T/S TR MESSMAN STEWARD CHIEF (1) (1) MESSMAN\"",
+     "notes": []
+    },
+    {
+     "label": "MESSMAN\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      604.4,
+      204.3,
+      639.9,
+      220.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"MESSMAN STEWARD CHIEF MESSMAN (2) T/S LKR\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      643.5,
+      192.5,
+      666.7,
+      204.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"MESSMAN (2) T/S COOK (2)\"",
+     "notes": []
+    },
+    {
+     "label": "LKR",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      643.5,
+      226.5,
+      663.1,
+      236.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"MESSMAN (2) COOK LKR\"",
+     "notes": []
+    },
+    {
+     "label": "COOK\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      675.3,
+      204.3,
+      696.0,
+      220.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S COOK (2) LKR\"",
+     "notes": []
+    },
+    {
+     "label": "LAUNDRY",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      302.8,
+      285.1,
+      337.0,
+      292.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"LAUNDRY HVAC\"",
+     "notes": []
+    },
+    {
+     "label": "HVAC",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      345.6,
+      285.1,
+      363.9,
+      292.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"LAUNDRY HVAC\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      335.8,
+      312.8,
+      360.2,
+      325.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S\"",
+     "notes": []
+    },
+    {
+     "label": "HOSPITAL\nAND\nMEDICAL STORAGE",
+     "room_number": null,
+     "kind": "hospital",
+     "berths": null,
+     "bbox": [
+      302.8,
+      341.4,
+      362.7,
+      365.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"MEDICAL STORAGE HOSPITAL AND\"",
+     "notes": []
+    },
+    {
+     "label": "CENTERWELL",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      488.4,
+      369.1,
+      528.7,
+      377.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"CENTERWELL\"",
+     "notes": []
+    },
+    {
+     "label": "GALLEY",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      743.6,
+      204.3,
+      771.7,
+      212.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"GALLEY\"",
+     "notes": []
+    },
+    {
+     "label": "MESS\nROOM",
+     "room_number": null,
+     "kind": "mess",
+     "berths": null,
+     "bbox": [
+      813.3,
+      238.4,
+      836.5,
+      255.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"MESS ROOM\"",
+     "notes": []
+    },
+    {
+     "label": "HVAC",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      616.7,
+      297.0,
+      636.2,
+      304.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"HVAC\"",
+     "notes": []
+    },
+    {
+     "label": "EXERCISE\nROOM",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      670.4,
+      296.2,
+      702.1,
+      312.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"EXERCISE ROOM\"",
+     "notes": []
+    },
+    {
+     "label": "LOUNGE",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      727.8,
+      303.3,
+      754.6,
+      310.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"LOUNGE\"",
+     "notes": []
+    },
+    {
+     "label": "LIBRARY",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      727.8,
+      347.7,
+      755.9,
+      355.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"UBRARY\"",
+     "notes": []
+    },
+    {
+     "label": "ORDINARY\nSEAMAN\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      603.2,
+      350.1,
+      636.2,
+      373.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"ORDINARY SEAAN (2) T/S VT\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      641.1,
+      351.6,
+      666.7,
+      364.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"ORDINARY SEAAN (2) T/S VT WIPER OILER &\"",
+     "notes": []
+    },
+    {
+     "label": "WIPER\n&\nOILER",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      672.8,
+      355.6,
+      694.8,
+      380.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S VT WIPER OILER &\"",
+     "notes": []
+    },
+    {
+     "label": "LKR",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      794.9,
+      312.8,
+      814.5,
+      323.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"LKR s/1 COMMISSIONED\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      821.8,
+      312.8,
+      847.4,
+      324.7
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"LKR s/1 COMMISSIONED\"",
+     "notes": []
+    },
+    {
+     "label": "COMMISSIONED\nOFFICER\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      799.8,
+      337.4,
+      853.5,
+      361.9
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"s/1 COMMISSIONED COMMISSIONED OFFICER (2)\"",
+     "notes": []
+    },
+    {
+     "label": "COMMISSIONED\nOFFICER\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      799.8,
+      374.6,
+      853.5,
+      399.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"COMMISSIONED OFFICER (2) (2) VT\"",
+     "notes": []
+    },
+    {
+     "label": "LKR",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      790.1,
+      415.0,
+      808.4,
+      426.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"LKR COMMISSIONED T/S OFFICER\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      810.8,
+      415.0,
+      836.5,
+      427.7
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"LKR COMMISSIONED T/S OFFICER VT\"",
+     "notes": []
+    },
+    {
+     "label": "COMMISSIONED\nOFFICER\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      796.2,
+      430.1,
+      849.9,
+      454.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"LKR COMMISSIONED T/S OFFICER (2) VT\"",
+     "notes": []
+    },
+    {
+     "label": "LKR",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      790.1,
+      469.7,
+      808.4,
+      480.7
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"(2) LKR T/S\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      810.8,
+      469.7,
+      836.5,
+      482.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"(2) LKR T/S VT\"",
+     "notes": []
+    },
+    {
+     "label": "COMMANDING\nOFFICER\n(1)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      796.2,
+      503.7,
+      843.8,
+      528.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/s COMMANDING OFFICER (1) VT\"",
+     "notes": []
+    },
+    {
+     "label": "SCIENTIST\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      217.4,
+      496.6,
+      251.5,
+      513.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"UP SCIENTIST (2) s/1\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      246.7,
+      529.1,
+      269.9,
+      541.7
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"(2) (2) s/1\"",
+     "notes": []
+    },
+    {
+     "label": "SCIENTIST\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      269.9,
+      496.6,
+      304.1,
+      513.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SCIENTIST (2) SCIENTIST s/1\"",
+     "notes": []
+    },
+    {
+     "label": "SENIOR\nSCIENTIST\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      317.5,
+      502.1,
+      346.8,
+      526.7
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SCIENTIST SCIENTIST SENIOR (2) VT\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      326.0,
+      469.7,
+      350.5,
+      481.5
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"s/1\"",
+     "notes": []
+    },
+    {
+     "label": "SCIENTIST\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      299.2,
+      430.1,
+      334.6,
+      445.9
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SCIENTIST (2) T/S\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      340.7,
+      441.9,
+      363.9,
+      454.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SCIENTIST (2) T/S TECHNICIAN SURVEY s/1\"",
+     "notes": []
+    },
+    {
+     "label": "SURVEY\nTECHNICIAN\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      366.3,
+      430.1,
+      407.8,
+      454.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S TECHNICIAN SURVEY (2) TECHNICIAN SURVEY\"",
+     "notes": []
+    },
+    {
+     "label": "SURVEY\nTECHNICIAN\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      411.5,
+      430.1,
+      453.0,
+      454.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"TECHNICIAN SURVEY TECHNICIAN SURVEY (2) s/1 LKR\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      455.5,
+      441.9,
+      478.7,
+      454.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"TECHNICIAN SURVEY s/1 BOATSWAIN SEAMAN CHIEF (1) (1)\"",
+     "notes": []
+    },
+    {
+     "label": "LKR",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      457.9,
+      415.0,
+      476.2,
+      425.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"TECHNICIAN SURVEY LKR SEAMAN CHIEF (1)\"",
+     "notes": []
+    },
+    {
+     "label": "SEAMAN\n(1)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      479.9,
+      422.1,
+      512.9,
+      438.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"s/1 LKR BOATSWAIN SEAMAN CHIEF (1)\"",
+     "notes": []
+    },
+    {
+     "label": "CHIEF\nBOATSWAIN\n(1)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      476.2,
+      440.4,
+      517.7,
+      464.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"s/1 BOATSWAIN SEAMAN CHIEF (1) (1) WORK DECK\"",
+     "notes": []
+    },
+    {
+     "label": "ELECTRICAL\nTECHNICIAN\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      542.2,
+      434.0,
+      584.9,
+      458.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"TECHNICIAN ELECTRICAL (2) T/S\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      582.5,
+      422.1,
+      606.9,
+      434.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"TECHNICIAN ELECTRICAL T/S SEAMAN (2) AB\"",
+     "notes": []
+    },
+    {
+     "label": "AB\nSEAMAN\n(2)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      611.8,
+      422.1,
+      639.9,
+      446.7
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S SEAMAN (2) AB ENGINEER ENGINEER\"",
+     "notes": []
+    },
+    {
+     "label": "JR\nENGINEER\n(1)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      653.3,
+      411.8,
+      685.0,
+      436.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SEAMAN ENGINEER ENGINEER 3d (1) JR T/S LKR\"",
+     "notes": []
+    },
+    {
+     "label": "3rd\nENGINEER\n(1)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      653.3,
+      438.8,
+      685.0,
+      463.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SEAMAN ENGINEER ENGINEER 3d (1) (1) T/S UP\"",
+     "notes": []
+    },
+    {
+     "label": "LKR",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      693.6,
+      415.0,
+      710.7,
+      426.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"ENGINEER T/S LKR UP\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      692.4,
+      438.0,
+      708.2,
+      450.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"ENGINEER ENGINEER T/S EXHAUST UP TRUNK\"",
+     "notes": []
+    },
+    {
+     "label": "SHIP\nSTORES",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      720.4,
+      415.0,
+      742.4,
+      430.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S LKR UP STORES SHIP\"",
+     "notes": []
+    },
+    {
+     "label": "EXHAUST\nTRUNK",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      719.2,
+      459.4,
+      746.1,
+      475.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S EXHAUST LKR TRUNK\"",
+     "notes": []
+    },
+    {
+     "label": "LKR",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      754.6,
+      452.2,
+      773.0,
+      463.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"EXHAUST LKR TRUNK\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      705.8,
+      503.7,
+      730.2,
+      515.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S ENGINEER CHIEF (1)\"",
+     "notes": []
+    },
+    {
+     "label": "CHIEF\nENGINEER\n(1)",
+     "room_number": null,
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      735.1,
+      510.8,
+      762.0,
+      535.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S ENGINEER CHIEF T/s (1)\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      771.7,
+      510.8,
+      790.1,
+      522.7
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"ENGINEER T/s COMMANDING\"",
+     "notes": []
+    },
+    {
+     "label": "WORK DECK",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      519.0,
+      475.2,
+      554.4,
+      483.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"(2) WORK DECK\"",
+     "notes": []
+    }
+   ],
    "roles_without_count": [
     "OILER",
     "WIPER"
    ]
-  },
-  {
-   "page": 43,
-   "drawing": "2175-000-06",
-   "title": "THIRD DECK",
-   "deck": "Third Deck",
-   "is_ga": true,
-   "scale": "1/8\u00b0=1'\u22120\"",
-   "rooms": 0,
-   "berths": 0,
-   "roles_without_count": []
   }
  ],
  "facts": [
@@ -578,7 +2031,10 @@
   "p.42 Dwg 2175-000-05: role label(s) without a berth count: OILER, WIPER - those berths are not counted.",
   "Berths labelled on the GA drawings: 58; total complement in the text: 60 (p.16). Rooms labelled without a berth count (see above) may account for the difference.",
   "Text: 9 single and 22 double staterooms; read from the drawings: 10 single, 24 double - check the OCR result and the drawing.",
-  "[46CFR190 \u00a7 190.20-35(a)] applies (crew 21 persons (p.38), endurance 60 days (p.47)): \"HOSPITAL\" is labelled on p.42 (Dwg 2175-000-05, Second Deck). Status: met.",
+  "Gemini read 92 labelled spaces on the GA sheets; code confirmed 88 against the drawing text at the reported position (4 shown as 'Gemini only', not used).",
+  "Staterooms confirmed on the drawings: 34 (19 science / marine tech, 0 labelled CREW, 15 named for a role, e.g. CHIEF MATE).",
+  "Gemini counts 2 drawn berth(s) in rooms that have no berth number on the drawing (WIPER & OILER): 58 + 2 = 60 berths. Not confirmed by a printed number - for an engineer to check.",
+  "[46CFR190 \u00a7 190.20-35(a)] applies (crew 21 persons (p.38), endurance 60 days (p.47)): a space labelled HOSPITAL is on p.42 (Dwg 2175-000-05, Second Deck). Status: met.",
   "[46CFR190 \u00a7 190.20-30(b)] applies (messroom seats 32 persons (p.47), total complement 60 persons (p.16)): the mess room seats 32 of 60 persons at one sitting; confirm how many eat at one time (sittings / watches). Status: review."
  ]
 }

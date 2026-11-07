@@ -19,6 +19,7 @@ uvicorn rulemate.api:app --port 8000                         # terminal 1
 streamlit run ui/app.py                                      # terminal 2 -> http://localhost:8501
 ```
 
+- Gemini drawing readings are cached (`data/cache/gemini/`): the demo makes no Gemini calls. Free tier: about 20 requests per model per day.
 - Groq's free tier is rate-limited: run the warm-up at least a minute before going on stage, and don't run the eval right before.
 - Sidebar: provider **groq,ollama**, **Use answer cache** on (same provider as the warm-up, or the cache misses).
 - `python scripts/fetch_design_sources.py` once, and put the RCRV GA and design summary in `data/designs/sources/` (see the script) - needed to show the drawing evidence.
@@ -33,13 +34,13 @@ streamlit run ui/app.py                                      # terminal 2 -> htt
 | Time | Do | Say |
 |---|---|---|
 | 0:00-0:15 | UI open on *Compliance check* | "You told us: the earlier a compliance defect is found, the cheaper. RuleMate reads the design, checks it against the rules in code, and every finding is traceable to a clause and to the place in the drawing it came from." |
-| 0:15-0:55 | **Demo 1, measuring your vessel's drawing.** Select *RCRV – measured from its GA*, open the *Read from…* box, *Run check*, click **S01**. | "This is the RCRV GA you gave us, Rev J, a vector CAD drawing. RuleMate measured the stair angles from the drawing's own lines: three flights, each 50.0 degrees. 46 CFR 190.10-25(b) allows at most 50: PASS, and it tells you *exactly at the limit, no margin*: worth a look before construction tolerances. Here is the stair on the drawing, boxed. From the design summary it read crew 12 and 21 days endurance, so a hospital is required, and it found it on the 01-level plan." |
-| 0:55-1:15 | Select *NOAA research ship – read from its GA drawing*, *Run check*, click a row. | "Scanned drawings work too: the 1990 NOAA study from your brief, read with OCR on this laptop: 34 of 34 berth labels, every room at most four persons, and it flags what it cannot count, like the wiper and oiler room with no berth number." |
-| 1:15-1:35 | **Demo 2, non-compliant design.** Select *Research vessel example – 46 CFR 190*, *Run check*, click **R12**, then **R14**. | "Planted defects: R12: a 1.0 m bulwark against 39 and a half **inches**: 39.37 inches, **FAIL**, computed by code. R14: two-tier berths, the limit only applies *where two tiers are fitted*: code cannot confirm that, so **NEEDS REVIEW**, never a guess." |
+| 0:15-0:55 | **Demo 1, reading your vessel's drawing.** Select *RCRV – measured from its GA*, open the *Read from…* box, *Run check*, click **S01**. | "This is the RCRV GA you gave us. Two readers work on it. Code measures: the stair angles straight from the drawing's lines, 50.0 degrees, the 46 CFR maximum, PASS but *no margin*. And Gemini reads the sheets like an engineer: 160 labelled spaces, every cabin and room number. Gemini only proposes: code confirms each reading on the drawing before it counts: 143 confirmed. The result matches your design summary exactly: 8 science cabins, 7 single and 3 double crew cabins, a hospital on the 01 level. And where Gemini is wrong (it sees one berth where bunks are drawn on top of each other) the check catches it and does not use it." |
+| 0:55-1:15 | Select *NOAA research ship – read from its GA drawing*, open *Read from…*. | "A scanned 1990 drawing from your brief: OCR read 34 of 34 berth labels; Gemini, checked against our reading by eye, 33 of 34, and it counted the two berths in the one room that has no number, which makes the drawing add up to the stated 60 people. Reported for an engineer, not assumed." |
+| 1:15-1:35 | **Demo 2, an interior designer's check.** Select *Accessible stateroom – interior design, ADA*, *Run check*, click **A04**, then **A02**. | "Your users are interior designers. Accessible stateroom against the ADA standards: a 1500 mm turning circle is 59.06 inches, the rule says 60: **FAIL**, clause 304.3.1. The bathroom door at 30 inches: **FAIL**, 32 required. Metric or imperial, the designer types what the drawing says." |
 | 1:35-2:00 | **Demo 3, cited answer.** *Ask the rules* tab, sidebar: *How high must guard rails be on a research vessel?* Click the 📄 citation. | "The same rules answer questions. Verified: every sentence cited, and code checked that the cited clause supports it and that every number and unit is in it." |
 | 2:00-2:20 | **Demo 4, cross-reference.** Sidebar: *How is the corridor width calculated when many people use it?* Point at Sources. | "Rules point at each other. This clause says *in accordance with 4.2*; RuleMate followed the reference in code, and the answer gives 4.2's actual requirement. (Synthetic cruise-ship sample, marked as such.)" |
 | 2:20-2:35 | **Demo 5, refusal.** Sidebar: *What is the required size of a helicopter landing area?* | "Part 190 does not cover helidecks: *Not found in the provided rules*, with the closest clauses. Decided in code before any model was called." |
-| 2:35-3:00 | Eval table (slide 5) or `eval/results/latest.md` | "We measure it: 3 of 3 stair flights measured, 34 of 34 drawing labels read, every planted defect caught, 0 false FAILs at the exact limit, 100 % correct refusals, 91 % of answers verified and the rest shown as excerpts, never unchecked. It runs fully offline, so your designs can stay on your servers." |
+| 2:35-3:00 | Eval table (slide 5) or `eval/results/latest.md` | "We measure it: Gemini 33 of 34 drawing labels exact and every reading confirmed in code, 3 of 3 stair flights measured, every planted defect caught, 0 false FAILs at the exact limit, 100 % correct refusals, 91 % of answers verified and the rest shown as excerpts, never unchecked. It runs fully offline, so your designs can stay on your servers." |
 
 Optional if there is time, in a terminal (change impact after a late design change):
 
@@ -69,7 +70,7 @@ python -m rulemate check new_design.csv --baseline data/designs/rcrv_example_des
 - Generic AI is not usable here: it invents clause numbers and values, and you cannot tell when.
 
 ## 2. Solution: RuleMate
-- **Read the design**: GA drawings read with OCR on the laptop (a real 1990 NOAA GA: 34 of 34 berth labels), report text and particulars sheets; every value keeps its page, drawing number and position, shown boxed next to the verdict.
+- **Read the design with Gemini, confirmed in code**: Gemini reads GA sheets like an engineer (rooms, room numbers, drawn berths); code confirms every reading on the drawing before it is used. Plus GA drawings read with OCR on the laptop (a real 1990 NOAA GA: 34 of 34 berth labels), report text and particulars sheets; every value keeps its page, drawing number and position, shown boxed next to the verdict.
 - **Check the design**: design values (as the drawing writes them, e.g. `2'-6"`, with their source drawing) checked against the rule sets that apply to the vessel; PASS / FAIL / NEEDS REVIEW per item with the clause, the computed comparison and an explanation.
 - **Ask the rules**: plain-language questions, answers with exact clause citations, one click to the clause text.
 - **After a change**: re-check and list only what changed verdict.
@@ -85,6 +86,8 @@ python -m rulemate check new_design.csv --baseline data/designs/rcrv_example_des
 
 | Metric (Meyer criterion) | Result |
 |---|---|
+| Gemini reading of the NOAA GA, confirmed in code (interpretation) | 33 of 34 exact, 34 of 34 confirmed |
+| RCRV GA read by Gemini vs design summary | 8 science, 7 + 3 crew cabins, hospital: all match |
 | Stair flights measured from the RCRV GA vectors (interpretation) | 3 of 3, 50.0 deg each |
 | GA drawing labels read by OCR, real NOAA drawing (interpretation) | 34 of 34 labels, 58 of 58 berths |
 | Planted defects caught (accuracy) | 100 % of 14 across both designs |

@@ -44,6 +44,7 @@ pytest -q                            # 120 tests, about 10 s
 | `LLM_PROVIDER` | `groq,ollama` | Providers in order; the next one is used if one fails, times out or is rate-limited |
 | `GROQ_API_KEY`, `GROQ_MODEL` | -, `openai/gpt-oss-120b` | Groq (console.groq.com) |
 | `OPENAI_BASE_URL`, `OPENAI_API_KEY`, `OPENAI_MODEL` | OpenAI | Any OpenAI-compatible endpoint, e.g. a self-hosted vLLM or an EU-hosted service |
+| `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_VISION_MODEL`, `GEMINI_BASE_URL` | -, `gemini-flash-latest` | Google Gemini for answers and for reading GA drawings (aistudio.google.com) |
 | `OLLAMA_BASE_URL`, `OLLAMA_MODEL` | `http://localhost:11434`, `llama3.2` | Local model |
 | `LLM_TIMEOUT` | `25` | Seconds per LLM call before falling back |
 | `LLM_REASONING_EFFORT` | `low` | For gpt-oss models |
@@ -61,6 +62,11 @@ pytest -q                            # 120 tests, about 10 s
 | **Fully offline / on-premises** | `LLM_PROVIDER=ollama` | Nothing. Parsing, drawing OCR, embeddings, checks and the LLM all run locally. |
 | **Own or EU-hosted model** | `LLM_PROVIDER=openai`, `OPENAI_BASE_URL=https://<your endpoint>/v1` | The question and the retrieved clause text go to that endpoint, nothing else. |
 | **Hosted (demo)** | `LLM_PROVIDER=groq,ollama` | The question and retrieved clause text go to Groq (US). Fine for public rule texts; not for confidential designs. |
+
+**Gemini drawing reading** (`design --gemini`) sends each rendered GA sheet to Google. For confidential designs,
+use Gemini on Google Cloud Vertex AI in an EU region (data residency, no training on customer data): set
+`GEMINI_BASE_URL` to the Vertex AI OpenAI-compatible endpoint of that region and `GEMINI_API_KEY` to its access
+token. Without `--gemini`, drawings are read by local OCR and vector geometry only.
 
 Design values are never sent to an LLM for the verdict. With explanations switched on (`--explain`, UI toggle), the
 row being explained (space, parameter, value) and its clauses are sent to the configured LLM; use an offline or own

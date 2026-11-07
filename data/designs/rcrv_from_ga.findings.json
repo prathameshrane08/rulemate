@@ -3,66 +3,6 @@
  "file": "data/designs/sources/RCRV_GA_6096-070-001_RevJ.pdf",
  "drawings": [
   {
-   "page": 1,
-   "drawing": "6096-163-001",
-   "title": "",
-   "deck": "",
-   "is_ga": true,
-   "view": "",
-   "scale": "",
-   "rooms": 0,
-   "berths": 0,
-   "roles_without_count": []
-  },
-  {
-   "page": 2,
-   "drawing": "6096-070-001",
-   "title": "",
-   "deck": "",
-   "is_ga": true,
-   "view": "",
-   "scale": "",
-   "rooms": 0,
-   "berths": 0,
-   "roles_without_count": []
-  },
-  {
-   "page": 3,
-   "drawing": "6096-070-001",
-   "title": "",
-   "deck": "",
-   "is_ga": true,
-   "view": "",
-   "scale": "",
-   "rooms": 0,
-   "berths": 0,
-   "roles_without_count": []
-  },
-  {
-   "page": 4,
-   "drawing": "6096-070-001",
-   "title": "ELEVATION 2-5A",
-   "deck": "",
-   "is_ga": true,
-   "view": "ELEVATION 2-5A",
-   "scale": "",
-   "rooms": 0,
-   "berths": 0,
-   "roles_without_count": []
-  },
-  {
-   "page": 5,
-   "drawing": "6096-070-001",
-   "title": "ELEVATION 3-4A",
-   "deck": "",
-   "is_ga": true,
-   "view": "ELEVATION 3-4A",
-   "scale": "",
-   "rooms": 0,
-   "berths": 0,
-   "roles_without_count": []
-  },
-  {
    "page": 6,
    "drawing": "6096-070-001",
    "title": "ELEVATION 4-5A",
@@ -72,6 +12,922 @@
    "scale": "",
    "rooms": 0,
    "berths": 0,
+   "gemini": [
+    {
+     "label": "PILOTHOUSE",
+     "room_number": "03-23-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      718.5,
+      304.1,
+      761.3,
+      313.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"TRUNK PILOT-DUSF 01-32-0 03-23-0\"",
+     "notes": []
+    },
+    {
+     "label": "CHART ROOM",
+     "room_number": "03-32-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      651.2,
+      308.9,
+      689.1,
+      319.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"CHAR ROOM TRUNK 0-.27 01-32-0\"",
+     "notes": []
+    },
+    {
+     "label": "TRUNK",
+     "room_number": "01-32-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      695.2,
+      312.0,
+      719.7,
+      322.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"TRUNK PILOT-DUSF 01-32-0 03-23-0\"",
+     "notes": []
+    },
+    {
+     "label": "CREW DOUBLE",
+     "room_number": "02-24-0",
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      832.3,
+      304.9,
+      878.8,
+      315.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": true,
+     "evidence": "OCR at that spot: \"CREW DOLELE 02-24-0 CHIEFMATE 02 20 :\"",
+     "notes": [
+      "berths from the label"
+     ]
+    },
+    {
+     "label": "CHIEF MATE",
+     "room_number": "02-20-0",
+     "kind": "stateroom",
+     "berths": null,
+     "bbox": [
+      832.3,
+      318.4,
+      875.2,
+      328.7
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"CREW DOLELE 02-24-0 CHIEFMATE 02 20 : CHEF 22-15- ENC\"",
+     "notes": []
+    },
+    {
+     "label": "CHIEF ENG",
+     "room_number": "02-15-1",
+     "kind": "stateroom",
+     "berths": null,
+     "bbox": [
+      849.5,
+      332.6,
+      888.6,
+      342.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"02-24-0 CHIEFMATE 02 20 : CHEF 22-15- ENC\"",
+     "notes": []
+    },
+    {
+     "label": "PASSAGEWAY",
+     "room_number": "02-17-2",
+     "kind": "corridor",
+     "berths": null,
+     "bbox": [
+      627.9,
+      346.9,
+      667.1,
+      358.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"PISSWGEWT z-:.-2n LINEN LKR 02-33-0 0\"",
+     "notes": []
+    },
+    {
+     "label": "LINEN LKR",
+     "room_number": "02-33-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      669.5,
+      339.0,
+      678.1,
+      369.9
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"01-32-0 LINEN LKR 02-33-0 0\"",
+     "notes": []
+    },
+    {
+     "label": "STAIRWAY",
+     "room_number": "01-24-0",
+     "kind": "stairway",
+     "berths": null,
+     "bbox": [
+      695.2,
+      348.5,
+      730.7,
+      358.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"STAIRWAY 0-\u304b7-.0 0\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      758.9,
+      360.4,
+      772.3,
+      366.7
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/5 0\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      831.1,
+      360.4,
+      844.6,
+      366.7
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"22-15- T/5 MCCRNG EQUPMENI\"",
+     "notes": []
+    },
+    {
+     "label": "STACK",
+     "room_number": "1-50-4",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      484.7,
+      348.5,
+      505.5,
+      358.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"S ACK 1-50-4\"",
+     "notes": []
+    },
+    {
+     "label": "TRUNK",
+     "room_number": "1-50-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      610.8,
+      346.1,
+      619.3,
+      369.9
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"PISSWGEWT z-:.-2n ACleSSte\"",
+     "notes": []
+    },
+    {
+     "label": "CENTERBOARD TRUNK",
+     "room_number": "4-42-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      558.1,
+      386.5,
+      599.8,
+      406.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"CENTTRBOARD TRUN 4-42-C RUNK C-6E-\"",
+     "notes": []
+    },
+    {
+     "label": "PASSAGEWAY",
+     "room_number": "01-16-2",
+     "kind": "corridor",
+     "berths": null,
+     "bbox": [
+      623.0,
+      383.3,
+      634.0,
+      407.1
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"RUNK C-6E- ACleSSte 6-91-13 CC 01-33-C\"",
+     "notes": []
+    },
+    {
+     "label": "CG LKR",
+     "room_number": "01-33-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      643.8,
+      390.5,
+      669.5,
+      400.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"ACleSSte 6-91-13 CC 01-33-C LINEN LKR\"",
+     "notes": []
+    },
+    {
+     "label": "STAIRWAY",
+     "room_number": "01-24-0",
+     "kind": "stairway",
+     "berths": null,
+     "bbox": [
+      712.4,
+      383.3,
+      746.6,
+      393.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/5 STAIRWAY T\u00c9CH 01-24-0 01-20-0\"",
+     "notes": []
+    },
+    {
+     "label": "TECH",
+     "room_number": "01-20-0",
+     "kind": "stateroom",
+     "berths": null,
+     "bbox": [
+      755.2,
+      384.1,
+      777.2,
+      393.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/5 T/S STAIRWAY T\u00c9CH 01-24-0 01-20-0\"",
+     "notes": []
+    },
+    {
+     "label": "SCI",
+     "room_number": "01-15-0",
+     "kind": "stateroom",
+     "berths": null,
+     "bbox": [
+      799.3,
+      384.1,
+      815.2,
+      393.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/5 T/S SCI 01-15-0\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      769.9,
+      400.0,
+      783.4,
+      407.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S T\u00c9CH 01-20-0 01-15-0\"",
+     "notes": []
+    },
+    {
+     "label": "T/S",
+     "room_number": null,
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      785.8,
+      400.0,
+      799.3,
+      407.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S T\u00c9CH SCI 01-20-0 01-15-0\"",
+     "notes": []
+    },
+    {
+     "label": "MOORING EQUIPMENT",
+     "room_number": "01-(-4)-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      836.0,
+      381.0,
+      900.9,
+      392.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/5 MCCRNG EQUPMENI c1-(\u2212<)-c\"",
+     "notes": []
+    },
+    {
+     "label": "CHAIN LKR (P/S)",
+     "room_number": "1-5-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      924.1,
+      381.7,
+      957.2,
+      399.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"CHAIN IKK (=/S) OFCK LCCKFR 1-5-2\"",
+     "notes": []
+    },
+    {
+     "label": "DECK LOCKER",
+     "room_number": "01-(-4)-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      965.7,
+      381.7,
+      1008.6,
+      391.2
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"CHAIN IKK OFCK LCCKFR C1\u2212(\u22124)\u2212C\"",
+     "notes": []
+    },
+    {
+     "label": "VESTIBULE",
+     "room_number": "1-64-0",
+     "kind": "corridor",
+     "berths": null,
+     "bbox": [
+      383.1,
+      420.6,
+      392.9,
+      445.9
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"I\"UISJA 0-19-1 FCk\"",
+     "notes": []
+    },
+    {
+     "label": "HYDRO/WET LAB",
+     "room_number": "1-47-0",
+     "kind": "lab",
+     "berths": null,
+     "bbox": [
+      428.4,
+      426.1,
+      474.9,
+      435.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"HYDRO/WE 147-3 LA3\"",
+     "notes": []
+    },
+    {
+     "label": "TRUNK",
+     "room_number": "1-47-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      541.0,
+      419.0,
+      549.6,
+      434.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"TNK 1-47-0\"",
+     "notes": []
+    },
+    {
+     "label": "MAIN LAB",
+     "room_number": "1-33-0",
+     "kind": "lab",
+     "berths": null,
+     "bbox": [
+      624.2,
+      428.5,
+      654.8,
+      439.6
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"RUNK C-6E- WAIN LAB 1-55-1 O\"",
+     "notes": []
+    },
+    {
+     "label": "STAIRWAY",
+     "room_number": "1-25-0",
+     "kind": "stairway",
+     "berths": null,
+     "bbox": [
+      714.8,
+      418.2,
+      744.2,
+      428.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"25 0 ASSAG_WAY\"",
+     "notes": []
+    },
+    {
+     "label": "PASSAGEWAY",
+     "room_number": "1-14-0",
+     "kind": "corridor",
+     "berths": null,
+     "bbox": [
+      756.4,
+      427.7,
+      794.4,
+      438.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"ASSAG_WAY 4\"",
+     "notes": []
+    },
+    {
+     "label": "DRY STORES",
+     "room_number": "1-14-1",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      814.0,
+      423.7,
+      839.7,
+      441.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"T/S STRRES 1-:1-1 DR\u00b0 SAREAGE\"",
+     "notes": []
+    },
+    {
+     "label": "GARBAGE ROOM",
+     "room_number": "1-5-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      855.6,
+      423.7,
+      887.4,
+      441.9
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SAREAGE ROOM 1-5-0\"",
+     "notes": []
+    },
+    {
+     "label": "ATMOSPHERIC EQUIP",
+     "room_number": "1-(-1)-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      936.4,
+      422.1,
+      978.0,
+      440.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"AIIESOR_A 1-{-1;-0 CQ_P\"",
+     "notes": []
+    },
+    {
+     "label": "VOID",
+     "room_number": "3-88-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      155.4,
+      454.6,
+      173.8,
+      464.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"VOID 3-88-2\"",
+     "notes": []
+    },
+    {
+     "label": "MOTOR/DRIVE ROOM",
+     "room_number": "3-77-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      254.6,
+      460.9,
+      285.2,
+      478.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"JARC/ECION ROOM 277 C IOA\"",
+     "notes": []
+    },
+    {
+     "label": "WINCH ROOM",
+     "room_number": "3-67-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      326.8,
+      464.9,
+      359.9,
+      474.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"WINCH ROON 5-67-0\"",
+     "notes": []
+    },
+    {
+     "label": "ECR",
+     "room_number": "3-63-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      390.5,
+      455.4,
+      407.6,
+      464.9
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"I\"UISJA 0-19-1 FCk 3-63-0\"",
+     "notes": []
+    },
+    {
+     "label": "ENGINE ROOM",
+     "room_number": "3-51-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      430.8,
+      459.4,
+      468.8,
+      468.9
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"ENGIVE ROOM 3-51-0 o o\"",
+     "notes": []
+    },
+    {
+     "label": "AUX MACH ROOM",
+     "room_number": "3-44-4",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      523.9,
+      456.2,
+      545.9,
+      481.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"3141-4 WAC- ROOU AX\"",
+     "notes": []
+    },
+    {
+     "label": "POTABLE WATER",
+     "room_number": "3-37-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      609.6,
+      479.2,
+      637.7,
+      496.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"POTAR \u00c9 WATFR 3-37-0 CQJIPVENT RCCV 3 A 2\"",
+     "notes": []
+    },
+    {
+     "label": "DOMESTIC EQUIPMENT ROOM",
+     "room_number": "3-31-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      638.9,
+      454.6,
+      669.5,
+      480.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"1-55-1 POTAR \u00c9 WATFR 3-37-0 CQJIPVENT COMESIC RCCV 3 9 2\"",
+     "notes": []
+    },
+    {
+     "label": "STAIRWAY",
+     "room_number": "2-25-0",
+     "kind": "stairway",
+     "berths": null,
+     "bbox": [
+      717.3,
+      461.7,
+      745.4,
+      472.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SARWAY 2-25-C\"",
+     "notes": []
+    },
+    {
+     "label": "SHIP'S STORES",
+     "room_number": "2-14-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      785.8,
+      468.1,
+      827.4,
+      478.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SHIP'S STORES 2-14-C\"",
+     "notes": []
+    },
+    {
+     "label": "BOW THRUSTER ROOM",
+     "room_number": "3-5-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      848.2,
+      464.1,
+      887.4,
+      480.7
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"BOW IHEUSTER ROCN 3-5-0\"",
+     "notes": []
+    },
+    {
+     "label": "VOID",
+     "room_number": "2-(-2)-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      946.2,
+      462.5,
+      952.3,
+      478.4
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"CIOA (-(z-)-\u03c4 [\"",
+     "notes": []
+    },
+    {
+     "label": "VOID",
+     "room_number": "4-77-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      258.3,
+      489.5,
+      276.6,
+      499.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"ROOM 277 C IOA 4-77-0\"",
+     "notes": []
+    },
+    {
+     "label": "FUEL OIL 7P",
+     "room_number": "4-67-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      308.4,
+      495.0,
+      351.3,
+      504.5
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"-FIJE_OL 7F 1-37-2\"",
+     "notes": []
+    },
+    {
+     "label": "FUEL OIL 6P",
+     "room_number": "4-51-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      434.5,
+      512.4,
+      472.5,
+      522.7
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"4-51-2 FUEL OIL 6P\"",
+     "notes": []
+    },
+    {
+     "label": "FUEL OIL SETTLER",
+     "room_number": "4-47-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      517.8,
+      512.4,
+      544.7,
+      533.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"FUEL SETTLER 4-47-0 50 MTWT\"",
+     "notes": []
+    },
+    {
+     "label": "FUEL OIL",
+     "room_number": "4-33-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      632.8,
+      515.6,
+      657.3,
+      525.1
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"FI3II 1-22-%\"",
+     "notes": []
+    },
+    {
+     "label": "ROLL TANK",
+     "room_number": "04-37-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      624.2,
+      546.5,
+      651.2,
+      556.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"1-22-% MTWT 40 24-37-0 ROLL TANK 35\"",
+     "notes": []
+    },
+    {
+     "label": "DEF",
+     "room_number": "4-27-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      702.6,
+      510.8,
+      720.9,
+      518.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"4-2/-Q DEF TRANSDUCE\"",
+     "notes": []
+    },
+    {
+     "label": "AFT TRANSDUCER ROOM",
+     "room_number": "4-22-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      734.4,
+      499.0,
+      769.9,
+      522.7
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"4-2/-Q TRANSDUCE ROCM --22-6 A7 FWD\"",
+     "notes": []
+    },
+    {
+     "label": "FWD TRANSDUCER ROOM",
+     "room_number": "4-14-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      780.9,
+      499.0,
+      827.4,
+      522.7
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"FWD RANSDUCER ROOW 4 14 0\"",
+     "notes": []
+    },
+    {
+     "label": "WASTE OIL/SLUDGE",
+     "room_number": "4-31-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      685.4,
+      561.5,
+      730.7,
+      571.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"3HD 0 25 4\u2013.11\u20130 MTWT WASTE OIL/SLUDGE\"",
+     "notes": []
+    },
+    {
+     "label": "FOREPEAK BALLAST",
+     "room_number": "4-(-4)-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      924.1,
+      499.0,
+      953.5,
+      515.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"FORE EAK BALLAS 4-(-4)-0\"",
+     "notes": []
+    },
+    {
+     "label": "BOW THRUSTER VOID",
+     "room_number": "4-5-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      938.8,
+      545.7,
+      996.3,
+      555.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"H\u65e5 :-5-0 nOW \"I RUSTTR VC D 0 -5 COLL\"",
+     "notes": []
+    }
+   ],
    "roles_without_count": []
   },
   {
@@ -84,6 +940,7 @@
    "scale": "",
    "rooms": 0,
    "berths": 0,
+   "gemini": [],
    "roles_without_count": []
   },
   {
@@ -96,6 +953,88 @@
    "scale": "",
    "rooms": 0,
    "berths": 0,
+   "gemini": [
+    {
+     "label": "UPTAKE",
+     "room_number": "1-50-4",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      351.3,
+      410.3,
+      380.7,
+      421.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"S.RVIVAL S. I S OWACE L2-AKF 1-50-4\"",
+     "notes": []
+    },
+    {
+     "label": "W/C",
+     "room_number": "03-35-2",
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      547.1,
+      449.9,
+      569.2,
+      462.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"ROOM W/C 03-35-2 CHART\"",
+     "notes": []
+    },
+    {
+     "label": "CHART ROOM",
+     "room_number": "03-32-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      560.6,
+      464.1,
+      590.0,
+      481.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"ROOM LOTHOUSE W/C 03-35-2 CHART 03-32-0f\"",
+     "notes": []
+    },
+    {
+     "label": "PILOTHOUSE",
+     "room_number": "03-22-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      558.1,
+      489.5,
+      602.2,
+      505.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"ROOM LOTHOUSE 30 03-32-0f 03-22-0\"",
+     "notes": []
+    },
+    {
+     "label": "STAIRWAY",
+     "room_number": "02-29-1",
+     "kind": "stairway",
+     "berths": null,
+     "bbox": [
+      450.4,
+      552.8,
+      493.3,
+      583.7
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"STAIRWAY -62-20 (HALF HEIGHI D ID MO ERDG: DECK)\"",
+     "notes": []
+    }
+   ],
    "roles_without_count": []
   },
   {
@@ -108,6 +1047,264 @@
    "scale": "",
    "rooms": 0,
    "berths": 0,
+   "gemini": [
+    {
+     "label": "3RD ENG",
+     "room_number": "02-37-2",
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      537.3,
+      395.2,
+      564.3,
+      409.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"3RC ENG 02 37 2 2ND ENG 22-33-2\"",
+     "notes": []
+    },
+    {
+     "label": "2ND ENG",
+     "room_number": "02-33-2",
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      575.3,
+      395.2,
+      602.2,
+      409.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"3RC ENG 02 37 2 2ND ENG 22-33-2\"",
+     "notes": []
+    },
+    {
+     "label": "ELECTRICAL ENGINEER",
+     "room_number": "02-25-2",
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      643.8,
+      393.6,
+      675.6,
+      415.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"02-25-2 SNR LCTRICAL 2NDWAI 52-21-2\"",
+     "notes": []
+    },
+    {
+     "label": "2ND MATE",
+     "room_number": "02-21-2",
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      680.5,
+      399.2,
+      708.7,
+      415.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"02-25-2 SNR LCTRICAL 2NDWAI 52-21-2 CAP7A\\ 07-15-4\"",
+     "notes": []
+    },
+    {
+     "label": "CAPTAIN",
+     "room_number": "02-15-4",
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      718.5,
+      400.8,
+      744.2,
+      415.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"2NDWAI 52-21-2 CAP7A\\ 07-15-4 O\"",
+     "notes": []
+    },
+    {
+     "label": "PILOTHOUSE ELECTRONICS",
+     "room_number": "02-29-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      598.5,
+      423.7,
+      612.0,
+      460.9
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"PILOTHOUSE ELECTRONICS 02-29-2\"",
+     "notes": []
+    },
+    {
+     "label": "PASSAGEWAY",
+     "room_number": "02-18-2",
+     "kind": "corridor",
+     "berths": null,
+     "bbox": [
+      673.2,
+      483.9,
+      712.4,
+      494.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"DASSAGEWAY\"",
+     "notes": []
+    },
+    {
+     "label": "PASSAGEWAY",
+     "room_number": "02-15-2",
+     "kind": "corridor",
+     "berths": null,
+     "bbox": [
+      798.0,
+      483.9,
+      836.0,
+      494.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"PASSAGEWAY 02-15-2\"",
+     "notes": []
+    },
+    {
+     "label": "STAIRWAY",
+     "room_number": "02-29-1",
+     "kind": "stairway",
+     "berths": null,
+     "bbox": [
+      614.4,
+      605.1,
+      643.8,
+      615.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"STARWAY 02-22-1 CREW\"",
+     "notes": []
+    },
+    {
+     "label": "CREW DOUBLE",
+     "room_number": "02-24-0",
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      659.7,
+      598.8,
+      685.4,
+      615.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": true,
+     "evidence": "OCR at that spot: \"CREW OOUBLE C 4t 6) CH-+ 0-03-c0 AII\"",
+     "notes": []
+    },
+    {
+     "label": "CHIEF MATE",
+     "room_number": "02-20-0",
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      697.7,
+      598.8,
+      719.7,
+      615.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"CH-+ 0-03-c0 AII CHEF CNG 20\"",
+     "notes": []
+    },
+    {
+     "label": "CHIEF ENG",
+     "room_number": "02-15-0",
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      730.7,
+      598.8,
+      755.2,
+      615.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"0-03-c0 CHEF CNG 20 O\"",
+     "notes": []
+    },
+    {
+     "label": "EMERGENCY GENERATOR FUEL TANK",
+     "room_number": "02-41-4",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      422.3,
+      389.7,
+      506.7,
+      406.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"EVERGENCY GENERATOR VHNI A ON HIEL ANK U2 41 1-50-2 L\"",
+     "notes": []
+    },
+    {
+     "label": "EMERGENCY GENERATOR",
+     "room_number": "02-41-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      466.3,
+      436.4,
+      501.8,
+      459.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"EVERSENC GENERATOR 02-41-2 209/120 EMERG SWBD\"",
+     "notes": []
+    },
+    {
+     "label": "LN LKR",
+     "room_number": "02-33-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      490.8,
+      540.9,
+      517.8,
+      551.2
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"32-31-3 1VIKH R..NK 37 1 UP\"",
+     "notes": []
+    },
+    {
+     "label": "CG LOCKER (BELOW STAIRS)",
+     "room_number": "02-32-1",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      492.0,
+      603.5,
+      537.3,
+      622.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"(3E_OW STAIRS) CG LCCKEF 02 32\"",
+     "notes": []
+    }
+   ],
    "roles_without_count": []
   },
   {
@@ -120,6 +1317,552 @@
    "scale": "",
    "rooms": 0,
    "berths": 0,
+   "gemini": [
+    {
+     "label": "UPTAKE",
+     "room_number": "1-50-4",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      403.9,
+      79.2,
+      429.6,
+      90.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"UPTAKE ACCESS ROO JPTAKE 1-50-4\"",
+     "notes": []
+    },
+    {
+     "label": "VENTILATION",
+     "room_number": "1-50-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      450.4,
+      86.3,
+      494.5,
+      98.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"01 LVCL BOO OOCION VENTILATION 0\"",
+     "notes": []
+    },
+    {
+     "label": "TECH LKR",
+     "room_number": "01-45-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      534.9,
+      82.4,
+      564.3,
+      93.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"LKP TA.NDRY 01-:1-2 01-45-2\"",
+     "notes": []
+    },
+    {
+     "label": "LAUNDRY",
+     "room_number": "01-40-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      574.1,
+      86.3,
+      602.2,
+      97.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"LKP TA.NDRY 01-:1-2 SCIENCE 01-36-2\"",
+     "notes": []
+    },
+    {
+     "label": "SCIENCE",
+     "room_number": "01-36-2",
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      613.2,
+      86.3,
+      640.2,
+      97.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"TA.NDRY SCIENCE 01-36-2 seI NCI -31-2\"",
+     "notes": []
+    },
+    {
+     "label": "SCIENCE",
+     "room_number": "01-31-2",
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      654.8,
+      86.3,
+      683.0,
+      97.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"seI NCI -31-2\"",
+     "notes": []
+    },
+    {
+     "label": "SCIENCE",
+     "room_number": "01-26-2",
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      698.9,
+      87.9,
+      727.1,
+      99.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"01-2--3 SCIENCE\"",
+     "notes": []
+    },
+    {
+     "label": "SCIENCE",
+     "room_number": "01-21-2",
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      750.3,
+      91.1,
+      777.2,
+      102.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SC ENCE 01-21-2 C-EF SC ENCE 01-15-4\"",
+     "notes": []
+    },
+    {
+     "label": "CHIEF SCIENCE",
+     "room_number": "01-15-4",
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      784.6,
+      91.1,
+      825.0,
+      102.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"C-EF SC ENCE DAMAGE CONTROL _OCKER 01-15-4 01-13-2\"",
+     "notes": []
+    },
+    {
+     "label": "DAMAGE CONTROL LOCKER",
+     "room_number": "01-13-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      832.3,
+      90.3,
+      909.4,
+      101.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"C-EF SC ENCE DAMAGE CONTROL _OCKER 01-13-2\"",
+     "notes": []
+    },
+    {
+     "label": "EQUIP HVAC",
+     "room_number": "01-40-4",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      543.5,
+      114.8,
+      563.0,
+      136.2
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "no OCR text at that spot",
+     "notes": []
+    },
+    {
+     "label": "DECK LOCKER",
+     "room_number": "01-(-4)-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      979.2,
+      160.8,
+      1022.0,
+      173.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"DEC< LOCKER C1-(-4)-C\"",
+     "notes": []
+    },
+    {
+     "label": "CG LKR",
+     "room_number": "01-35-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      572.8,
+      169.5,
+      598.5,
+      181.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"CC 01-35-0 CENTERBOARD TRUNK\"",
+     "notes": []
+    },
+    {
+     "label": "STAIRWAY",
+     "room_number": "01-25-0",
+     "kind": "stairway",
+     "berths": null,
+     "bbox": [
+      618.1,
+      170.3,
+      647.5,
+      182.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"STAIRWAY 1-25-0\"",
+     "notes": []
+    },
+    {
+     "label": "STAIRWAY",
+     "room_number": "01-24-0",
+     "kind": "stairway",
+     "berths": null,
+     "bbox": [
+      663.4,
+      169.5,
+      694.0,
+      181.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"STARWAY ij1\"",
+     "notes": []
+    },
+    {
+     "label": "PASSAGEWAY",
+     "room_number": "01-15-2",
+     "kind": "corridor",
+     "berths": null,
+     "bbox": [
+      732.0,
+      170.3,
+      772.3,
+      181.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"PASSAGERAY 01-15-2\"",
+     "notes": []
+    },
+    {
+     "label": "CENTERBOARD TRUNK",
+     "room_number": "1-41-4",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      526.3,
+      188.5,
+      583.8,
+      199.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"CC 01-35-0 CENTERBOARD TRUNK 4-41-0\"",
+     "notes": []
+    },
+    {
+     "label": "10 MOORING EQUIPMENT",
+     "room_number": "01-0-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      832.3,
+      198.8,
+      865.4,
+      222.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"MOORAS 10 OU FMIN 01-0-0 \u771f\"",
+     "notes": []
+    },
+    {
+     "label": "HOSPITAL",
+     "room_number": "01-34-1",
+     "kind": "hospital",
+     "berths": null,
+     "bbox": [
+      553.2,
+      213.8,
+      585.1,
+      228.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"4-41-0 HOSPNAL 01-39F\"",
+     "notes": []
+    },
+    {
+     "label": "HVAC EQUIP",
+     "room_number": "01-20-1",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      683.0,
+      223.3,
+      714.8,
+      236.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"HVAC QU|P 01-\"",
+     "notes": []
+    },
+    {
+     "label": "DECK OPERATIONS STATION",
+     "room_number": "01-63-1",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      248.5,
+      259.0,
+      323.1,
+      272.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"DEC< OP-RATIONS STATION 01-63-1\"",
+     "notes": []
+    },
+    {
+     "label": "TRUNK",
+     "room_number": "01-39-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      591.2,
+      286.7,
+      612.0,
+      300.2
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"0-62-10 IRLNK CREW DOUBL: 0-1\u20ac-10\"",
+     "notes": []
+    },
+    {
+     "label": "CREW DOUBLE",
+     "room_number": "01-34-0",
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      623.0,
+      286.7,
+      647.5,
+      305.7
+     ],
+     "confirmed": true,
+     "berths_confirmed": true,
+     "evidence": "OCR at that spot: \"0-62-10 IRLNK CREW DOUBL: CREN DCJBLE 0-1\u20ac-10 C-29-5\"",
+     "notes": []
+    },
+    {
+     "label": "CREW DOUBLE",
+     "room_number": "01-29-0",
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      658.5,
+      285.9,
+      684.2,
+      305.7
+     ],
+     "confirmed": true,
+     "berths_confirmed": true,
+     "evidence": "OCR at that spot: \"DOUBL: CREN DCJBLE 1-2-0 K.N4 0-1\u20ac-10 C-29-5\"",
+     "notes": []
+    },
+    {
+     "label": "TRUNK",
+     "room_number": "1-32-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      695.2,
+      285.9,
+      716.0,
+      299.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"DCJBLE 1-2-0 K.N4\"",
+     "notes": []
+    },
+    {
+     "label": "MARINE TECH",
+     "room_number": "01-20-0",
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      744.2,
+      285.9,
+      772.3,
+      305.7
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"AA NE -CH SCIENCE C1-G-3 31-2C-G\"",
+     "notes": []
+    },
+    {
+     "label": "SCIENCE",
+     "room_number": "01-15-0",
+     "kind": "stateroom",
+     "berths": 1,
+     "bbox": [
+      782.1,
+      289.1,
+      810.3,
+      301.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SCIENCE C1-G-3 V2NILA ION 1 \u2212 1)\u22125\"",
+     "notes": []
+    },
+    {
+     "label": "SHIP'S HAZ MAT",
+     "room_number": "01-13-1",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      832.3,
+      288.3,
+      878.8,
+      299.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"-SI F'S HIAZ MA\" C1-13-1 V2NILA ION 1 \u2212 1)\u22125 BHD\"",
+     "notes": []
+    },
+    {
+     "label": "VENTILATION",
+     "room_number": "01-13-3",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      820.1,
+      303.3,
+      855.6,
+      316.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SCIENCE C1-G-3 -SI F'S HIAZ MA\" C1-13-1 V2NILA ION 1 \u2212 1)\u22125\"",
+     "notes": []
+    },
+    {
+     "label": "UPTAKE",
+     "room_number": "1-50-4",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      418.6,
+      407.1,
+      444.3,
+      419.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"UPTAKT 1-5C-1\"",
+     "notes": []
+    },
+    {
+     "label": "VENTILATION",
+     "room_number": "01-50-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      440.6,
+      462.5,
+      479.8,
+      472.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"VENTILATION 01-50-2\"",
+     "notes": []
+    },
+    {
+     "label": "TECH LKR",
+     "room_number": "01-45-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      515.3,
+      462.5,
+      538.6,
+      481.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"\u00bfTCCII LKR 1-45-2\"",
+     "notes": []
+    },
+    {
+     "label": "CENTERBOARD TRUNK",
+     "room_number": "1-41-4",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      517.8,
+      508.5,
+      549.6,
+      521.9
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"TNTERBO\"",
+     "notes": []
+    },
+    {
+     "label": "DECK OPERATIONS STATION",
+     "room_number": "01-63-1",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      315.8,
+      582.9,
+      357.4,
+      609.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"DECK OFERA- ONS SIAICN 101 13 1 CRAN:\"",
+     "notes": []
+    }
+   ],
    "roles_without_count": []
   },
   {
@@ -132,6 +1875,472 @@
    "scale": "",
    "rooms": 0,
    "berths": 0,
+   "gemini": [
+    {
+     "label": "VESTIBULE",
+     "room_number": "1-64-0",
+     "kind": "corridor",
+     "berths": null,
+     "bbox": [
+      379.4,
+      130.7,
+      389.2,
+      153.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"e -64-0\"",
+     "notes": []
+    },
+    {
+     "label": "BOSUN STORES/SHOP",
+     "room_number": "1-57-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      421.1,
+      122.8,
+      459.0,
+      136.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"OC KF 1-59-2 BOSUN STORES/SHOP 1-57-2\"",
+     "notes": []
+    },
+    {
+     "label": "FAN ROOM",
+     "room_number": "1-48-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      510.4,
+      148.1,
+      541.0,
+      156.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"TAN TRIAK 1-48-2\"",
+     "notes": []
+    },
+    {
+     "label": "PUBLIC W/C",
+     "room_number": "1-45-2",
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      554.5,
+      90.3,
+      597.3,
+      99.8
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"-NRE SPPRESSIOV 1-1f-1 UBJC W/C 1-10-2 ACCESSIBLE SC ENCE 1-\"",
+     "notes": []
+    },
+    {
+     "label": "ACCESSIBLE SCIENCE",
+     "room_number": "1-41-2",
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      605.9,
+      87.9,
+      663.4,
+      96.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"UBJC W/C ACCESSIBLE SC ENCE 1-1-2\"",
+     "notes": []
+    },
+    {
+     "label": "LOUNGE",
+     "room_number": null,
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      620.6,
+      130.7,
+      640.2,
+      136.2
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"DUSGL 1-33-2\"",
+     "notes": []
+    },
+    {
+     "label": "STAIRWAY",
+     "room_number": "2-24-0",
+     "kind": "stairway",
+     "berths": null,
+     "bbox": [
+      641.4,
+      171.1,
+      667.1,
+      179.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"STA RWAY \u7530 o 2-24-0\"",
+     "notes": []
+    },
+    {
+     "label": "STAIRWAY",
+     "room_number": "1-25-0",
+     "kind": "stairway",
+     "berths": null,
+     "bbox": [
+      698.9,
+      170.3,
+      724.6,
+      179.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"1-25-0 TAIRWA\"",
+     "notes": []
+    },
+    {
+     "label": "MESS",
+     "room_number": "1-21-2",
+     "kind": "mess",
+     "berths": null,
+     "bbox": [
+      739.3,
+      132.3,
+      755.2,
+      141.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"VESS 1-21-2\"",
+     "notes": []
+    },
+    {
+     "label": "PASSAGEWAY",
+     "room_number": "1-14-0",
+     "kind": "corridor",
+     "berths": null,
+     "bbox": [
+      744.2,
+      175.8,
+      780.9,
+      184.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"PASSAGEWAY 1-14-0\"",
+     "notes": []
+    },
+    {
+     "label": "FROZEN STORES",
+     "room_number": "1-18-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      782.1,
+      138.6,
+      805.4,
+      151.3
+     ],
+     "confirmed": false,
+     "berths_confirmed": false,
+     "evidence": "no OCR text at that spot",
+     "notes": []
+    },
+    {
+     "label": "CHILLED STORES",
+     "room_number": "1-14-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      809.1,
+      138.6,
+      832.3,
+      150.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"14\"",
+     "notes": []
+    },
+    {
+     "label": "GARBAGE ROOM",
+     "room_number": "1-8-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      843.3,
+      200.4,
+      880.1,
+      215.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"GARHAGH ROCV 10 STCRCS 1-5-0\"",
+     "notes": []
+    },
+    {
+     "label": "CHAIN LKR (P)",
+     "room_number": "1-5-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      902.1,
+      165.5,
+      918.0,
+      179.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"C- R 1-5-2\"",
+     "notes": []
+    },
+    {
+     "label": "CHAIN LKR (S)",
+     "room_number": "1-5-1",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      902.1,
+      205.9,
+      918.0,
+      219.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"CHM (5) 1-5-1\"",
+     "notes": []
+    },
+    {
+     "label": "DRY STORES",
+     "room_number": "1-14-1",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      811.5,
+      222.6,
+      836.0,
+      234.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"GARHAGH ROCV STCRCS \u4f01 DRY 1-14-1 1-5-0\"",
+     "notes": []
+    },
+    {
+     "label": "GALLEY",
+     "room_number": "1-18-1",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      758.9,
+      248.7,
+      778.5,
+      256.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"1-18-1\"",
+     "notes": []
+    },
+    {
+     "label": "SCULLERY",
+     "room_number": "1-25-1",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      714.8,
+      219.4,
+      744.2,
+      227.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SCUL.CRY 25\"",
+     "notes": []
+    },
+    {
+     "label": "COMPUTER LAB",
+     "room_number": "1-25-3",
+     "kind": "lab",
+     "berths": null,
+     "bbox": [
+      676.9,
+      247.1,
+      718.5,
+      255.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"COVPLT\u00c8R LAB 1-25-3\"",
+     "notes": []
+    },
+    {
+     "label": "MAIN LAB",
+     "room_number": "1-33-0",
+     "kind": "lab",
+     "berths": null,
+     "bbox": [
+      597.3,
+      225.7,
+      627.9,
+      234.4
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"MAY LAE 1-33-0\"",
+     "notes": []
+    },
+    {
+     "label": "WET LAB",
+     "room_number": "1-47-1",
+     "kind": "lab",
+     "berths": null,
+     "bbox": [
+      484.7,
+      209.1,
+      510.4,
+      218.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"5.5 \u5341 HHHP WET LAB 1-47-1\"",
+     "notes": []
+    },
+    {
+     "label": "EMERGENCY CONTROL STATION",
+     "room_number": "1-59-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      422.3,
+      205.1,
+      460.2,
+      227.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"ENERGENCY STATION CONIRCL 1-59-0\"",
+     "notes": []
+    },
+    {
+     "label": "ER ACCESS",
+     "room_number": "3-59-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      446.8,
+      171.1,
+      477.4,
+      179.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"ER ACCESS 3-59-2 1 7\"",
+     "notes": []
+    },
+    {
+     "label": "PUBLIC W/C",
+     "room_number": "1-45-2",
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      554.5,
+      417.4,
+      597.3,
+      426.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"-FIRE SU==RESEION + i 1 -PUB_IC W/C ACCESSIB_E SC ENCE 145 7\"",
+     "notes": []
+    },
+    {
+     "label": "ACCESSIBLE SCIENCE",
+     "room_number": "1-41-2",
+     "kind": "stateroom",
+     "berths": 2,
+     "bbox": [
+      605.9,
+      410.3,
+      663.4,
+      419.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"-PUB_IC W/C ACCESSIB_E SC ENCE 1-41-2\"",
+     "notes": []
+    },
+    {
+     "label": "MESS",
+     "room_number": "1-21-2",
+     "kind": "mess",
+     "berths": null,
+     "bbox": [
+      739.3,
+      456.2,
+      755.2,
+      464.9
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"WESS 1-21-2\"",
+     "notes": []
+    },
+    {
+     "label": "PASSAGEWAY",
+     "room_number": "1-14-0",
+     "kind": "corridor",
+     "berths": null,
+     "bbox": [
+      744.2,
+      499.8,
+      780.9,
+      508.5
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"PASSAGLWAY 1-14-0\"",
+     "notes": []
+    },
+    {
+     "label": "MAIN LAB",
+     "room_number": "1-33-0",
+     "kind": "lab",
+     "berths": null,
+     "bbox": [
+      597.3,
+      548.9,
+      627.9,
+      557.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"MAN LA5 1-33-0\"",
+     "notes": []
+    },
+    {
+     "label": "COMPUTER LAB",
+     "room_number": "1-25-3",
+     "kind": "lab",
+     "berths": null,
+     "bbox": [
+      676.9,
+      574.2,
+      718.5,
+      582.9
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"CC'MPLT\u00c8R 25\"",
+     "notes": []
+    }
+   ],
    "roles_without_count": []
   },
   {
@@ -144,6 +2353,312 @@
    "scale": ".",
    "rooms": 0,
    "berths": 0,
+   "gemini": [
+    {
+     "label": "SCIENCE STORES",
+     "room_number": "3-67-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      284.0,
+      130.7,
+      334.2,
+      141.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SCIENCE STORES 3-67-2\"",
+     "notes": []
+    },
+    {
+     "label": "ENGINE ROOM",
+     "room_number": "3-51-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      410.0,
+      130.7,
+      450.4,
+      141.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"ENGINE ROCW 3-51-0\"",
+     "notes": []
+    },
+    {
+     "label": "AUXILIARY MACHINERY ROOM",
+     "room_number": "3-41-4",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      485.9,
+      126.7,
+      525.1,
+      152.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"5-4:-4 MACHINERY AUIAR J<1 4 POOU LWS\"",
+     "notes": []
+    },
+    {
+     "label": "WORKSHOP",
+     "room_number": "2-22-4",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      675.6,
+      137.0,
+      706.2,
+      148.9
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"WCRKSHIGP 2-22-4\"",
+     "notes": []
+    },
+    {
+     "label": "GYM",
+     "room_number": "2-22-2",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      689.1,
+      167.1,
+      706.2,
+      179.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"CYM. 2-22-2\"",
+     "notes": []
+    },
+    {
+     "label": "SHIP'S STORES",
+     "room_number": "2-14-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      767.4,
+      171.9,
+      790.7,
+      190.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"SHIP'S STORES 7-1-3 SWTD UP\"",
+     "notes": []
+    },
+    {
+     "label": "MOTOR/DRIVE ROOM",
+     "room_number": "3-77-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      160.3,
+      184.5,
+      222.8,
+      198.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"MOTOR/DRIVE ROOM 3-88-0\"",
+     "notes": []
+    },
+    {
+     "label": "TRANSCEIVER ROOM",
+     "room_number": "2-18-1",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      744.2,
+      221.0,
+      779.7,
+      240.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"TRNISSEVER RoCY 2-1B-1 7\"",
+     "notes": []
+    },
+    {
+     "label": "WINCH ROOM",
+     "room_number": "3-67-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      290.1,
+      228.9,
+      331.7,
+      240.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"WINCH ROOM 3-67-0 O\"",
+     "notes": []
+    },
+    {
+     "label": "DOMESTIC EQUIPMENT ROOM",
+     "room_number": "3-31-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      613.2,
+      228.9,
+      651.2,
+      254.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"35 OAHKE EQUIPMEN JOMES IIC JEE 0-1E-C ROOM\"",
+     "notes": []
+    },
+    {
+     "label": "DATA CENTER",
+     "room_number": "2-22-1",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      672.0,
+      234.4,
+      711.1,
+      246.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"LATA 2-22-1\"",
+     "notes": []
+    },
+    {
+     "label": "ECR",
+     "room_number": "3-63-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      351.3,
+      236.8,
+      368.4,
+      248.7
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"-CR 3-63-0\"",
+     "notes": []
+    },
+    {
+     "label": "CHILLER EQUIPMENT ROOM",
+     "room_number": "3-41-1",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      493.3,
+      252.6,
+      531.2,
+      282.0
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"ECENI CHI__ER ROOW i-41-1 O\"",
+     "notes": []
+    },
+    {
+     "label": "ELECTRICAL ROOM",
+     "room_number": "3-51-1",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      381.9,
+      262.9,
+      427.2,
+      274.8
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"ELECTRICAL ROOM\"",
+     "notes": []
+    },
+    {
+     "label": "BOW THRUSTER ROOM",
+     "room_number": "3-5-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      875.2,
+      263.7,
+      932.7,
+      275.6
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"BHC FOW THR.STE? RCOM 2-5-3\"",
+     "notes": []
+    },
+    {
+     "label": "W/C",
+     "room_number": "3-65-1",
+     "kind": "toilet_shower",
+     "berths": null,
+     "bbox": [
+      362.3,
+      299.4,
+      386.8,
+      311.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"141F BHU w/c 3-65-1 F 5\"",
+     "notes": []
+    },
+    {
+     "label": "AFT TRANSDUCER ROOM",
+     "room_number": "4-22-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      756.4,
+      409.5,
+      829.9,
+      421.3
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"WASE OIL/SLJOGE AHI HANSDUCH ROOM \u00bf-22-0\"",
+     "notes": []
+    },
+    {
+     "label": "FWD TRANSDUCER ROOM",
+     "room_number": "4-14-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      806.6,
+      437.2,
+      871.5,
+      449.1
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"FWD TRANSDUC_R ROOM 4-1\u00f7-0 SEACHEST\"",
+     "notes": []
+    },
+    {
+     "label": "MOTOR/DRIVE ROOM",
+     "room_number": "3-77-0",
+     "kind": "other",
+     "berths": null,
+     "bbox": [
+      157.9,
+      497.4,
+      197.1,
+      517.2
+     ],
+     "confirmed": true,
+     "berths_confirmed": false,
+     "evidence": "OCR at that spot: \"MCTOR/DRVE Q- 3-77-0 ROOM 9\u2103 85\"",
+     "notes": []
+    }
+   ],
    "roles_without_count": []
   }
  ],
@@ -290,9 +2805,53 @@
    "source_page": 6,
    "source_bbox": "701.3,454.5,730.9,489.8",
    "checkable": true
+  },
+  {
+   "item_id": "V01",
+   "space": "Stateroom Crew Double 02-24-0",
+   "parameter": "persons berthed per sleeping room",
+   "value": 2.0,
+   "unit": "persons",
+   "source": "RCRV General Arrangement 6096-070-001 Rev J, p.6, Dwg 6096-070-001 Elevation 4-5A: read by Gemini (\"CREW DOUBLE\" 02-24-0, 2 berths), confirmed in code: OCR at that spot: \"CREW DOLELE 02-24-0 CHIEFMATE 02 20 :\"; berths from the label",
+   "notes": "crew",
+   "source_file": "data/designs/sources/RCRV_GA_6096-070-001_RevJ.pdf",
+   "source_page": 6,
+   "source_bbox": "832.3,304.9,878.8,315.2",
+   "checkable": true
+  },
+  {
+   "item_id": "V02",
+   "space": "Stateroom Crew Double 01-34-0",
+   "parameter": "persons berthed per sleeping room",
+   "value": 2.0,
+   "unit": "persons",
+   "source": "RCRV General Arrangement 6096-070-001 Rev J, p.10, Dwg 6096-070-001 Plan 8-4C: read by Gemini (\"CREW DOUBLE\" 01-34-0, 2 berths), confirmed in code: OCR at that spot: \"0-62-10 IRLNK CREW DOUBL: CREN DCJBLE 0-1\u20ac-10 C-29-5\";",
+   "notes": "crew",
+   "source_file": "data/designs/sources/RCRV_GA_6096-070-001_RevJ.pdf",
+   "source_page": 10,
+   "source_bbox": "623,286.7,647.5,305.7",
+   "checkable": true
+  },
+  {
+   "item_id": "V03",
+   "space": "Stateroom Crew Double 01-29-0",
+   "parameter": "persons berthed per sleeping room",
+   "value": 2.0,
+   "unit": "persons",
+   "source": "RCRV General Arrangement 6096-070-001 Rev J, p.10, Dwg 6096-070-001 Plan 8-4C: read by Gemini (\"CREW DOUBLE\" 01-29-0, 2 berths), confirmed in code: OCR at that spot: \"DOUBL: CREN DCJBLE 1-2-0 K.N4 0-1\u20ac-10 C-29-5\";",
+   "notes": "crew",
+   "source_file": "data/designs/sources/RCRV_GA_6096-070-001_RevJ.pdf",
+   "source_page": 10,
+   "source_bbox": "658.5,285.9,684.2,305.7",
+   "checkable": true
   }
  ],
  "findings": [
+  "Gemini read 160 labelled spaces on the GA sheets; code confirmed 143 against the drawing text at the reported position (17 shown as 'Gemini only', not used).",
+  "Staterooms confirmed on the drawings: 19 (8 science / marine tech, 3 labelled CREW, 8 named for a role, e.g. CHIEF MATE).",
+  "Science staterooms: 8 on the drawings vs 8 in the text (p.2).",
+  "Crew cabins: 7 single (named for a role: 2Nd Eng, 2Nd Mate, 3Rd Eng, Captain, Chief Eng, Chief Mate, Electrical Engineer) and 3 CREW DOUBLE on the drawings vs 7 single and 3 double in the text (p.2).",
+  "Gemini counted 1 drawn berth in 7 science stateroom(s) that the text calls double: upper and lower berths drawn in plan look like one outline. Berth counts not confirmed by the label are not used for checks.",
   "[46CFR190 \u00a7 190.20-35(a)] applies (crew 12 persons (p.2), endurance 21 days (p.2)): a space labelled HOSPITAL is on p.10 (Dwg 6096-070-001, Plan 8-4C). Status: met."
  ]
 }

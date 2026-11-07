@@ -62,8 +62,10 @@ class OpenAICompatible:
                 )
             except httpx.HTTPError as e:
                 raise LLMError(f"{self.name}: {type(e).__name__}: {e}") from e
-            if r.status_code != 429:
+            if r.status_code not in (429, 503):  # rate limit / temporarily overloaded: wait and retry
                 break
+            if r.status_code == 429 and ("PerDay" in r.text or ("quota" in r.text.lower() and "retry" not in r.text.lower())):
+                break  # daily quota used up (Gemini free tier: 20 requests/day/model) - waiting will not help
             # rate limited (free tiers cap tokens per minute): wait as told, up to LLM_RATE_LIMIT_WAIT seconds
             # in total, then fail so a chained provider (e.g. ollama) can take over
             wait = _retry_after(r)
@@ -178,7 +180,7 @@ def make_provider(name: str):
         return OpenAICompatible(
             base_url=os.getenv("GEMINI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai"),
             api_key=os.getenv("GEMINI_API_KEY", ""),
-            model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
+            model=os.getenv("GEMINI_MODEL", "gemini-flash-latest"),
             name="gemini",
             timeout=float(os.getenv("GEMINI_TIMEOUT", str(timeout))),
         )
