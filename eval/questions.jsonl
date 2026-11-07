@@ -36,3 +36,10 @@
 {"id": "r06", "type": "clause_id", "question": "What does 46 CFR 190.10-30 say?", "expected": ["190.10-30(a)", "190.10-30"], "facts": ["40"]}
 {"id": "r07", "type": "clause_id", "question": "Show me § 190.25-5(a)", "expected": ["190.25-5(a)"], "facts": ["39"]}
 {"id": "r08", "type": "unanswerable", "question": "What fuel tank capacity is required on an oceanographic research vessel?", "expected": [], "facts": []}
+{"id": "m01", "type": "answerable", "question": "What is the minimum headroom in seafarer accommodation?", "expected": ["A3.1/6(a)"], "facts": ["203"]}
+{"id": "m02", "type": "answerable", "question": "What are the minimum inside dimensions of a seafarer's berth?", "expected": ["A3.1/9(e)"], "facts": ["198", "80"]}
+{"id": "m03", "type": "answerable", "question": "Which ships must have a separate hospital for seafarers?", "expected": ["A3.1/12"], "facts": ["15"]}
+{"id": "m04", "type": "answerable", "question": "What floor area must a single berth seafarer sleeping room have on a ship of 5,000 gross tonnage?", "expected": ["A3.1/9(f)"], "facts": ["5.5"]}
+{"id": "m05", "type": "answerable", "question": "When must a ship carry a qualified medical doctor?", "expected": ["A4.1/4(b)"], "facts": ["100"]}
+{"id": "m06", "type": "clause_id", "question": "What does Standard A3.1, paragraph 6(a) require?", "expected": ["A3.1/6(a)"], "facts": ["203"]}
+{"id": "m07", "type": "unanswerable", "question": "What is the minimum ceiling height in a passenger cabin under MLC?", "expected": [], "facts": []}

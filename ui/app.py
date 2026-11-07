@@ -181,16 +181,25 @@ def render_answer(ans: Answer, i: int) -> None:
         if key not in ss and st.button("Answer from general knowledge", key=f"gbtn-{i}", icon=":material/public:"):
             from rulemate.general import general_answer
 
+            from rulemate.retrieval import get_retriever
+
             with st.spinner("Asking the bot (Groq / Ollama)…"):
-                ss[key] = general_answer(ans.question)
+                ss[key] = general_answer(ans.question, retriever=get_retriever())
         g = ss.get(key)
         if g:
             st.badge("general knowledge", icon=":material/public:", color="violet")
-            st.warning(f"{g['label']}. Not checked against any rule text; accuracy not measured. "
-                       "Confirm in the governing rules before using it in a design.")
+            st.warning(f"{g['label']}. Accuracy not measured. Confirm in the named source before using it in a design.")
+            for w in g.get("warnings", []):
+                st.error(w)
             st.markdown(g["text"] if g["ok"] else g["error"])
+            if g.get("references"):
+                st.markdown("**Sources named by the model, checked in code**")
+                for r in g["references"]:
+                    mark = {"loaded clause: read the sentence": "🟢", "named source, not loaded": "🟠"}.get(r["status"], "🔴")
+                    st.markdown(f"{mark} **{r['source']}** · _{r['status']}_  \n{r['why']}"
+                                + (f"  \n[{r['url']}]({r['url']})" if r.get("url") else ""))
             if g["model"]:
-                st.caption(g["model"])
+                st.caption(f"{g['model']} · model's own certainty: {g.get('certainty', '?')}")
 
 
 def sources_panel(ans: Answer) -> None:

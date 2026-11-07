@@ -15,3 +15,6 @@ eval/results/*.json
 /data/designs/sources/
 /data2/
 !eval/results/gemini_drawing.json
+
+# ILO text, downloaded by scripts/fetch_mlc.py, not redistributed
+data/rules/MLC2006.md
