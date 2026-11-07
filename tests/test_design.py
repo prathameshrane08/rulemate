@@ -180,3 +180,11 @@ def test_printed_berth_count_in_label_confirms_berths():
     [r] = verify([{"label": "SENIOR SCIENTIST (2)", "room_number": None, "kind": "stateroom", "berths": 2,
                    "box_2d": _box(596, 398, 650, 430)}], words, PAGE_W, PAGE_H)
     assert r.confirmed and r.berths_confirmed
+
+
+
+def test_man_count_cabin_labels_state_berths():
+    words = [W("2M", 600, 400)]
+    [r] = verify([{"label": "2M", "room_number": None, "kind": "stateroom", "berths": 2,
+                   "box_2d": _box(596, 398, 640, 420)}], words, PAGE_W, PAGE_H)
+    assert r.confirmed and r.berths_confirmed and r.berths == 2

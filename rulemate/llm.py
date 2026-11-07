@@ -49,7 +49,7 @@ class OpenAICompatible:
         if not self.api_key:
             raise LLMError(f"{self.name}: no API key set in .env")
         body: dict = {"model": self.model, "messages": messages, "temperature": temperature, "max_tokens": max_tokens}
-        if self.reasoning_effort and "gpt-oss" in self.model:
+        if self.reasoning_effort and ("gpt-oss" in self.model or self.name == "gemini"):
             body["reasoning_effort"] = self.reasoning_effort
         waited = 0.0
         while True:
@@ -217,9 +217,11 @@ class GeminiRotation:
         for m in self.models:
             if m in spent:
                 continue
-            p = OpenAICompatible(base_url=self.base_url, api_key=self.api_key, model=m, name="gemini", timeout=self.timeout)
+            p = OpenAICompatible(base_url=self.base_url, api_key=self.api_key, model=m, name="gemini", timeout=self.timeout,
+                                 reasoning_effort=os.getenv("GEMINI_REASONING_EFFORT", "low"))
             try:
-                out = p.complete(messages, temperature=temperature, max_tokens=max_tokens)
+                # Gemini's thinking counts against max_tokens: leave room so the answer is not cut off
+                out = p.complete(messages, temperature=temperature, max_tokens=max(max_tokens, 8192))
                 self.last = m
                 return out
             except LLMError as e:
