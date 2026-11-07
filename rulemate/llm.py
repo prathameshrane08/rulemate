@@ -173,13 +173,22 @@ def make_provider(name: str):
             timeout=timeout,
             reasoning_effort=effort,
         )
+    if name == "gemini":
+        # Google Gemini through its OpenAI-compatible endpoint (text and images); key from Google AI Studio
+        return OpenAICompatible(
+            base_url=os.getenv("GEMINI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai"),
+            api_key=os.getenv("GEMINI_API_KEY", ""),
+            model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
+            name="gemini",
+            timeout=float(os.getenv("GEMINI_TIMEOUT", str(timeout))),
+        )
     if name == "ollama":
         return Ollama(
             base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
             model=os.getenv("OLLAMA_MODEL", "llama3.2"),
             timeout=float(os.getenv("OLLAMA_TIMEOUT", "90")),
         )
-    raise ValueError(f"Unknown LLM provider '{name}' (use groq, openai or ollama)")
+    raise ValueError(f"Unknown LLM provider '{name}' (use groq, gemini, openai or ollama)")
 
 
 def get_llm(spec: str | None = None) -> ChainLLM:

@@ -100,3 +100,39 @@ def test_stair_in_machinery_space_is_marked():
     words = [W("STAIR", 380, 440), W("ENGINE ROOM", 420, 500)]
     [f] = flights_from_lines(lines, words)
     assert f.machinery
+
+
+# ---------------------------------------------------------------- Gemini readings are confirmed in code
+
+from rulemate.design.vision import verify  # noqa: E402
+
+PAGE_W, PAGE_H = 1224.0, 792.0
+
+
+def _box(x0, y0, x1, y1):  # PDF points -> Gemini box_2d (0-1000, ymin xmin ymax xmax)
+    return [y0 / PAGE_H * 1000, x0 / PAGE_W * 1000, y1 / PAGE_H * 1000, x1 / PAGE_W * 1000]
+
+
+def test_gemini_reading_confirmed_by_noisy_ocr():
+    words = [W("CREW", 600, 400), W("DOUBL:", 600, 409), W("01-34-0", 598, 418)]  # CAD-font OCR
+    [r] = verify([{"label": "CREW DOUBLE", "room_number": "01-34-0", "kind": "stateroom", "berths": 2,
+                   "box_2d": _box(596, 398, 640, 428)}], words, PAGE_W, PAGE_H)
+    assert r.confirmed and r.berths_confirmed and r.berths == 2
+
+
+def test_gemini_reading_with_nothing_on_the_sheet_is_not_used():
+    words = [W("LAUNDRY", 300, 200)]
+    [r] = verify([{"label": "CREW DOUBLE", "room_number": "02-99-0", "kind": "stateroom", "berths": 2,
+                   "box_2d": _box(800, 500, 840, 520)}], words, PAGE_W, PAGE_H)
+    assert not r.confirmed
+
+
+def test_gemini_berths_must_agree_with_the_label():
+    words = [W("CREW", 600, 400), W("DOUBLE", 600, 409)]
+    [r] = verify([{"label": "CREW DOUBLE", "room_number": None, "kind": "stateroom", "berths": 3,
+                   "box_2d": _box(596, 398, 640, 420)}], words, PAGE_W, PAGE_H)
+    assert r.confirmed and not r.berths_confirmed and "label says 2" in r.notes[0]
+
+
+def test_bad_box_is_skipped():
+    assert verify([{"label": "X", "box_2d": None}], [], PAGE_W, PAGE_H) == []

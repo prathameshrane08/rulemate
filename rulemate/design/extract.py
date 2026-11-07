@@ -313,9 +313,11 @@ def text_facts(pages: list[str]) -> list[tuple[str, str, str, float, str, int, s
 
 
 def extract(path: Path, pages: list[int] | None = None, doc_label: str | None = None,
-            progress=None, dpi: int = DPI, context: list[tuple[Path, str]] = ()) -> Extraction:
+            progress=None, dpi: int = DPI, context: list[tuple[Path, str]] = (), vision_llm=None) -> Extraction:
     """``context``: other documents of the same ship (report, particulars) whose stated facts are read too,
-    e.g. crew and endurance for the requirement findings."""
+    e.g. crew and endurance for the requirement findings.
+    ``vision_llm``: a Gemini provider; each GA sheet is also read by Gemini and every reading is confirmed in code
+    (see vision.py) before it is used."""
     import pdfplumber
 
     path = Path(path)
@@ -380,7 +382,32 @@ def extract(path: Path, pages: list[int] | None = None, doc_label: str | None = 
                     notes="within machinery spaces: exempt from 46 CFR 190.10-25(b)" if fl.machinery else "",
                     source_file=rel, source_page=page, source_bbox=",".join(f"{v:g}" for v in fl.bbox),
                     checkable=not fl.machinery))
+        vision = []
+        if vision_llm is not None:
+            from .vision import read_sheet
+
+            try:
+                vision = read_sheet(path, page, vision_llm, words)
+            except Exception as e:  # Gemini down or quota: the OCR/vector results still stand
+                ex.findings.append(f"p.{page}: Gemini reading failed ({str(e)[:80]}); OCR and vector results only.")
+            where = f"Dwg {meta['drawing']} " if meta["drawing"] else ""
+            for v in vision:
+                if v.kind == "stateroom" and v.confirmed and v.berths_confirmed and v.berths:
+                    n_v = sum(1 for f in ex.facts if f.item_id.startswith("V")) + 1
+                    name = f"{v.label.title()} {v.room_number or ''}".strip()
+                    ex.facts.append(Fact(
+                        item_id=f"V{n_v:02d}",
+                        space=f"Stateroom {name}",
+                        parameter="persons berthed per sleeping room",
+                        value=float(v.berths),
+                        unit="persons",
+                        source=(f"{label}, p.{page}, {where}{meta['title'].title()}: read by Gemini "
+                                f"(\"{v.label}\" {v.room_number or ''}, {v.berths} berths), confirmed in code: "
+                                f"{v.evidence}; {'; '.join(v.notes)}").strip(),
+                        notes="crew" if "CREW" in v.label.upper() else "",
+                        source_file=rel, source_page=page, source_bbox=",".join(f"{x:g}" for x in v.bbox)))
         ex.drawings.append({"page": page, **meta, "rooms": len(rooms), "berths": sum(r.persons for r in rooms),
+                            "gemini": [v.__dict__ for v in vision],
                             "roles_without_count": sorted({w.text for w in loose}),
                             "words": [w.text for w in words]})
         if loose:
@@ -423,9 +450,9 @@ def extract(path: Path, pages: list[int] | None = None, doc_label: str | None = 
         got_s, got_d = sum(f.value == 1 for f in rooms), sum(f.value == 2 for f in rooms)
         ex.findings.append(f"Text: {s:g} single and {d:g} double staterooms; read from the drawings: {got_s} single, "
                            f"{got_d} double{'' if (got_s, got_d) == (s, d) else ' - check the OCR result and the drawing'}.")
-    from .findings import rule_findings
+    from .findings import gemini_findings, rule_findings
 
-    ex.findings += rule_findings(ex)
+    ex.findings += gemini_findings(ex) + rule_findings(ex)
     return ex
 
 

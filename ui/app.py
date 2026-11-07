@@ -24,7 +24,7 @@ from ui.backend import Backend  # noqa: E402
 st.set_page_config(page_title="RuleMate", page_icon="⚓", layout="wide")
 
 from rulemate.config import DEMO_QUESTIONS  # noqa: E402  (question, rule documents)
-PROVIDERS = ["groq,ollama", "groq", "ollama", "openai"]
+PROVIDERS = ["groq,ollama", "gemini,ollama", "groq", "gemini", "ollama", "openai"]
 BADGES = {
     "verified": ("Verified", ":material/verified:", "green"),
     "excerpts": ("Excerpts only", ":material/format_quote:", "orange"),

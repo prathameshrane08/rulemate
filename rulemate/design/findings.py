@@ -56,6 +56,36 @@ TRIGGERS = [
 ]
 
 
+def gemini_findings(ex) -> list[str]:
+    """What Gemini read on the drawings, what code confirmed, and how it compares with the stated facts."""
+    readings = [r for d in ex.drawings for r in d.get("gemini", [])]
+    if not readings:
+        return []
+    conf = [r for r in readings if r["confirmed"]]
+    out = [f"Gemini read {len(readings)} labelled spaces on the GA sheets; code confirmed {len(conf)} against the "
+           f"drawing text at the reported position ({len(readings) - len(conf)} shown as 'Gemini only', not used)."]
+    rooms = {}
+    for r in conf:
+        if r["kind"] == "stateroom":
+            key = (r["label"].upper(), r["room_number"] or f"p{r['bbox']}")
+            rooms[key] = r
+    crew = [r for r in rooms.values() if "CREW" in r["label"].upper()]
+    sci = [r for r in rooms.values() if re.search(r"SCI|TECH", r["label"].upper())]
+    facts = {x.parameter: x for x in ex.facts if x.item_id.startswith("T")}
+    if rooms:
+        out.append(f"Staterooms confirmed on the drawings: {len(rooms)} ({len(sci)} science / marine tech, {len(crew)} "
+                   f"labelled CREW, {len(rooms) - len(sci) - len(crew)} named for a role, e.g. CHIEF MATE).")
+    if "science double staterooms" in facts and sci:
+        stated = facts["science double staterooms"]
+        out.append(f"Science staterooms: {len(sci)} on the drawings vs {stated.value:g} in the text "
+                   f"(p.{stated.source_page}){'' if len(sci) == stated.value else ' - check'}.")
+    disagree = [r for r in readings if any("but the label says" in n for n in r.get("notes", []))]
+    for r in disagree:
+        out.append(f"Gemini counted berths that disagree with the label {r['label']} {r['room_number'] or ''}: "
+                   f"{'; '.join(r['notes'])} - not used.")
+    return out
+
+
 def rule_findings(ex) -> list[str]:
     facts = {}
     for x in ex.facts:
