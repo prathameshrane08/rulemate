@@ -18,3 +18,10 @@ eval/results/*.json
 
 # ILO text, downloaded by scripts/fetch_mlc.py, not redistributed
 data/rules/MLC2006.md
+
+# rendered walkthrough video (large binaries); the scripts that build it are kept
+video/*.mp4
+video/*.srt
+video/frames/
+video/build_*/
+video/build/

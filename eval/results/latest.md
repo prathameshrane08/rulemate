@@ -1,20 +1,20 @@
 ## RuleMate evaluation
 
-15 questions (12 answerable incl. 0 clause-ID, 3 unanswerable) · LLM: ollama:qwen3:8b · retrieval: hybrid · 2026-11-07 21:50
+45 questions (38 answerable incl. 8 clause-ID, 7 unanswerable) · LLM: ollama:qwen3:8b · retrieval: hybrid · 2026-11-07 22:21
 
 | Metric | Result |
 |---|---|
-| Retrieval hit@5 | **92%** (MRR 0.52) |
-| Correct "not found" on unanswerable questions | **100%** (3 questions) |
+| Retrieval hit@5 | **100%** (MRR 0.92) |
+| Correct "not found" on unanswerable questions | **100%** (7 questions) |
 | Answerable questions wrongly refused | 0% |
-| Answers verified (all guardrails passed) | **92%** |
-| Answers shown as excerpts only | 8% |
-| Verified answers containing the key numbers | 89% (9 checked) |
-| Citation precision (overlap check) | **100%** (27 citations) |
-| LLM drafts rejected by guardrails | 12% of 16 drafts (7% of questions) |
+| Answers verified (all guardrails passed) | **79%** |
+| Answers shown as excerpts only | 21% |
+| Verified answers containing the key numbers | 100% (29 checked) |
+| Citation precision (overlap check) | **93%** (61 citations) |
+| LLM drafts rejected by guardrails | 33% of 55 drafts (22% of questions) |
 | Drafts that failed a guardrail shown to the user | **0** (by construction) |
-| Answer latency p50 / p95 | 17.5 s / 54.3 s |
-| Retrieval latency p50 | 15 ms |
+| Answer latency p50 / p95 | 19.3 s / 74.6 s |
+| Retrieval latency p50 | 13 ms |
 | Compliance verdicts correct (research vessel, 46 CFR 190) | **100%** (14 items: 7 PASS, 6 FAIL, 1 REVIEW) |
 | Planted defects caught (research vessel, 46 CFR 190) | **100%** of 7 (7 FAIL, 0 REVIEW) |
 | False FAIL with the value exactly at the limit (research vessel, 46 CFR 190) | **0%** of 7 |
@@ -34,11 +34,11 @@ Threshold calibration (current: low=0.6, high=0.7; answerable = non-ID questions
 
 | low threshold | unanswerable refused by retrieval | answerable wrongly refused |
 |---|---|---|
-| 0.55 | 0/3 | 0/12 |
-| 0.58 | 0/3 | 0/12 |
-| 0.60 | 0/3 | 0/12 |
-| 0.62 | 2/3 | 0/12 |
-| 0.64 | 2/3 | 0/12 |
-| 0.66 | 2/3 | 0/12 |
-| 0.68 | 3/3 | 0/12 |
-| 0.70 | 3/3 | 0/12 |
+| 0.55 | 0/7 | 0/30 |
+| 0.58 | 0/7 | 0/30 |
+| 0.60 | 0/7 | 0/30 |
+| 0.62 | 0/7 | 0/30 |
+| 0.64 | 1/7 | 0/30 |
+| 0.66 | 2/7 | 0/30 |
+| 0.68 | 4/7 | 0/30 |
+| 0.70 | 5/7 | 0/30 |
