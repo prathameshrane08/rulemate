@@ -13,6 +13,8 @@ Unconfirmed readings are shown as "Gemini only" and never decide a verdict.
 
 from __future__ import annotations
 
+from ..config import CACHE_DIR
+
 import base64
 import io
 import json
@@ -62,7 +64,7 @@ def render_png(path: Path, page_no: int, dpi: int = 150) -> tuple[bytes, float, 
     return buf.getvalue(), w, h
 
 
-CACHE = Path(__file__).resolve().parents[2] / "data" / "cache" / "gemini"
+CACHE = CACHE_DIR / "gemini"
 
 
 def ask_gemini(llm, png: bytes, max_tokens: int = 32000, prompt: str | None = None, list_key: str = "rooms") -> list[dict]:

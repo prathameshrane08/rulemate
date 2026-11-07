@@ -26,7 +26,7 @@ from typing import Literal
 import numpy as np
 from pydantic import BaseModel, Field
 
-from ..config import ROOT
+from ..config import ROOT, CACHE_DIR
 from ..guardrails import check_answer
 from ..llm import LLMError
 from ..models import Clause
@@ -37,7 +37,7 @@ from .units import UnitError, compatible, convert, parse_number, parse_value
 Verdict = Literal["PASS", "FAIL", "NEEDS REVIEW"]
 MIN_SIM = 0.70  # below this, no limit is considered to cover the parameter
 MARGIN = 0.02  # limits within this similarity of the best match are evaluated together
-EXPLAIN_CACHE = ROOT / "data" / "cache" / "explanations.json"
+EXPLAIN_CACHE = CACHE_DIR / "explanations.json"
 ABBREVIATIONS = {"mvz": "main vertical zone", "lll": "low-location lighting", "fd": "fire door"}
 # what designers write -> the words the rules use; applied before matching a design value to a limit
 DESIGNER_TERMS = {

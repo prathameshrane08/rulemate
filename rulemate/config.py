@@ -19,6 +19,7 @@ def _path(var: str, default: str) -> Path:
 RULES_DIR = _path("RULES_DIR", "data/rules")
 INDEX_DIR = _path("INDEX_DIR", "data/index")
 CLAUSES_FILE = INDEX_DIR / "clauses.json"
+CACHE_DIR = _path("RULEMATE_CACHE_DIR", "data/cache")  # answers, explanations, OCR and Gemini readings
 EMBED_MODEL = os.getenv("EMBED_MODEL", "BAAI/bge-small-en-v1.5")
 
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".html", ".htm", ".txt", ".md"}

@@ -24,9 +24,9 @@ import statistics
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-from ..config import ROOT
+from ..config import ROOT, CACHE_DIR
 
-OCR_CACHE = ROOT / "data" / "cache" / "ocr"
+OCR_CACHE = CACHE_DIR / "ocr"
 DPI = 200
 _PT = 72 / DPI  # pixels -> PDF points
 

@@ -17,14 +17,14 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from .config import CLAUSES_FILE, ROOT
+from .config import CLAUSES_FILE, ROOT, CACHE_DIR
 from .guardrails import check_answer
 from .ingest.parsers import NOT_A_VALUE
 from .llm import LLMError, get_llm
 from .models import Clause
 from .retrieval import Hit, RetrievalResult, Retriever, get_retriever
 
-CACHE_FILE = ROOT / "data" / "cache" / "answers.json"
+CACHE_FILE = CACHE_DIR / "answers.json"
 MAX_CONTEXT = 12
 NOT_FOUND_TEXT = "Not found in the provided rules."
 
