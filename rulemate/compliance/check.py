@@ -111,8 +111,16 @@ class RowResult(BaseModel):
         return self.verdict == "NEEDS REVIEW" and self.reason.startswith("No limit in the rules")
 
     @property
+    def bad_input(self) -> bool:
+        """The value itself cannot be checked: not a number, or no unit given."""
+        return self.verdict == "NEEDS REVIEW" and (self.reason.startswith("Design value '")
+                                                   or self.reason.startswith("No unit given"))
+
+    @property
     def shown_verdict(self) -> str:
-        return "NO RULE" if self.no_rule else self.verdict
+        """PASS / FAIL; NEEDS REVIEW only when a rule applies but a condition must be confirmed;
+        NO RULE when no loaded rule limits the value; CHECK INPUT when the value or its unit is missing."""
+        return "NO RULE" if self.no_rule else "CHECK INPUT" if self.bad_input else self.verdict
 
     @property
     def applied(self) -> list[LimitResult]:

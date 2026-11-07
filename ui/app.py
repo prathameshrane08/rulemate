@@ -242,6 +242,7 @@ VERDICT_STYLE = {
     "FAIL": "background-color: #fee4e2; color: #b42318; font-weight: 600",
     "NEEDS REVIEW": "background-color: #fef0c7; color: #b54708; font-weight: 600",
     "NO RULE": "background-color: #eaecf0; color: #475467; font-weight: 600",
+    "CHECK INPUT": "background-color: #eaecf0; color: #475467; font-weight: 600",
 }
 VERDICT_BADGE = {"PASS": ("PASS", ":material/check_circle:", "green"),
                  "FAIL": ("FAIL", ":material/cancel:", "red"),
@@ -547,13 +548,16 @@ with tab_check:
 
     results = ss.check_results
     if results:
-        counts = {v: sum(r.shown_verdict == v for r in results) for v in ("PASS", "FAIL", "NEEDS REVIEW", "NO RULE")}
+        counts = {v: sum(r.shown_verdict == v for r in results)
+                  for v in ("PASS", "FAIL", "NEEDS REVIEW", "NO RULE", "CHECK INPUT")}
         m1, m2, m3, m4, m5 = st.columns(5)
         m1.metric("Items", len(results))
         m2.metric("PASS", counts["PASS"])
         m3.metric("FAIL", counts["FAIL"])
         m4.metric("NEEDS REVIEW", counts["NEEDS REVIEW"], help="A rule applies, but a condition must be confirmed")
-        m5.metric("NO RULE", counts["NO RULE"], help="None of the loaded rule texts limits this value")
+        m5.metric("NO RULE / CHECK INPUT", f'{counts["NO RULE"]} / {counts["CHECK INPUT"]}',
+                  help="NO RULE: none of the loaded rule texts limits this value. CHECK INPUT: the value is not a "
+                       "number or has no unit.")
         if any(r.synthetic for r in results):
             st.caption(":orange[Limits come from SYNTHETIC sample rules.]")
         def deciding(r):

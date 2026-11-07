@@ -235,3 +235,12 @@ def test_large_sheets_are_read_in_tiles():
     assert len(a0) == 4 and all(x1 > x0 and y1 > y0 for x0, y0, x1, y1 in a0)
     xs = sorted({round(t[0]) for t in a0})
     assert xs[0] == 0 and a0[0][2] > a0[1][0]  # neighbouring tiles overlap
+
+
+
+def test_unusable_input_is_check_input():
+    from rulemate.compliance.check import RowResult
+
+    r = RowResult(row=DesignRow(item_id="x", parameter="crane capacity", raw_value="4T/14M"), verdict="NEEDS REVIEW",
+                  reason="Design value '4T/14M' is not a number.")
+    assert r.shown_verdict == "CHECK INPUT"
