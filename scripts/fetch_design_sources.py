@@ -2,8 +2,10 @@
 
     python scripts/fetch_design_sources.py
 
-Sources are the links in Meyer's challenge brief. The RCRV GA drawings and 3D model are on Box and must be
-downloaded in a browser from https://ceoas.oregonstate.edu/regional-class-research-vessel-ship-design
+Sources are the links in Meyer's challenge brief. The RCRV GA drawing and design summary are on Box and must be
+downloaded in a browser from https://ceoas.oregonstate.edu/regional-class-research-vessel-ship-design and saved as
+    data/designs/sources/RCRV_GA_6096-070-001_RevJ.pdf               ("6096-070-001-(J) General Arrangement.pdf")
+    data/designs/sources/RCRV_design_summary_12100-000-01_RevA.pdf   ("12100-000-01_design_summary_report_rev_a.pdf")
 """
 
 from __future__ import annotations

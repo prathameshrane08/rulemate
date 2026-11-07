@@ -232,7 +232,18 @@ def drawing_metrics() -> dict | None:
     g = Counter((l.roles[0], l.counts[0]) for l in got)
     exact = sum((t & g).values())
     counts_ok = sum((Counter(n for _, n in truth["labels"]) & Counter(l.counts[0] for l in got)).values())
-    return {"n": len(truth["labels"]), "found": len(got), "exact": exact, "counts_ok": counts_ok,
+    stairs = None
+    st_file = EVAL_DIR / "rcrv_ga_truth.json"
+    if st_file.exists():
+        st = json.loads(st_file.read_text())
+        st_pdf = ROOT / st["source_file"]
+        if st_pdf.exists():
+            from rulemate.design.measure import stair_flights
+
+            fl = stair_flights(st_pdf, st["page"], ocr_page(st_pdf, st["page"], 300))
+            stairs = {"n": len(st["stairs"]), "found": len(fl), "numbered": sum(f.room_no in st["stairs"] for f in fl),
+                      "angles": sorted({f.angle for f in fl})}
+    return {"stairs": stairs, "n": len(truth["labels"]), "found": len(got), "exact": exact, "counts_ok": counts_ok,
             "berths_truth": sum(n for _, n in truth["labels"]), "berths_read": sum(l.persons for l in got),
             "uncounted_flagged": sorted({w.text for w in room_labels.unlabelled}) == sorted(truth["roles_without_count"])}
 
@@ -273,6 +284,10 @@ def report(rm: dict, am: dict | None, cm: dict | None, calib: list[dict], meta: 
     if dm:
         L.append(f"| GA drawing read by OCR (NOAA, second deck): berth labels found | **{dm['found']} of {dm['n']}**, "
                  f"{dm['berths_read']} of {dm['berths_truth']} berths, role text exact for {dm['exact']} |")
+        if dm.get("stairs"):
+            st = dm["stairs"]
+            L.append(f"| RCRV GA (vector), stair flights measured on the inboard profile | **{st['found']} of {st['n']}**, "
+                     f"angle {', '.join(f'{a:g}' for a in st['angles'])} deg, room number read for {st['numbered']} |")
     L.append("")
     L.append("_Caveats: the questions and the example design values were written by the team, and thresholds were tuned "
              "on them; 46 CFR 190 and the NOAA GA drawing are real documents, the cruise-ship rules are synthetic. Expect "

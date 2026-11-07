@@ -1,0 +1,6 @@
+{
+ "_about": "Stairways on RCRV GA 6096-070-001 Rev J, sheet 4 (PDF page 6, inboard profile), read by eye: three labelled interior stair flights in the stair tower. The angle is checked against the CAD stringer lines.",
+ "source_file": "data/designs/sources/RCRV_GA_6096-070-001_RevJ.pdf",
+ "page": 6,
+ "stairs": ["01-24-0", "1-25-0", "2-25-0"]
+}

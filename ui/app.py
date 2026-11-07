@@ -380,6 +380,7 @@ with tab_check:
 
     # example designs and the rule sets that apply to that vessel type
     designs = {
+        "RCRV – measured from its GA (vector CAD)": ("rcrv_from_ga.csv", ["46CFR190"]),
         "NOAA research ship – read from its GA drawing": ("noaa_swath_from_ga.csv", ["46CFR190"]),
         "Research vessel example – 46 CFR 190 (US units)": ("rcrv_example_design.csv", ["46CFR190"]),
         "Cruise-ship sample – synthetic rules": ("sample_design.csv", ["SAMPLE_SYNTHETIC_rules"]),

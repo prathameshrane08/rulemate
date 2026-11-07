@@ -9,6 +9,7 @@ an engineer to confirm, never a PASS/FAIL verdict.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Callable
 
@@ -27,10 +28,18 @@ class Trigger:
 def _hospital(f: dict, drawings: list[dict]) -> tuple[str, str]:
     if not drawings:
         return "not shown", "no GA drawing was read - confirm a hospital space on the GA"
-    hits = [d for d in drawings if any("HOSPITAL" in w.upper() for w in d.get("words", []))]
+    from .extract import similar
+
+    hits = [d for d in drawings if any(similar(w, "HOSPITAL", 0.75) for w in d.get("words", []))]
+    plans = [d for d in hits if re.search(r"PLAN", f"{d.get('view', '')} {d.get('title', '')}", re.I) or d.get("rooms")]
+    if plans:
+        d = plans[0]
+        what = f"{d['title'] or d.get('view') or 'plan'}".title()
+        return "met", f"a space labelled HOSPITAL is on p.{d['page']} (Dwg {d['drawing']}, {what})"
     if hits:
         d = hits[0]
-        return "met", f"\"HOSPITAL\" is labelled on p.{d['page']} (Dwg {d['drawing']}, {d['title'].title()})"
+        return "review", (f"HOSPITAL is mentioned on p.{d['page']} (Dwg {d['drawing']}) but not found on a plan view - "
+                          "confirm on the GA")
     return "not shown", "no space labelled HOSPITAL on the drawings read - confirm on the GA"
 
 

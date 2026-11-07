@@ -116,16 +116,18 @@ OVERLAP = 500
 SINGLE_PASS_MAX = 3600
 
 
-def ocr_page(path: Path, page_no: int) -> list[Word]:
-    """OCR one page (1-based). Cached per file content and page. Positions are in PDF points."""
-    cache = OCR_CACHE / f"{_file_hash(path)}_p{page_no}_{DPI}_v3.json"
+def ocr_page(path: Path, page_no: int, dpi: int = DPI) -> list[Word]:
+    """OCR one page (1-based). Cached per file content, page and resolution. Positions are in PDF points.
+    Small drawing text (CAD sheets printed at half size) needs dpi 300 or more."""
+    pt = 72 / dpi
+    cache = OCR_CACHE / f"{_file_hash(path)}_p{page_no}_{dpi}_v3.json"
     if cache.exists():
         return [Word(**w) for w in json.loads(cache.read_text())]
     import numpy as np
     import pdfplumber
 
     with pdfplumber.open(path) as pdf:
-        img = np.array(pdf.pages[page_no - 1].to_image(resolution=DPI).original.convert("RGB"))
+        img = np.array(pdf.pages[page_no - 1].to_image(resolution=dpi).original.convert("RGB"))
     H, W = img.shape[:2]
 
     def run(arr, ox: int, oy: int) -> list[Word]:
@@ -133,7 +135,7 @@ def ocr_page(path: Path, page_no: int) -> list[Word]:
         out = []
         for box, txt, sc in zip(res.boxes if res.boxes is not None else [], res.txts or [], res.scores or []):
             xs, ys = [float(q[0]) + ox for q in box], [float(q[1]) + oy for q in box]
-            out.append(Word(txt.strip(), min(xs) * _PT, min(ys) * _PT, max(xs) * _PT, max(ys) * _PT,
+            out.append(Word(txt.strip(), min(xs) * pt, min(ys) * pt, max(xs) * pt, max(ys) * pt,
                             round(float(sc), 3)))
         return out
 
@@ -178,12 +180,30 @@ def _engine():
 # ------------------------------------------------------------------ GA drawings
 
 
+def similar(text: str, target: str, cutoff: float = 0.72) -> bool:
+    """OCR of CAD stroke fonts is noisy ("HOSPNAL", "STARWAY"): compare against a known word."""
+    from difflib import SequenceMatcher
+
+    t = re.sub(r"[^A-Z]", "", text.upper())
+    return bool(t) and (target in t or SequenceMatcher(None, t, target).ratio() >= cutoff)
+
+
 def drawing_meta(words: list[Word]) -> dict:
     text = [w.text for w in words]
     joined = " | ".join(text)
+    spaced = re.sub(r"\s+", " ", " ".join(text)).upper()
     dwg = re.search(r"DWG\.?\s*No\.?\s*([0-9A-Z][0-9A-Z\-./]+)", joined, re.I)
     scale = re.search(r"SCALE:?\s*([^|]+)", joined, re.I)
-    is_ga = "GENERAL ARRANGEMENT" in joined.upper()
+    is_ga = "GENERAL ARRANGEMENT" in spaced or (
+        any(similar(t, "GENERAL") for t in text) and any(similar(t, "ARRANGEMENT") for t in text))
+    numbers = re.findall(r"\b(\d{4}-\d{3}-\d{3})\b", joined)
+    if not dwg and numbers:  # the sheet's own number repeats in the title block; reference lists hold others
+        from collections import Counter
+
+        dwg = re.search(re.escape(Counter(numbers).most_common(1)[0][0]), joined)
+        dwg = type("M", (), {"group": lambda self, i, v=dwg.group(0): v})()
+    view = next((t.strip() for t in text if re.search(r"\b(ELEVATION|INBOARD PROFILE|OUTBOARD PROFILE|PLAN VIEW|PLAN\s+\d)", t, re.I)
+                 and len(t) < 60), "")
     title = ""
     for i, t in enumerate(text):
         if t.upper() == "GENERAL ARRANGEMENT" and i + 1 < len(text):
@@ -191,7 +211,9 @@ def drawing_meta(words: list[Word]) -> dict:
             break
     plan = next((t for t in text if re.match(r"^PLAN AT ", t, re.I)), "")
     deck = plan[8:].strip().title() if plan else title.title()
-    return {"drawing": dwg.group(1) if dwg else "", "title": title, "deck": deck, "is_ga": is_ga,
+    if not title or title.upper() in ("ARRANGEMENT", "GENERAL"):
+        title = view
+    return {"drawing": dwg.group(1) if dwg else "", "title": title, "deck": deck, "is_ga": is_ga, "view": view,
             "scale": scale.group(1).strip() if scale else ""}
 
 
@@ -255,6 +277,13 @@ _TEXT_FACTS = [
     (r"Endurance days\s+(\d+)", "Ship", "endurance", "days"),
     (r"operations for a\s+minimum of (\d+) days", "Ship", "endurance", "days"),
     (r"Length \(overall\) ft\s+([\d.]+)", "Ship", "length overall", "ft"),
+    # RCRV design summary report: "Total Compliment .... 16 Scientists/Marine Technicians, 12 Crew"
+    (r"Total Compliment\W+(\d+) Scientists", "Ship", "scientific personnel berths", "persons"),
+    (r"Total Compliment\W+\d+ Scientists/Marine Technicians, (\d+) Crew", "Ship", "crew", "persons"),
+    (r"Endurance\s*\.{3,}\s*(\d+)\s*days", "Ship", "endurance", "days"),
+    (r"Crew Berths\s*\.{3,}\s*(\d+) Single Berths", "Accommodation", "crew single berths", "rooms"),
+    (r"Crew Berths\s*\.{3,}\s*\d+ Single Berths, (\d+) Double Berths", "Accommodation", "crew double berths", "rooms"),
+    (r"Total Science Berths[^.]*\.{3,}\s*(\d+) Double Staterooms", "Accommodation", "science double staterooms", "rooms"),
     (r"Total Complement\s+(\d+)", "Ship", "total complement", "persons"),
     (r"mess room can\s+accommodate up to (\d+)\s+persons", "Mess room", "messroom seats", "persons"),
     (r"accommodations are provided for\s+(\d+)\s+persons", "Ship", "persons accommodated", "persons"),
@@ -284,7 +313,9 @@ def text_facts(pages: list[str]) -> list[tuple[str, str, str, float, str, int, s
 
 
 def extract(path: Path, pages: list[int] | None = None, doc_label: str | None = None,
-            progress=None) -> Extraction:
+            progress=None, dpi: int = DPI, context: list[tuple[Path, str]] = ()) -> Extraction:
+    """``context``: other documents of the same ship (report, particulars) whose stated facts are read too,
+    e.g. crew and endurance for the requirement findings."""
     import pdfplumber
 
     path = Path(path)
@@ -294,11 +325,25 @@ def extract(path: Path, pages: list[int] | None = None, doc_label: str | None = 
         texts = [(p.extract_text() or "") for p in pdf.pages]
     rel = str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path)
 
-    # 1. stated facts from the text
-    for i, (space, param, unit, value, _, page, sentence) in enumerate(text_facts(texts), start=1):
-        ex.facts.append(Fact(item_id=f"T{i:02d}", space=space, parameter=param, value=value, unit=unit,
-                             source=f"{label}, p.{page}: \"{sentence}\"", source_file=rel, source_page=page,
-                             checkable=False))
+    # 1. stated facts from the text of this document and of its context documents
+    docs = [(rel, label, texts)]
+    for cpath, clabel in context:
+        cpath = Path(cpath)
+        with pdfplumber.open(cpath) as cpdf:
+            ctexts = [(pg.extract_text() or "") for pg in cpdf.pages]
+        crel = str(cpath.relative_to(ROOT)) if cpath.is_relative_to(ROOT) else str(cpath)
+        docs.append((crel, clabel or cpath.stem, ctexts))
+    seen: set[str] = set()
+    i = 0
+    for drel, dlabel, dtexts in docs:
+        for space, param, unit, value, _, page, sentence in text_facts(dtexts):
+            if param in seen:
+                continue
+            seen.add(param)
+            i += 1
+            ex.facts.append(Fact(item_id=f"T{i:02d}", space=space, parameter=param, value=value, unit=unit,
+                                 source=f"{dlabel}, p.{page}: \"{sentence}\"", source_file=drel, source_page=page,
+                                 checkable=False))
 
     # 2. GA drawings: pages with little text (scans) or a GA title block
     cand = pages or [i + 1 for i, t in enumerate(texts) if "GENERAL ARRANGEMENT" in t.upper() or len(t.strip()) < 40]
@@ -306,12 +351,35 @@ def extract(path: Path, pages: list[int] | None = None, doc_label: str | None = 
     for page in cand:
         if progress:
             progress(page)
-        words = ocr_page(path, page)
+        words = ocr_page(path, page, dpi)
         meta = drawing_meta(words)
         if not meta["is_ga"]:
             continue
-        rooms = room_labels(words)
-        loose = getattr(room_labels, "unlabelled", [])
+        # berth labels "ROLE (n)" only on sheets that label berths that way (NOAA GA); CAD sheets that name
+        # rooms ("CREW DOUBLE 02-24-0") would otherwise give stray matches
+        if sum(1 for w in words if _OCC.match(w.text)) >= 5:
+            rooms = room_labels(words)
+            loose = getattr(room_labels, "unlabelled", [])
+        else:
+            rooms, loose = [], []
+        if re.search(r"ELEVATION|PROFILE", meta.get("view", "") + " " + meta["title"], re.I):
+            from .measure import stair_flights
+
+            for fl in stair_flights(path, page, words):
+                n_st = sum(1 for f in ex.facts if f.item_id.startswith("S")) + 1
+                where = f"Dwg {meta['drawing']} " if meta["drawing"] else ""
+                name = f"{fl.label.title()} {fl.room_no}".strip()
+                ex.facts.append(Fact(
+                    item_id=f"S{n_st:02d}",
+                    space=f"{name} ({'machinery space' if fl.machinery else 'interior stairway'})",
+                    parameter="stairway angle of inclination",
+                    value=fl.angle,
+                    unit="degree",
+                    source=(f"{label}, p.{page}, {where}{meta['title'].title()}: measured from {fl.stringers} vector "
+                            f"stringer line(s) {', '.join(f'{a:g}' for a in fl.raw_angles)} deg (+/-0.1)"),
+                    notes="within machinery spaces: exempt from 46 CFR 190.10-25(b)" if fl.machinery else "",
+                    source_file=rel, source_page=page, source_bbox=",".join(f"{v:g}" for v in fl.bbox),
+                    checkable=not fl.machinery))
         ex.drawings.append({"page": page, **meta, "rooms": len(rooms), "berths": sum(r.persons for r in rooms),
                             "roles_without_count": sorted({w.text for w in loose}),
                             "words": [w.text for w in words]})
@@ -337,7 +405,7 @@ def extract(path: Path, pages: list[int] | None = None, doc_label: str | None = 
     # 3. consistency between drawing and text (for an engineer to look at, not a rule verdict)
     berths = sum(d["berths"] for d in ex.drawings)
     stated = {f.parameter: f for f in ex.facts if f.item_id.startswith("T")}
-    if ex.drawings and "total complement" in stated:
+    if any(d["rooms"] for d in ex.drawings) and "total complement" in stated:
         c = stated["total complement"]
         if berths != c.value:
             ex.findings.append(
@@ -349,7 +417,7 @@ def extract(path: Path, pages: list[int] | None = None, doc_label: str | None = 
                     else "More berths than persons."))
         else:
             ex.findings.append(f"Berths on the GA drawings ({berths}) match the stated complement ({c.value:g}).")
-    if "single staterooms" in stated and "double staterooms" in stated and ex.drawings:
+    if "single staterooms" in stated and "double staterooms" in stated and any(d["rooms"] for d in ex.drawings):
         s, d = stated["single staterooms"].value, stated["double staterooms"].value
         rooms = [f for f in ex.facts if f.item_id.startswith("G")]
         got_s, got_d = sum(f.value == 1 for f in rooms), sum(f.value == 2 for f in rooms)

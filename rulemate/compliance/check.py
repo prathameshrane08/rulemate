@@ -263,7 +263,10 @@ def _limit_line(row: DesignRow, r: LimitResult) -> str:
     conv = f" (= {r.value_in_limit_unit:g} {l.unit})" if r.value_in_limit_unit is not None and row.unit != l.unit else ""
     mark = "meets" if r.outcome == "pass" else "does not meet"
     cond = f", only if: {l.condition}" if l.condition else ""
-    return f"- {row.value:g} {row.unit}{conv} {mark} {l.describe()}{cond} {l.citation}"
+    v = r.value_in_limit_unit
+    edge = (" - exactly at the limit, no margin" if r.outcome == "pass" and v is not None and l.value
+            and abs(v - l.value) <= 1e-3 * abs(l.value) else "")
+    return f"- {row.value:g} {row.unit}{conv} {mark} {l.describe()}{edge}{cond} {l.citation}"
 
 
 # ------------------------------------------------------------------ explanation (LLM, guardrailed)

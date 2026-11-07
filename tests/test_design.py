@@ -66,11 +66,37 @@ def test_hospital_trigger_uses_drawings():
     ex = _ex(crew=13, endurance=21)
     [f] = rule_findings(ex)
     assert "190.20-35(a)" in f and "not shown" in f  # required, no drawing read
-    ex.drawings = [{"page": 42, "drawing": "2175-000-05", "title": "SECOND DECK", "words": ["HOSPITAL", "AND"]}]
+    ex.drawings = [{"page": 2, "drawing": "6096-070-001", "title": "", "view": "", "rooms": 0, "words": ["HOSPITAL"]}]
     [f] = rule_findings(ex)
-    assert "Status: met" in f and "p.42" in f
+    assert "Status: review" in f  # only mentioned (e.g. revision list), not on a plan view
+    ex.drawings.append({"page": 10, "drawing": "6096-070-001", "title": "", "view": "PLAN 8-4C", "rooms": 0,
+                        "words": ["HOSPNAL"]})  # CAD-font OCR
+    [f] = rule_findings(ex)
+    assert "Status: met" in f and "p.10" in f
 
 
 def test_trigger_does_not_apply_below_threshold():
     assert rule_findings(_ex(crew=11, endurance=21)) == []
     assert rule_findings(_ex(crew=13, endurance=2)) == []
+
+
+# ---------------------------------------------------------------- stair angle from vector lines
+
+from rulemate.design.measure import flights_from_lines  # noqa: E402
+
+
+def test_stair_flight_angle_from_stringers():
+    # RCRV inboard profile: two stringers of one flight at 49.97 and 50.02 degrees (PDF coordinate rounding)
+    lines = [(49.97, 46.1, (699, 415, 729, 450)), (50.02, 46.1, (700, 416, 730, 451)),
+             (74.97, 38.6, (770, 300, 780, 337))]  # mast line: no stair label nearby
+    words = [W("STAIRWAY", 690, 395), W("1-25-0", 695, 404)]
+    [f] = flights_from_lines(lines, words)
+    assert f.angle == 50.0 and f.stringers == 2 and f.label == "STAIRWAY" and f.room_no == "1-25-0"
+    assert not f.machinery
+
+
+def test_stair_in_machinery_space_is_marked():
+    lines = [(49.99, 57.3, (391, 453, 428, 497))]
+    words = [W("STAIR", 380, 440), W("ENGINE ROOM", 420, 500)]
+    [f] = flights_from_lines(lines, words)
+    assert f.machinery

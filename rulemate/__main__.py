@@ -162,7 +162,9 @@ def cmd_design(args) -> None:
             lo, _, hi = part.partition("-")
             pages += list(range(int(lo), int(hi or lo) + 1))
     src = Path(args.pdf)
-    ex = extract(src, pages=pages, doc_label=args.label, progress=lambda p: print(f"  reading page {p} ...", flush=True))
+    context = [(Path(c.split("=", 1)[0]), c.split("=", 1)[1] if "=" in c else "") for c in (args.with_ or [])]
+    ex = extract(src, pages=pages, doc_label=args.label, dpi=args.dpi, context=context,
+                 progress=lambda p: print(f"  reading page {p} ...", flush=True))
     for d in ex.drawings:
         print(f"GA p.{d['page']} Dwg {d['drawing'] or '?'} {d['title']}: {d['rooms']} berth labels, {d['berths']} berths")
     for f in ex.facts:
@@ -264,6 +266,9 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("pdf")
     p.add_argument("--pages", help="pages to read as drawings, e.g. 41-43 (default: GA / scanned pages)")
     p.add_argument("--label", help="document name used in the evidence")
+    p.add_argument("--with", dest="with_", action="append", metavar="PDF[=LABEL]",
+                   help="another document of the same ship (report, particulars) to read stated facts from")
+    p.add_argument("--dpi", type=int, default=200, help="OCR resolution; 300 for half-size CAD sheets")
     p.add_argument("--out", help="write the checkable values as a design CSV (+ .findings.json)")
     p.set_defaults(fn=cmd_design)
 

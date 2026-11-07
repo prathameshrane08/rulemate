@@ -21,8 +21,8 @@ streamlit run ui/app.py                                      # terminal 2 -> htt
 
 - Groq's free tier is rate-limited: run the warm-up at least a minute before going on stage, and don't run the eval right before.
 - Sidebar: provider **groq,ollama**, **Use answer cache** on (same provider as the warm-up, or the cache misses).
-- `python scripts/fetch_design_sources.py` once (the NOAA PDF is needed to show the drawing evidence).
-- Clear the chat. Open the Compliance tab once so it loads; leave *NOAA research ship* selected.
+- `python scripts/fetch_design_sources.py` once, and put the RCRV GA and design summary in `data/designs/sources/` (see the script) - needed to show the drawing evidence.
+- Clear the chat. Open the Compliance tab once so it loads; leave *RCRV – measured from its GA* selected.
 - No Wi-Fi: set `LLM_PROVIDER=ollama` in `.env` and rerun the warm-up with `--provider ollama`. Everything runs on
   the laptop; that is also the answer to "can it run on our own servers?".
 - If an answer comes back as **excerpts only**, that is the safety net working; say so and move on.
@@ -33,12 +33,13 @@ streamlit run ui/app.py                                      # terminal 2 -> htt
 | Time | Do | Say |
 |---|---|---|
 | 0:00-0:15 | UI open on *Compliance check* | "You told us: the earlier a compliance defect is found, the cheaper. RuleMate reads the design, checks it against the rules in code, and every finding is traceable to a clause and to the place in the drawing it came from." |
-| 0:15-0:55 | **Demo 1, reading a real drawing.** Select *NOAA research ship – read from its GA drawing*, open the *Read from…* box, *Run check*, click any row (e.g. **G02**). | "This is the NOAA research-ship study from your brief: a 1990 scanned GA, no text layer. RuleMate read it with OCR on this laptop: 34 berth labels, 58 berths, each with drawing number and position. Here is the part of the drawing this value came from, boxed. Every room meets 46 CFR 190.20-20(b), at most four persons per room. And it reads across documents: crew 21 and 60 days endurance mean a hospital is required, and there it is on page 42. Mess room seats 32 of 60: that is flagged for review, not guessed. Against our reading by eye: 34 of 34 labels." |
-| 0:55-1:35 | **Demo 2, non-compliant design.** Select *Research vessel example – 46 CFR 190*, *Run check*, click **R12**, then **R14**. | "Now a design with planted defects, values in US notation. R12: a 1.0 m bulwark against 39 and a half **inches**: 39.37 inches, **FAIL**, computed by code. R14: two-tier berths, the limit only applies *where two tiers are fitted*: code cannot confirm that, so **NEEDS REVIEW**, never a guess." |
+| 0:15-0:55 | **Demo 1, measuring your vessel's drawing.** Select *RCRV – measured from its GA*, open the *Read from…* box, *Run check*, click **S01**. | "This is the RCRV GA you gave us, Rev J, a vector CAD drawing. RuleMate measured the stair angles from the drawing's own lines: three flights, each 50.0 degrees. 46 CFR 190.10-25(b) allows at most 50: PASS, and it tells you *exactly at the limit, no margin*: worth a look before construction tolerances. Here is the stair on the drawing, boxed. From the design summary it read crew 12 and 21 days endurance, so a hospital is required, and it found it on the 01-level plan." |
+| 0:55-1:15 | Select *NOAA research ship – read from its GA drawing*, *Run check*, click a row. | "Scanned drawings work too: the 1990 NOAA study from your brief, read with OCR on this laptop: 34 of 34 berth labels, every room at most four persons, and it flags what it cannot count, like the wiper and oiler room with no berth number." |
+| 1:15-1:35 | **Demo 2, non-compliant design.** Select *Research vessel example – 46 CFR 190*, *Run check*, click **R12**, then **R14**. | "Planted defects: R12: a 1.0 m bulwark against 39 and a half **inches**: 39.37 inches, **FAIL**, computed by code. R14: two-tier berths, the limit only applies *where two tiers are fitted*: code cannot confirm that, so **NEEDS REVIEW**, never a guess." |
 | 1:35-2:00 | **Demo 3, cited answer.** *Ask the rules* tab, sidebar: *How high must guard rails be on a research vessel?* Click the 📄 citation. | "The same rules answer questions. Verified: every sentence cited, and code checked that the cited clause supports it and that every number and unit is in it." |
 | 2:00-2:20 | **Demo 4, cross-reference.** Sidebar: *How is the corridor width calculated when many people use it?* Point at Sources. | "Rules point at each other. This clause says *in accordance with 4.2*; RuleMate followed the reference in code, and the answer gives 4.2's actual requirement. (Synthetic cruise-ship sample, marked as such.)" |
 | 2:20-2:35 | **Demo 5, refusal.** Sidebar: *What is the required size of a helicopter landing area?* | "Part 190 does not cover helidecks: *Not found in the provided rules*, with the closest clauses. Decided in code before any model was called." |
-| 2:35-3:00 | Eval table (slide 5) or `eval/results/latest.md` | "We measure it: 34 of 34 drawing labels read, every planted defect caught, 0 false FAILs at the exact limit, 100 % correct refusals, 91 % of answers verified and the rest shown as excerpts, never unchecked. It runs fully offline, so your designs can stay on your servers." |
+| 2:35-3:00 | Eval table (slide 5) or `eval/results/latest.md` | "We measure it: 3 of 3 stair flights measured, 34 of 34 drawing labels read, every planted defect caught, 0 false FAILs at the exact limit, 100 % correct refusals, 91 % of answers verified and the rest shown as excerpts, never unchecked. It runs fully offline, so your designs can stay on your servers." |
 
 Optional if there is time, in a terminal (change impact after a late design change):
 
@@ -84,6 +85,7 @@ python -m rulemate check new_design.csv --baseline data/designs/rcrv_example_des
 
 | Metric (Meyer criterion) | Result |
 |---|---|
+| Stair flights measured from the RCRV GA vectors (interpretation) | 3 of 3, 50.0 deg each |
 | GA drawing labels read by OCR, real NOAA drawing (interpretation) | 34 of 34 labels, 58 of 58 berths |
 | Planted defects caught (accuracy) | 100 % of 14 across both designs |
 | False FAIL with values exactly at the limit (accuracy) | 0 % of 14 |

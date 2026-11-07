@@ -13,3 +13,4 @@ eval/results/*.json
 /MeyerTurku_SinceAI2026/
 # source design documents (large; fetch from the links in data/designs/README.md)
 /data/designs/sources/
+/data2/

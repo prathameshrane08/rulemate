@@ -163,11 +163,28 @@ rule side: code reads, and every value keeps its evidence.
   46 CFR 190.20-35(a) requires a hospital space, which is then looked for on the drawings. Findings are for an
   engineer to confirm, never a verdict.
 
+**Measuring vector CAD drawings** (`rulemate/design/measure.py`). The RCRV GA (Gulf Island / OSU, 6096-070-001
+Rev J) is a vector drawing whose text is drawn as shapes. Its inboard profile draws each stair flight as sloped
+stringer lines, so the angle comes from the line coordinates, independent of scale: 3 of 3 labelled interior stair
+flights measure 50.0 degrees, the maximum of 46 CFR 190.10-25(b): PASS, and the check marks it "exactly at the limit,
+no margin". Stair labels are found with fuzzy OCR matching (the CAD font reads as "SARWAY"); a flight whose label is
+not read is kept as "label not read", never given a neighbour's label. Flights next to machinery spaces are marked
+exempt. The same run reads crew 12 and 21 days endurance from the design summary report and finds the HOSPITAL on
+the 01-level plan (190.20-35(a): met).
+
+```bash
+python -m rulemate design data/designs/sources/RCRV_GA_6096-070-001_RevJ.pdf --dpi 300 \
+    --label "RCRV General Arrangement 6096-070-001 Rev J" \
+    --with "data/designs/sources/RCRV_design_summary_12100-000-01_RevA.pdf=RCRV Design Summary 12100-000-01 Rev A" \
+    --with "data/designs/sources/RCRV_particulars.pdf=RCRV Particulars (OSU)" --out data/designs/rcrv_from_ga.csv
+```
+
 On the NOAA second-deck GA (a real 1990 design, the "study" link in Meyer's brief), OCR found 34 of 34 berth labels
 and 58 of 58 berths compared with a reading by eye (`eval/noaa_ga_truth.json`); 2 role names have OCR typos.
 Limits: room sizes, corridor and stair widths are not measured from drawings yet (the scans have no reliable scale),
-and the G.O. Sars GA labels rooms by number, not occupancy. The RCRV GA and 3D model are on Box and must be
-downloaded in a browser; the RCRV particulars sheet gives crew, berths and endurance (`data/designs/rcrv_particulars.findings.json`).
+and the G.O. Sars GA labels rooms by number, not occupancy. The RCRV GA and design summary are on Box (download in a
+browser, see `scripts/fetch_design_sources.py`); the Navisworks model (`.nwd`) needs Autodesk software and is not read.
+OCR of the RCRV CAD font is noisy, so room names there are only used through fuzzy matching, not counted.
 
 ## Compliance check
 
