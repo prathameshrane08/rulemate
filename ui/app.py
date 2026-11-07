@@ -537,7 +537,7 @@ with tab_check:
             ss.extra_rows = []
             st.rerun()
 
-    o1, o2 = st.columns([1, 3])
+    o1, o2 = st.columns([1.6, 3])
     explain = o2.toggle("LLM explanations (checked by guardrails)", value=False,
                         help="Slower: one LLM call per row. Verdicts do not change.")
     if o1.button("Run check", type="primary", disabled=not rows, icon=":material/play_arrow:"):
@@ -554,25 +554,46 @@ with tab_check:
         m4.metric("NEEDS REVIEW", counts["NEEDS REVIEW"])
         if any(r.synthetic for r in results):
             st.caption(":orange[Limits come from SYNTHETIC sample rules.]")
-        table_df = pd.DataFrame([{
-            "item": r.row.item_id, "space": r.row.space, "parameter": r.row.parameter,
-            "value": r.row.display, "verdict": r.verdict,
-            "limit(s)": "; ".join(x.limit.describe() + (" (if …)" if x.limit.condition else "") for x in r.applied),
-            "clause(s)": ", ".join(sorted({x.limit.clause_id for x in r.applied})),
-            "design source": r.row.source,
-        } for r in results])
-        styled = table_df.style.map(lambda v: VERDICT_STYLE.get(v, ""), subset=["verdict"])
-        ev = st.dataframe(styled, hide_index=True, width="stretch", on_select="rerun",
-                          selection_mode="single-row", key="check-table", height=table_height(len(results)),
-                          column_config={"space": st.column_config.TextColumn(width="large"),
-                                         "design source": st.column_config.TextColumn(width="large"),
-                                         "limit(s)": st.column_config.TextColumn(width="medium")})
+        def deciding(r):
+            """The limit that decided the verdict: the failed one, else the one with the smallest margin."""
+            ap = r.applied
+            if not ap:
+                return None
+            failed = [x for x in ap if x.outcome == "fail" and x.role == "applied"]
+            if failed:
+                return failed[0]
+            def margin(x):
+                v = x.value_in_limit_unit
+                return abs(v - x.limit.value) / abs(x.limit.value) if v is not None and x.limit.value else 9e9
+            return min(ap, key=margin)
+
+        def short(r):
+            d = deciding(r)
+            return (f"{d.limit.describe()}{' (if …)' if d.limit.condition else ''}", d.limit.clause_id) if d else ("", "")
+
+        full_text = st.toggle("Show full text (every limit checked, design source)", key="full-table")
+        rows_t = []
+        for r in results:
+            lim, cl = short(r)
+            row_t = {"Item": r.row.item_id, "Verdict": r.verdict,
+                     "Checked": f"{r.row.parameter} — {r.row.space}" if r.row.space else r.row.parameter,
+                     "Value": r.row.display, "Deciding limit": f"{lim} [{cl}]" if cl else "no matching limit"}
+            if full_text:
+                row_t["All limits checked"] = "; ".join(
+                    f"{x.limit.describe()}{' (if …)' if x.limit.condition else ''} [{x.limit.clause_id}]" for x in r.applied)
+                row_t["Design value from"] = r.row.source
+            rows_t.append(row_t)
+        # a wrapped table always fits the page width: nothing hides off to the right on a laptop screen
+        st.table(pd.DataFrame(rows_t).style.map(lambda v: VERDICT_STYLE.get(v, ""), subset=["Verdict"])
+                 .hide(axis="index"))
         st.download_button("Download results (CSV)", results_to_csv(results), file_name="rulemate_compliance.csv",
                            mime="text/csv", icon=":material/download:")
-        sel = ev.selection.rows
-        pick = sel[0] if sel else next((i for i, r in enumerate(results) if r.verdict == "FAIL"), 0)
         st.divider()
-        st.caption("Select a row to see how the verdict was reached.")
+        first_fail = next((i for i, r in enumerate(results) if r.verdict == "FAIL"), 0)
+        pick = st.selectbox("Show how the verdict was reached for", range(len(results)), index=first_fail,
+                            format_func=lambda i: f"{results[i].row.item_id} · {results[i].verdict} · "
+                                                  f"{results[i].row.parameter} — {results[i].row.space}"[:110],
+                            key="detail-pick")
         row_detail(results[pick], pick)
 
     st.divider()
