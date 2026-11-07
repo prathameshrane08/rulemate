@@ -176,6 +176,21 @@ def render_answer(ans: Answer, i: int) -> None:
         with st.expander("Why the generated answer was rejected"):
             for v in ans.violations:
                 st.markdown(f"- {v}")
+    if ans.status == "not_found":  # outside the loaded rules: a general answer, clearly labelled, Groq / Ollama only
+        key = f"general-{i}"
+        if key not in ss and st.button("Answer from general knowledge", key=f"gbtn-{i}", icon=":material/public:"):
+            from rulemate.general import general_answer
+
+            with st.spinner("Asking the bot (Groq / Ollama)…"):
+                ss[key] = general_answer(ans.question)
+        g = ss.get(key)
+        if g:
+            st.badge("general knowledge", icon=":material/public:", color="violet")
+            st.warning(f"{g['label']}. Not checked against any rule text; accuracy not measured. "
+                       "Confirm in the governing rules before using it in a design.")
+            st.markdown(g["text"] if g["ok"] else g["error"])
+            if g["model"]:
+                st.caption(g["model"])
 
 
 def sources_panel(ans: Answer) -> None:
